@@ -1,0 +1,19 @@
+{
+  "recommendations": [
+    "formulahendry.auto-rename-tag",
+    "aaron-bond.better-comments",
+    "dbaeumer.vscode-eslint",
+    "redjue.git-commit-plugin",
+    "crystal-spider.jsdoc-generator",
+    "pkief.material-icon-theme",
+    "christian-kohler.path-intellisense",
+    "esbenp.prettier-vscode",
+    "yoavbls.pretty-ts-errors",
+    "prisma.prisma",
+    "abians.prisma-generate-uml",
+    "ms-azuretools.vscode-docker",
+    "expresssnippets.vscode-express-snippets",
+    "vitest.explorer",
+    "streetsidesoftware.code-spell-checker"
+  ]
+}

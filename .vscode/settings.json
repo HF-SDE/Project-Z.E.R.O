@@ -1,0 +1,19 @@
+{
+  "cSpell.words": [
+    "alphanum",
+    "datepicker",
+    "dbml",
+    "healthcheck",
+    "mobileprovision",
+    "moussé",
+    "nodemon",
+    "Pressable",
+    "PSQL",
+    "webp"
+  ],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[nginx]": {
+    "editor.defaultFormatter": "ahmadalli.vscode-nginx-conf"
+  }
+}

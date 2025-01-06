@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["omitApi"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  initials  String
+  name      String
+  email     String   @unique
+  username  String   @unique
+  password  String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions        Session[]
+  UserPermissions UserPermissions[]
+}
+
+model Session {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     Token[]
+  expiresAt DateTime
+}
+
+model Token {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId    String   @db.ObjectId
+  session      Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  accessToken  String   @unique
+  refreshToken String   @unique
+  createdAt    DateTime @default(now())
+}
+
+model UserPermissions {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
+  permissionId String   @db.ObjectId
+  assignedAt   DateTime @default(now())
+  assignedBy   String
+
+  Permission Permission @relation(fields: [permissionId], references: [id])
+  User       User       @relation(fields: [userId], references: [id])
+}
+
+model PermissionGroup {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Permissions Permission[]
+}
+
+model Permission {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  code              String
+  description       String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  permissionGroupId String   @db.ObjectId
+
+  UserPermissions UserPermissions[]
+
+  PermissionGroup PermissionGroup @relation(fields: [permissionGroupId], references: [id])
+}
+
+

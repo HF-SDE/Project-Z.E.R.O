@@ -1,0 +1,16 @@
+config/environment-variables/.env.*.dev*
+config/environment-variables/.env.*.prod*
+
+*/dist
+**/node_modules
+**/package-lock.json
+*/.env
+*/.env.local
+.vs
+
+*.zip
+
+# macOS
+app/.DS_Store
+
+dbml
