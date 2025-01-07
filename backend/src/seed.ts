@@ -12,12 +12,9 @@ const prisma = new PrismaClient();
  * PSQL database is used in the app and management side
  */
 async function generatePSQL() {
-
   // Create Permission Groups
   await prisma.permissionGroup.createMany({
-    data: [
-      { name: 'Administrator' },
-    ],
+    data: [{ name: 'Administrator' }],
   });
 
   // Create Permission
@@ -87,36 +84,36 @@ async function generatePSQL() {
     }
   }
 
-/**
- * Find permission group id by name
- * @async
- * @param {string} name Permission group name
- * @returns {Promise<string>} Permission group id
- */
-async function findPermissionGroup(name: string): Promise<string> {
-  try {
-    const result = await prisma.permissionGroup.findFirst({
-      where: {
-        name,
-      },
-      select: {
-        id: true,
-      },
-    });
-    if (result) {
-      return result.id;
+  /**
+   * Find permission group id by name
+   * @async
+   * @param {string} name Permission group name
+   * @returns {Promise<string>} Permission group id
+   */
+  async function findPermissionGroup(name: string): Promise<string> {
+    try {
+      const result = await prisma.permissionGroup.findFirst({
+        where: {
+          name,
+        },
+        select: {
+          id: true,
+        },
+      });
+      if (result) {
+        return result.id;
+      }
+      throw new Error('Permission group not found');
+    } catch (error: unknown) {
+      return (error as Error).message;
     }
-    throw new Error('Permission group not found');
-  } catch (error: unknown) {
-    return (error as Error).message;
   }
-}
 }
 
 /**
  * Generate data to PostgreSQL
  */
-  generatePSQL()
+generatePSQL()
   .then(async () => {
     await prisma.$disconnect();
   })

@@ -33,10 +33,10 @@ export function isAllowed(permissions: string[]): ExpressFunction {
 
     if (Permissions.length) return next();
 
-      res.status(getHttpStatusCode(Status.Forbidden)).json({
-        status: 'Forbidden',
-        message: 'Forbidden',
-      });
+    res.status(getHttpStatusCode(Status.Forbidden)).json({
+      status: 'Forbidden',
+      message: 'Forbidden',
+    });
 
     return;
   };
