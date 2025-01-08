@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["omitApi"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -21,14 +20,15 @@ enum Identifier {
 }
 
 model Device {
-  uuid       String   @id @default(uuid(4)) @db.Uuid
-  name       String
-  locationId String   @db.Uuid
-  status     Status
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  uuid         String   @id @default(uuid(4)) @db.Uuid
+  name         String
+  locationUuid String   @db.Uuid
+  status       Status   @default(ACTIVE)
+  frequency    Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  Location   Location     @relation(fields: [locationId], references: [uuid])
+  Location   Location     @relation(fields: [locationUuid], references: [uuid])
   Timeseries Timeseries[]
   Alert      Alert[]
 }
