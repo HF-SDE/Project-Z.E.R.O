@@ -14,29 +14,24 @@ export function isAllowed(permissions: string[]): ExpressFunction {
     const user = req.user;
 
     if (!user) {
-      res.status(getHttpStatusCode(Status.Unauthorized)).json({
-        status: 'Unauthorized',
-        message: 'Unauthorized',
-      });
+      res
+        .status(getHttpStatusCode(Status.Unauthorized))
+        .json({ status: 'Unauthorized', message: 'Unauthorized' });
 
       return;
     }
 
     const Permissions = await prisma.userPermissions.findMany({
       where: {
-        AND: {
-          userId: user.id,
-          Permission: { code: { in: permissions } },
-        },
+        AND: { userId: user.id, Permission: { code: { in: permissions } } },
       },
     });
 
     if (Permissions.length) return next();
 
-    res.status(getHttpStatusCode(Status.Forbidden)).json({
-      status: 'Forbidden',
-      message: 'Forbidden',
-    });
+    res
+      .status(getHttpStatusCode(Status.Forbidden))
+      .json({ status: 'Forbidden', message: 'Forbidden' });
 
     return;
   };

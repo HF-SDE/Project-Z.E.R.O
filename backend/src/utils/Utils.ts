@@ -43,6 +43,8 @@ export function getHttpStatusCode(status: Status): number {
     case Status.TooManyRequests:
       return 429;
   }
+
+  return 500;
 }
 
 /**

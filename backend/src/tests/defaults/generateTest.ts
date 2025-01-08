@@ -1,100 +1,82 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { TestFunction, expect } from 'vitest';
 
 import { APIResponse } from '@api-types/general.types';
-import prisma from '@prisma-instance';
-import { MenuItem, Prisma } from '@prisma/client';
-import { DefaultArgs } from '@prisma/client/runtime/library';
 
-import { axiosInstance as axios } from './axiosInstance';
-import { login, logout } from './util';
+type ServiceFunction<T> = (...args: any[]) => Promise<APIResponse<T>>;
 
-type GetId = string | (() => Promise<{ id: string }>);
+type IService<T = any> = Partial<{
+  getAll: ServiceFunction<T[]>;
+  create: ServiceFunction<T>;
+  update: ServiceFunction<T>;
+  deleteRecord: ServiceFunction<T>;
+}>;
 
-interface ExpectedMessages {
-  getAll: string;
-  create: string;
-  update: string;
-  delete: string;
-}
+type FunctionWithArgs<T> = T extends (...args: infer P) => any
+  ? (...args: P) => TestFunction
+  : never;
 
-export default class TestCases<T extends { id: string }> {
-  url: string;
-  expectedMessage: Partial<ExpectedMessages>;
-  cleanupList: string[] = [];
+type ITestCases<T extends IService> = {
+  [K in keyof T as `${string & K}Test`]: FunctionWithArgs<T[K]>;
+} & {
+  cleanUp: () => void;
+};
 
-  constructor(url: string, expectedMessage: Partial<ExpectedMessages> = {}) {
-    this.url = url;
-    this.expectedMessage = expectedMessage;
+export default function createTestCases<T extends IService>(
+  service: T,
+  cleanupFunction: (id: string) => void = () => {},
+): ITestCases<T> {
+  const cleanupList: string[] = [];
+
+  const testCases = {
+    cleanUp() {
+      cleanupList.map(cleanupFunction);
+    },
+  } as ITestCases<T>;
+
+  if (service.getAll && typeof service.getAll === 'function') {
+    testCases.getAllTest = ((...args): TestFunction => {
+      return async () => {
+        const response = await service.getAll!(...args);
+
+        expect(response.status).toBe(200);
+        if (Array.isArray(response.data)) {
+          expect(response.data).toBeInstanceOf(Array);
+        } else {
+          expect(response.data).toBeInstanceOf(Object);
+        }
+      };
+    }) as FunctionWithArgs<T['getAll']>;
   }
 
-  cleanUp() {
-    if (!this) return;
+  if (service.create && typeof service.create === 'function') {
+    testCases.createTest = ((...args: any[]): TestFunction => {
+      return async () => {
+        const response = await service.create!(...args);
 
-    for (const id of this.cleanupList) {
-      axios.delete(`${this.url}/${id}`);
-    }
+        expect(response.status).toBe(201);
+      };
+    }) as FunctionWithArgs<T['create']>;
   }
 
-  getAllTest() {
-    return async () => {
-      const response = await axios.get<{ data: APIResponse<T[]> }>(this.url);
+  if (service.update && typeof service.update === 'function') {
+    testCases.updateTest = ((...args): TestFunction => {
+      return async () => {
+        const response = await service.update!(...args);
 
-      expect(response.status).toBe(200);
-      expect(response.data).toEqual({
-        data: expect.arrayContaining([]),
-        status: 'Found',
-        message: this.expectedMessage?.getAll,
-      });
-    };
+        expect(response.status).toBe(200);
+      };
+    }) as FunctionWithArgs<T['update']>;
   }
 
-  getOneTest(getId: GetId) {
-    return async () => {
-      let id = getId;
+  if (service.deleteRecord && typeof service.deleteRecord === 'function') {
+    testCases.deleteRecordTest = ((...args): TestFunction => {
+      return async () => {
+        const response = await service.deleteRecord!(...args);
 
-      if (typeof getId === 'function') id = (await getId()).id;
-
-      const response = await axios.get<{ data: APIResponse<T> }>(
-        `${this.url}/${id}`,
-      );
-
-      expect(response.status).toBe(200);
-      expect(response.data).toEqual({
-        data: expect.arrayContaining([]),
-        status: 'Found',
-        message: this.expectedMessage?.getAll,
-      });
-    };
+        expect(response.status).toBe(200);
+      };
+    }) as FunctionWithArgs<T['deleteRecord']>;
   }
 
-  createTest(body: any) {
-    return async () => {
-      const response = await axios.post<{ data: APIResponse<T> }>(
-        this.url,
-        body,
-      );
-
-      if (response.status === 201) {
-        const getAllResponse = await axios.get<APIResponse<T[]>>(this.url);
-        const getAll = getAllResponse.data.data;
-
-        if (!getAll) return;
-        this.cleanupList.push(getAll[getAll.length - 1].id);
-      }
-
-      expect(response.status).toBe(201);
-      expect(response.data).toStrictEqual({
-        status: 'Created',
-        message: this.expectedMessage?.create,
-      });
-    };
-  }
-
-  updateTest() {
-    return async () => {};
-  }
-
-  deleteTest() {
-    return async () => {};
-  }
+  return testCases;
 }

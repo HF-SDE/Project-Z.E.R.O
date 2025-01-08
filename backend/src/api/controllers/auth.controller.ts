@@ -12,8 +12,15 @@ import { getHttpStatusCode } from '@utils/Utils';
 import * as AuthService from '../services/auth.service';
 
 // Utility function to get the client's IP address
-const getClientIp = (req: any): string =>
-  req.headers['x-forwarded-for'] as string;
+
+/**
+ * Gets the client's IP address from the request headers.
+ * @param {Request} req - The request object containing the headers.
+ * @returns {string} The client's IP address.
+ */
+function getClientIp(req: Request<any>): string {
+  return req.headers['x-forwarded-for'] as string;
+}
 
 /**
  * Handles user login, authenticates with passport, and returns tokens on successful login.

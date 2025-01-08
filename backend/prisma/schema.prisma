@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["omitApi"]
@@ -14,8 +8,82 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Status {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
+
+enum Identifier {
+  CELSIUS
+  FAHRENHEIT
+  PERCENTAGE
+}
+
+model Device {
+  uuid       String   @id @default(uuid(4)) @db.Uuid
+  name       String
+  locationId String   @db.Uuid
+  status     Status
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  Location   Location     @relation(fields: [locationId], references: [uuid])
+  Timeseries Timeseries[]
+  Alert      Alert[]
+}
+
+model Location {
+  uuid      String   @id @default(uuid(4)) @db.Uuid
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  devices Device[]
+}
+
+model Timeseries {
+  id         Int        @id @default(autoincrement())
+  value      Float
+  identifier Identifier
+  name       String?
+  deviceId   String     @db.Uuid
+  locationId String     @db.Uuid
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  Device          Device            @relation(fields: [deviceId], references: [uuid])
+  TimeseriesAlert TimeseriesAlert[]
+}
+
+model Alert {
+  uuid        String     @id @default(uuid(4)) @db.Uuid
+  name        String
+  description String
+  type        String
+  threshold   Float
+  identifier  Identifier
+  deviceId    String     @db.Uuid
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  Device          Device            @relation(fields: [deviceId], references: [uuid])
+  TimeseriesAlert TimeseriesAlert[]
+}
+
+model TimeseriesAlert {
+  id           Int      @id @default(autoincrement())
+  alertId      String   @db.Uuid
+  timeseriesId Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  Alert      Alert      @relation(fields: [alertId], references: [uuid])
+  Timeseries Timeseries @relation(fields: [timeseriesId], references: [id])
+}
+
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(uuid(4)) @db.Uuid
   initials  String
   name      String
   email     String   @unique
@@ -30,16 +98,16 @@ model User {
 }
 
 model Session {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @db.Uuid
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     Token[]
   expiresAt DateTime
 }
 
 model Token {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  sessionId    String   @db.ObjectId
+  id           String   @id @default(uuid(7)) @db.Uuid
+  sessionId    String   @db.Uuid
   session      Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   accessToken  String   @unique
   refreshToken String   @unique
@@ -47,9 +115,9 @@ model Token {
 }
 
 model UserPermissions {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId       String   @db.ObjectId
-  permissionId String   @db.ObjectId
+  id           String   @id @default(uuid(4)) @db.Uuid
+  userId       String   @db.Uuid
+  permissionId String   @db.Uuid
   assignedAt   DateTime @default(now())
   assignedBy   String
 
@@ -58,7 +126,7 @@ model UserPermissions {
 }
 
 model PermissionGroup {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(uuid(4)) @db.Uuid
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -67,16 +135,14 @@ model PermissionGroup {
 }
 
 model Permission {
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                String   @id @default(uuid(4)) @db.Uuid
   code              String
   description       String
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  permissionGroupId String   @db.ObjectId
+  permissionGroupId String   @db.Uuid
 
   UserPermissions UserPermissions[]
 
   PermissionGroup PermissionGroup @relation(fields: [permissionGroupId], references: [id])
 }
-
-

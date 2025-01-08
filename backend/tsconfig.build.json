@@ -19,12 +19,14 @@
       "@routes/*": ["api/routes/*"],
       "@controllers/*": ["api/controllers/*"],
       "@services/*": ["api/services/*"],
-      "@api-types/*": ["api/types/*"],
-      "@utils/*": ["api/utils/*"],
+      "@api-types/*": ["types/*"],
+      "@utils/*": ["utils/*"],
       "@config": ["config"],
       "@passport": ["passport"],
       "@prisma-instance": ["prisma"],
-      "@middlewares/*": ["middleware/*"]
+      "@middlewares/*": ["middleware/*"],
+      "@schemas/*": ["schemas/*"],
+      "@/*": ["./*"]
     },
     "allowJs": true
   },

@@ -15,6 +15,7 @@ import { capitalize } from '@utils/Utils';
  * @async
  * @param {prismaModels} prismaModel - The Prisma model to get the records from.
  * @param {Record<string, unknown>} config - The parameters to filter the records by.
+ * @param {Joi.ObjectSchema} schema - The schema to validate the query object.
  * @returns {Promise<APIResponse<any>>} A promise that resolves to an object containing the data, status, and message.
  */
 export async function getAll(
@@ -79,7 +80,6 @@ export async function create(
  * @param {prismaModels} prismaModel - The Prisma model to update the record from.
  * @param {string} id - The id of the record to update.
  * @param {any} data - The data to update the record with.
- * @param {boolean} isPatch - Whether to update the record with a patch.
  * @param {Joi.ObjectSchema} schema - The schema to validate the data against.
  * @returns {Promise<APIResponse>} A promise that resolves to an object containing the record data, status, and message.
  */

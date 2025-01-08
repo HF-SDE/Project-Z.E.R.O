@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { Status } from '@api-types/general.types';
-import { UuidSchema } from '@schemas/general.schemas';
+import { UuidSchema } from '@schemas/general';
 import { getHttpStatusCode } from '@utils/Utils';
 
 /**
