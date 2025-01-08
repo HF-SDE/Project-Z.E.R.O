@@ -50,6 +50,7 @@ services:
       - source: nginx_config
         target: /etc/nginx/nginx.conf
     networks:
+      - public
       - internal
 
 networks:
