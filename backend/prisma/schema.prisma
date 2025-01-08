@@ -20,13 +20,13 @@ enum Identifier {
 }
 
 model Device {
-  uuid         String   @id @default(uuid(4)) @db.Uuid
+  uuid         String   @id @default(uuid()) @db.Uuid
   name         String
   locationUuid String   @db.Uuid
-  status       Status   @default(ACTIVE)
+  status       Status?  @default(ACTIVE)
   frequency    Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+  updatedAt    DateTime @updatedAt @db.Timestamptz()
 
   Location   Location     @relation(fields: [locationUuid], references: [uuid])
   Timeseries Timeseries[]
@@ -34,10 +34,10 @@ model Device {
 }
 
 model Location {
-  uuid      String   @id @default(uuid(4)) @db.Uuid
+  uuid      String   @id @default(uuid()) @db.Uuid
   name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
 
   devices Device[]
 }
@@ -49,23 +49,23 @@ model Timeseries {
   name       String?
   deviceId   String     @db.Uuid
   locationId String     @db.Uuid
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  createdAt  DateTime   @default(now()) @db.Timestamptz()
+  updatedAt  DateTime   @updatedAt @db.Timestamptz()
 
   Device          Device            @relation(fields: [deviceId], references: [uuid])
   TimeseriesAlert TimeseriesAlert[]
 }
 
 model Alert {
-  uuid        String     @id @default(uuid(4)) @db.Uuid
+  uuid        String     @id @default(uuid()) @db.Uuid
   name        String
   description String
   type        String
   threshold   Float
   identifier  Identifier
   deviceId    String     @db.Uuid
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt   DateTime   @default(now()) @db.Timestamptz()
+  updatedAt   DateTime   @updatedAt @db.Timestamptz()
 
   Device          Device            @relation(fields: [deviceId], references: [uuid])
   TimeseriesAlert TimeseriesAlert[]
@@ -75,30 +75,30 @@ model TimeseriesAlert {
   id           Int      @id @default(autoincrement())
   alertId      String   @db.Uuid
   timeseriesId Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+  updatedAt    DateTime @updatedAt @db.Timestamptz()
 
   Alert      Alert      @relation(fields: [alertId], references: [uuid])
   Timeseries Timeseries @relation(fields: [timeseriesId], references: [id])
 }
 
 model User {
-  id        String   @id @default(uuid(4)) @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
   initials  String
   name      String
   email     String   @unique
   username  String   @unique
   password  String
   active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
 
   sessions        Session[]
   UserPermissions UserPermissions[]
 }
 
 model Session {
-  id        String   @id @default(uuid(7)) @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
   userId    String   @db.Uuid
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     Token[]
@@ -106,7 +106,7 @@ model Session {
 }
 
 model Token {
-  id           String   @id @default(uuid(7)) @db.Uuid
+  id           String   @id @default(uuid()) @db.Uuid
   sessionId    String   @db.Uuid
   session      Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   accessToken  String   @unique
@@ -115,7 +115,7 @@ model Token {
 }
 
 model UserPermissions {
-  id           String   @id @default(uuid(4)) @db.Uuid
+  id           String   @id @default(uuid()) @db.Uuid
   userId       String   @db.Uuid
   permissionId String   @db.Uuid
   assignedAt   DateTime @default(now())
@@ -126,20 +126,20 @@ model UserPermissions {
 }
 
 model PermissionGroup {
-  id        String   @id @default(uuid(4)) @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
   name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
 
   Permissions Permission[]
 }
 
 model Permission {
-  id                String   @id @default(uuid(4)) @db.Uuid
+  id                String   @id @default(uuid()) @db.Uuid
   code              String
   description       String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now()) @db.Timestamptz()
+  updatedAt         DateTime @updatedAt @db.Timestamptz()
   permissionGroupId String   @db.Uuid
 
   UserPermissions UserPermissions[]
