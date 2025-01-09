@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { UuidSchema } from "./general";
+import { UuidSchema } from "./general.schema";
 
 const name = Joi.string().min(3).max(255);
 const description = Joi.string().min(3).max(255);
