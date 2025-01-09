@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { LocationWithOutCreateAtAndUpdatedAt } from '@api-types/location.types';
 import {
   createRecord,
+  deleteRecord,
   getAll,
   updateRecord,
 } from '@controllers/default.controller';
@@ -28,5 +29,7 @@ router.post(
 );
 
 router.patch('/', isAllowed(['location:update']), updateRecord(updateLocationSchema, 'location'));
+
+router.delete('/:id', isAllowed(['location:delete']), deleteRecord('uuid', 'location'));
 
 export default router;
