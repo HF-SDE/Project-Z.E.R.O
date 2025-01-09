@@ -5,7 +5,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { capitalize } from '@utils/Utils';
 
 const prisma = new PrismaClient();
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+
 export default prisma;
 
 export type prismaModels = Uncapitalize<Prisma.ModelName>;
