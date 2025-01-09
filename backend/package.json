@@ -35,6 +35,7 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "prisma-joi-generator": "^0.2.0",
     "vite-tsconfig-paths": "^5.1.2"
   },
   "devDependencies": {
