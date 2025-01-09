@@ -14,7 +14,10 @@ const prisma = new PrismaClient();
 async function generatePSQL() {
   // Create Permission Groups
   await prisma.permissionGroup.createMany({
-    data: [{ name: 'Administrator' }],
+    data: [
+      { name: 'Administrator' }, 
+      { name: 'Location' }
+    ],
   });
 
   // Create Permission
@@ -55,6 +58,11 @@ async function generatePSQL() {
         permissionGroupId: await findPermissionGroup('Administrator'),
         description: 'Create new permission group',
       },
+      {
+        code: 'location:view',
+        permissionGroupId: await findPermissionGroup('Location'),
+        description: 'View location information',
+      }
     ],
   });
 
