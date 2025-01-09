@@ -84,7 +84,12 @@ async function generatePSQL() {
         code: 'alert:create',
         permissionGroupId: await findPermissionGroup('Alert'),
         description: 'Create new alert',
-      }
+      },
+      {
+        code: 'alert:update',
+        permissionGroupId: await findPermissionGroup('Alert'),
+        description: 'Update alert information',
+      },
     ],
   });
 
