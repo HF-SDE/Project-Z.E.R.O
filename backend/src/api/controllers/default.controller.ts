@@ -73,12 +73,12 @@ export function createRecord(
 
 /**
  * Controller to update a record
- * @param {schema} schema - The schema to validate the update object.
+ * @param {Joi.ObjectSchema | Joi.ArraySchema} schema - The schema to validate the update object.
  * @param {prismaModels} model - The Prisma model to update the record in.
  * @returns {ExpressFunction} The response object
  */
 export function updateRecord(
-  schema: Joi.ObjectSchema,
+  schema: Joi.ObjectSchema | Joi.ArraySchema,
   model?: prismaModels,
 ): ExpressFunction {
   return async (req, res) => {

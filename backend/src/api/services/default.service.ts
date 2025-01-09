@@ -87,7 +87,7 @@ export async function update(
   prismaModel: prismaModels,
   id: string,
   data: unknown,
-  schema: Joi.ObjectSchema,
+  schema: Joi.ObjectSchema | Joi.ArraySchema,
 ): Promise<APIResponse> {
   const { err, prismaType, validatedData } = Validate(
     prismaModel,
@@ -140,13 +140,13 @@ export async function deleteRecord(
  * Function to validate the data
  * @param {prismaModels} prismaModel - The Prisma model to validate the data against.
  * @param {unknown} data - The data to validate.
- * @param {Joi.ObjectSchema} schema - The schema to validate the data against.
+ * @param {Joi.ObjectSchema | Joi.ArraySchema} schema - The schema to validate the data against.
  * @returns {IAPIResponse} An object containing the status and message.
  */
 function Validate(
   prismaModel: prismaModels,
   data?: unknown,
-  schema?: Joi.ObjectSchema,
+  schema?: Joi.ObjectSchema | Joi.ArraySchema,
 ): { err?: IAPIResponse; prismaType?: any; validatedData?: unknown } {
   if (!Object.prototype.hasOwnProperty.call(prisma, prismaModel)) {
     return {
