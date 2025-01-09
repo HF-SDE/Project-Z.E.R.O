@@ -11,41 +11,23 @@ function getModel(req: Request): prismaModels {
   return req.baseUrl.replace('/', '') as prismaModels;
 }
 
-type Config = Record<prismaModels, Record<string, unknown>>;
-// const config: Config = configWithoutType as Config;
-
 /**
  * Controller to get all
- * @template T - The type of the data to be transformed.
  * @param {schema} schema - The schema to validate the query object.
  * @param {prismaModels} [model] - [Optional] - The Prisma model to get the records from.
- * @param {function} [transform] - [Optional] - The function to transform the data.
  * @returns {ExpressFunction} The response object
  */
-export function getAll<T = unknown, D = unknown>(
+export function getAll(
   schema: Joi.ObjectSchema,
   model?: prismaModels,
-  transform?: (data: T[] & D[]) => T[],
 ): ExpressFunction {
-  return async (req, res: Response) => {
-    if (!model) model = getModel(req);
+  return async (req, res) => {
+    model ??= getModel(req);
 
-    // req.query.id ??= req.params.id;
+    const config = { where: req.query };
 
-    const config = {} as Config;
+    const response = await DefaultService.getAll(model, config, schema);
 
-    const modelConfig = req.config || {
-      // eslint-disable-next-line security/detect-object-injection
-      ...config[model],
-      // eslint-disable-next-line security/detect-object-injection
-      where: Object.assign({}, req.query, config[model]?.where),
-    };
-
-    const response = await DefaultService.getAll(model, modelConfig, schema);
-
-    if (response.data && transform) {
-      response.data = transform(response.data as T[] & D[]);
-    }
     res.status(getHttpStatusCode(response.status)).json(response).end();
   };
 }
@@ -60,12 +42,10 @@ export function createRecord(
   schema: Joi.ObjectSchema,
   model?: prismaModels,
 ): ExpressFunction {
-  return async (req: Request, res: Response): Promise<void> => {
-    const response = await DefaultService.create(
-      model ?? getModel(req),
-      req.body,
-      schema,
-    );
+  return async (req, res) => {
+    model ??= getModel(req);
+
+    const response = await DefaultService.create(model, req.body, schema);
 
     res.status(getHttpStatusCode(response.status)).json(response).end();
   };
@@ -78,13 +58,13 @@ export function createRecord(
  * @returns {ExpressFunction} The response object
  */
 export function updateRecord(
-  schema: Joi.ObjectSchema,
+  schema: Joi.ArraySchema,
   model?: prismaModels,
 ): ExpressFunction {
   return async (req, res) => {
     const id = (req.params.id || req.query.id) as string;
 
-    if (!model) model = getModel(req);
+    model ??= getModel(req);
 
     const response = await DefaultService.update(model, id, req.body, schema);
 
@@ -99,11 +79,11 @@ export function updateRecord(
  */
 export function deleteRecord(model?: prismaModels): ExpressFunction {
   return async (req, res) => {
-    const id = (req.params.id || req.query.id) as string;
+    const uuid = (req.params.id || req.query.id || req.query.uuid) as string;
 
-    if (!model) model = getModel(req);
+    model ??= getModel(req);
 
-    const response = await DefaultService.deleteRecord(model, id);
+    const response = await DefaultService.deleteRecord(model, uuid);
 
     res.status(getHttpStatusCode(response.status)).json(response).end();
   };
@@ -111,24 +91,24 @@ export function deleteRecord(model?: prismaModels): ExpressFunction {
 
 /**
  * Controller to delete a record
- * @param {updateSchema} updateSchema - The schema to validate the update object.
+ * @param {Joi.ObjectSchema} schema - The schema to validate the update object.
  * @param {prismaModels} model - The Prisma model to delete the record from.
  * @returns {ExpressFunction} The response object
  */
 export function softDeleteRecord(
-  updateSchema: Joi.ObjectSchema,
+  schema: Joi.ArraySchema,
   model?: prismaModels,
 ): ExpressFunction {
   return async (req, res) => {
     const id = (req.params.id || req.query.id) as string;
 
-    if (!model) model = getModel(req);
+    model ??= getModel(req);
 
     const response = await DefaultService.update(
       model,
       id,
       { active: false },
-      updateSchema,
+      schema,
     );
 
     res.status(getHttpStatusCode(response.status)).json(response).end();
