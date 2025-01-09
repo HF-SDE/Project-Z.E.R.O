@@ -10,6 +10,8 @@ import authRoutes from '@routes/auth.routes';
 import deviceRoutes from '@routes/device.routes';
 import manageRoutes from '@routes/manage.routes';
 import profileRoutes from '@routes/profile.routes';
+import locationRoutes from '@routes/location.routes';
+import alertRoutes from '@routes/alert.routes';
 
 import './passport';
 
@@ -36,6 +38,8 @@ app.use('/', authRoutes);
 app.use('/manage', manageRoutes);
 app.use('/profile', profileRoutes);
 app.use('/device', deviceRoutes);
+app.use('/location', locationRoutes);
+app.use('/alert', alertRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });

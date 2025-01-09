@@ -53,12 +53,12 @@ export function createRecord(
 
 /**
  * Controller to update a record
- * @param {schema} schema - The schema to validate the update object.
+ * @param {Joi.ObjectSchema | Joi.ArraySchema} schema - The schema to validate the update object.
  * @param {prismaModels} model - The Prisma model to update the record in.
  * @returns {ExpressFunction} The response object
  */
 export function updateRecord(
-  schema: Joi.ArraySchema,
+  schema: Joi.ObjectSchema | Joi.ArraySchema,
   model?: prismaModels,
 ): ExpressFunction {
   return async (req, res) => {
@@ -74,16 +74,17 @@ export function updateRecord(
 
 /**
  * Controller to delete a record
- * @param {prismaModels} model - The Prisma model to delete the record from.
+ * @param {"id" | "uuid"} [idType='id'] - Default is id. Indecate if id is a id or a uuid.
+ * @param {prismaModels} [model] - The Prisma model to delete the record from.
  * @returns {ExpressFunction} The response object
  */
-export function deleteRecord(model?: prismaModels): ExpressFunction {
+export function deleteRecord(idType: "id" | "uuid" = 'id', model?: prismaModels): ExpressFunction {
   return async (req, res) => {
-    const uuid = (req.params.id || req.query.id || req.query.uuid) as string;
+    const id = (req.params.id || req.query.id || req.query.uuid) as string;
 
     model ??= getModel(req);
 
-    const response = await DefaultService.deleteRecord(model, uuid);
+    const response = await DefaultService.deleteRecord(model, id, idType);
 
     res.status(getHttpStatusCode(response.status)).json(response).end();
   };

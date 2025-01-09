@@ -80,7 +80,7 @@ export async function create(
  * @async
  * @param {prismaModels} prismaModel - The Prisma model to update the record from.
  * @param {string} id - The id of the record to update.
- * @param {any} data - The data to update the record with.
+ * @param {unknown} data - The data to update the record with.
  * @param {Joi.ObjectSchema} schema - The schema to validate the data against.
  * @returns {Promise<APIResponse>} A promise that resolves to an object containing the record data, status, and message.
  */
@@ -88,7 +88,7 @@ export async function update(
   prismaModel: prismaModels,
   id: string,
   data: unknown,
-  schema: Joi.ArraySchema,
+  schema: Joi.ObjectSchema | Joi.ArraySchema,
 ): Promise<APIResponse> {
   const { err, prismaType, validatedData } = Validate(
     prismaModel,
@@ -98,7 +98,18 @@ export async function update(
   if (err) return err;
 
   try {
-    await prismaType.update({ where: { id }, data: validatedData });
+    if (Array.isArray(validatedData)) {
+      const transactionCollection = [];
+      for (const item of validatedData) {
+        const { uuid, ...restItem } = item;
+        transactionCollection.push(
+          prismaType.update({ where: { uuid }, data: restItem }),
+        );
+      }
+      await prisma.$transaction(transactionCollection);
+    } else {
+      await prismaType.update({ where: { id }, data: validatedData });
+    }
 
     return {
       status: Status.Updated,
@@ -114,22 +125,24 @@ export async function update(
  * Service to delete a record
  * @async
  * @param {prismaModels} prismaModel - The Prisma model to delete the record from.
- * @param {string} uuid - The id of the record to delete.
+ * @param {string} id - The id of the record to delete.
+ * @param {"id" | "uuid"} [idType='id'] - Default is id. Indecate if id is a id or a uuid.
  * @returns {Promise<IAPIResponse>} A promise that resolves to an object containing the record data, status, and message.
  */
 export async function deleteRecord(
   prismaModel: prismaModels,
-  uuid: string,
+  id: string,
+  idType: 'id' | 'uuid' = 'id',
 ): Promise<IAPIResponse> {
-  const { err, prismaType, validatedData } = Validate(
-    prismaModel,
-    uuid,
-    UuidSchema,
-  );
+  const { err, prismaType } = Validate(prismaModel);
   if (err) return err;
 
   try {
-    await prismaType.delete({ where: { validatedData } });
+    if (idType === 'id') {
+      await prismaType.delete({ where: { id } });
+    } else {
+      await prismaType.delete({ where: { uuid: id } });
+    }
 
     return {
       status: Status.Deleted,
@@ -145,13 +158,13 @@ export async function deleteRecord(
  * Function to validate the data
  * @param {prismaModels} prismaModel - The Prisma model to validate the data against.
  * @param {unknown} data - The data to validate.
- * @param {Joi.ObjectSchema} schema - The schema to validate the data against.
- * @returns {IAPIResponse} An object containing the status and message.
+ * @param {Joi.ObjectSchema | Joi.ArraySchema} schema - The schema to validate the data against.
+ * @returns {err?: IAPIResponse; prismaType?: any; validatedData?: unknown} An object containing
  */
 export function Validate(
   prismaModel: prismaModels,
   data?: unknown,
-  schema?: Joi.AnySchema,
+  schema?: Joi.ObjectSchema | Joi.ArraySchema,
 ): { err?: IAPIResponse; prismaType?: any; validatedData?: unknown } {
   if (!Object.prototype.hasOwnProperty.call(prisma, prismaModel)) {
     return {

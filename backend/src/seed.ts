@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
 async function generatePSQL() {
   // Create Permission Groups
   await prisma.permissionGroup.createMany({
-    data: [{ name: 'Administrator' }, { name: 'Device' }],
+    data: [{ name: 'Administrator' }, { name: 'Device' }, { name: 'Location' }, { name: 'Alert' }],
   });
 
   // Create Permission
@@ -75,6 +75,41 @@ async function generatePSQL() {
         permissionGroupId: await findPermissionGroup('Device'),
         description: 'Delete device',
       },
+      {
+        code: 'location:view',
+        permissionGroupId: await findPermissionGroup('Location'),
+        description: 'View location information',
+      },
+      {
+        code: 'location:create',
+        permissionGroupId: await findPermissionGroup('Location'),
+        description: 'Create new location',
+      },
+      {
+        code: 'location:update',
+        permissionGroupId: await findPermissionGroup('Location'),
+        description: 'Update location information',
+      },
+      {
+        code: 'location:delete',
+        permissionGroupId: await findPermissionGroup('Location'),
+        description: 'Delete location',
+      },
+      {
+        code: 'alert:view',
+        permissionGroupId: await findPermissionGroup('Alert'),
+        description: 'View alert information',
+      },
+      {
+        code: 'alert:create',
+        permissionGroupId: await findPermissionGroup('Alert'),
+        description: 'Create new alert',
+      },
+      {
+        code: 'alert:update',
+        permissionGroupId: await findPermissionGroup('Alert'),
+        description: 'Update alert information',
+      },
     ],
   });
 
@@ -133,6 +168,18 @@ async function generatePSQL() {
   }
 
   await prisma.$transaction(technicianPermissionTransaction);
+
+  // Create location
+  await prisma.location.createMany({
+    data: [
+      {
+        name: 'Stue',
+      },
+      {
+        name: 'Gang',
+      },
+    ],
+  });
 
   /**
    * Find permission group id by name
