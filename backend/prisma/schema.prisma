@@ -32,6 +32,7 @@ model Device {
   locationUuid String   @db.Uuid
   status       Status?  @default(ACTIVE)
   frequency    Int
+  token        String?  @unique
   createdAt    DateTime @default(now()) @db.Timestamptz()
   updatedAt    DateTime @updatedAt @db.Timestamptz()
 
