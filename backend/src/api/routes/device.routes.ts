@@ -1,20 +1,26 @@
 import { Router } from 'express';
 
-import Joi from '@/joi';
-import * as DefaultController from '@controllers/default.controller';
-import { transformSearchQuery } from '@middlewares/device.mw';
-import { StatusSchema } from '@schemas/prisma/schemas/enums';
-// import { getAllSchema } from '@schemas/device';
 import {
-  DeviceUncheckedCreateInputSchemaObject as createSchema,
-  DeviceWhereInputSchemaObject as findSchema,
-} from '@schemas/prisma/schemas/objects';
+  createRecord,
+  deleteRecord,
+  getAll,
+  updateRecord,
+} from '@controllers/default.controller';
+import { verifyJWT } from '@middlewares/authenticate.mw';
+import { isAllowed } from '@middlewares/isAllowed.mw';
+import {
+  createSchema,
+  searchParamsSchema,
+  updateSchema,
+} from '@schemas/device.schema';
 
 const router = Router();
 
-const getSchema = Joi.object({ ...findSchema, status: StatusSchema });
+router.use('/', verifyJWT);
 
-router.get('/', transformSearchQuery, DefaultController.getAll(getSchema));
-router.post('/', DefaultController.createRecord(Joi.object(createSchema)));
+router.get('/', isAllowed('device:view'), getAll(searchParamsSchema));
+router.post('/', isAllowed('device:create'), createRecord(createSchema));
+router.patch('/', isAllowed('device:update'), updateRecord(updateSchema));
+router.delete('/:id', isAllowed('device:delete'), deleteRecord());
 
 export default router;

@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
 async function generatePSQL() {
   // Create Permission Groups
   await prisma.permissionGroup.createMany({
-    data: [{ name: 'Administrator' }, { name: 'Location' }, { name: 'Alert' }],
+    data: [{ name: 'Administrator' }, { name: 'Device' }, { name: 'Location' }, { name: 'Alert' }],
   });
 
   // Create Permission
@@ -54,6 +54,26 @@ async function generatePSQL() {
         code: 'administrator:permissiongroup:create',
         permissionGroupId: await findPermissionGroup('Administrator'),
         description: 'Create new permission group',
+      },
+      {
+        code: 'device:view',
+        permissionGroupId: await findPermissionGroup('Device'),
+        description: 'View devices',
+      },
+      {
+        code: 'device:create',
+        permissionGroupId: await findPermissionGroup('Device'),
+        description: 'Create new devices',
+      },
+      {
+        code: 'device:update',
+        permissionGroupId: await findPermissionGroup('Device'),
+        description: 'Update device information',
+      },
+      {
+        code: 'device:delete',
+        permissionGroupId: await findPermissionGroup('Device'),
+        description: 'Delete device',
       },
       {
         code: 'location:view',
@@ -104,6 +124,16 @@ async function generatePSQL() {
     },
   });
 
+  const technicianUser = await prisma.user.create({
+    data: {
+      initials: 'TC',
+      username: 'technician',
+      password: await hash('technician'),
+      name: 'Technician',
+      email: 'technician@example.com',
+    },
+  });
+
   // Assign permissions to super admin user
   const adminPermission = await prisma.permission.findMany();
 
@@ -118,6 +148,26 @@ async function generatePSQL() {
       });
     }
   }
+
+  const technicianPermissionTransaction = [];
+
+  const technicianPermissions = await prisma.permission.findMany({
+    where: { PermissionGroup: { name: 'Device' } },
+  });
+
+  for (const permission of technicianPermissions) {
+    const prismaTransaction = prisma.userPermissions.create({
+      data: {
+        userId: technicianUser.id,
+        assignedBy: superAdminUser.id,
+        permissionId: permission.id,
+      },
+    });
+
+    technicianPermissionTransaction.push(prismaTransaction);
+  }
+
+  await prisma.$transaction(technicianPermissionTransaction);
 
   // Create location
   await prisma.location.createMany({
@@ -140,16 +190,11 @@ async function generatePSQL() {
   async function findPermissionGroup(name: string): Promise<string> {
     try {
       const result = await prisma.permissionGroup.findFirst({
-        where: {
-          name,
-        },
-        select: {
-          id: true,
-        },
+        where: { name },
+        select: { id: true },
       });
-      if (result) {
-        return result.id;
-      }
+
+      if (result) return result.id;
       throw new Error('Permission group not found');
     } catch (error: unknown) {
       return (error as Error).message;

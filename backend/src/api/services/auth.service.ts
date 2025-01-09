@@ -1,5 +1,5 @@
 import { Mutex } from 'async-mutex';
-import { ObjectId } from 'bson';
+import { UUID } from 'bson';
 import jwt from 'jsonwebtoken';
 import passport from 'passport';
 
@@ -16,7 +16,7 @@ import { APIResponse, Status } from '@api-types/general.types';
 import config from '@config';
 import prisma from '@prisma-instance';
 import { Session } from '@prisma/client';
-import { LoginSchema, TokenSchema } from '@schemas/auth';
+import { LoginSchema, TokenSchema } from '@schemas/auth.schema';
 
 /**
  * Generates a JSON Web Token (JWT) for the given user.
@@ -48,7 +48,7 @@ export async function generateUserTokens(
   ip: string,
   session?: Session,
 ): Promise<AccessResult> {
-  const newId = new ObjectId();
+  const newId = new UUID();
 
   const userPermissions = await prisma.userPermissions.findMany({
     where: {

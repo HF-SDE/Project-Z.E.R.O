@@ -2,7 +2,7 @@ import * as argon2 from 'argon2';
 
 import { APIResponse, Status } from '@api-types/general.types';
 import prisma from '@prisma-instance';
-import { PasswordSchema } from '@schemas/password';
+import { PasswordSchema } from '@schemas/password.schema';
 
 /**
  * Service to reset a user's password

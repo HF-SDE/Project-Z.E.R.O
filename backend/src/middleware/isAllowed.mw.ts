@@ -9,7 +9,9 @@ import { getHttpStatusCode } from '@utils/Utils';
  * @param {string[]} permissions - The permissions required to access the route.
  * @returns {ExpressFunction} The middleware function to check permissions.
  */
-export function isAllowed(permissions: string[]): ExpressFunction {
+export function isAllowed(permissions: string[] | string): ExpressFunction {
+  if (typeof permissions === 'string') permissions = [permissions];
+
   return async (req, res: Response, next) => {
     const user = req.user;
 
