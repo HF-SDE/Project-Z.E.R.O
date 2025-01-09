@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
 async function generatePSQL() {
   // Create Permission Groups
   await prisma.permissionGroup.createMany({
-    data: [{ name: 'Administrator' }, { name: 'Technician' }],
+    data: [{ name: 'Administrator' }, { name: 'Device' }],
   });
 
   // Create Permission
@@ -56,23 +56,23 @@ async function generatePSQL() {
         description: 'Create new permission group',
       },
       {
-        code: 'technician:device:view',
-        permissionGroupId: await findPermissionGroup('Technician'),
+        code: 'device:view',
+        permissionGroupId: await findPermissionGroup('Device'),
         description: 'View devices',
       },
       {
-        code: 'technician:device:create',
-        permissionGroupId: await findPermissionGroup('Technician'),
+        code: 'device:create',
+        permissionGroupId: await findPermissionGroup('Device'),
         description: 'Create new devices',
       },
       {
-        code: 'technician:device:update',
-        permissionGroupId: await findPermissionGroup('Technician'),
+        code: 'device:update',
+        permissionGroupId: await findPermissionGroup('Device'),
         description: 'Update device information',
       },
       {
-        code: 'technician:device:delete',
-        permissionGroupId: await findPermissionGroup('Technician'),
+        code: 'device:delete',
+        permissionGroupId: await findPermissionGroup('Device'),
         description: 'Delete device',
       },
     ],
@@ -117,7 +117,7 @@ async function generatePSQL() {
   const technicianPermissionTransaction = [];
 
   const technicianPermissions = await prisma.permission.findMany({
-    where: { PermissionGroup: { name: 'Technician' } },
+    where: { PermissionGroup: { name: 'Device' } },
   });
 
   for (const permission of technicianPermissions) {

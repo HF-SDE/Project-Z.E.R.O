@@ -1,5 +1,5 @@
 import { Mutex } from 'async-mutex';
-import { ObjectId } from 'bson';
+import { UUID } from 'bson';
 import jwt from 'jsonwebtoken';
 import passport from 'passport';
 
@@ -48,7 +48,7 @@ export async function generateUserTokens(
   ip: string,
   session?: Session,
 ): Promise<AccessResult> {
-  const newId = new ObjectId();
+  const newId = new UUID();
 
   const userPermissions = await prisma.userPermissions.findMany({
     where: {
