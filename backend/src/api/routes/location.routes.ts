@@ -13,7 +13,7 @@ import {
   createLocationSchema,
   getLocationSchema,
   updateLocationSchema,
-} from '@schemas/location';
+} from '@schemas/location.schema';
 
 const router = Router();
 
