@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { UuidSchema } from "./general";
+import { UuidSchema } from "./general.schema";
 
 export const getLocationSchema = Joi.object({
     id: UuidSchema,
