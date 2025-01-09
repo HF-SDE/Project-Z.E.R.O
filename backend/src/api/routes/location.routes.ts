@@ -16,6 +16,7 @@ const router = Router();
 router.use('/', verifyJWT);
 router.get(
   '/',
+  isAllowed(['location:view']),
   getAll<
     LocationWithOutCreateAtAndUpdatedAt,
     LocationWithOutCreateAtAndUpdatedAt
