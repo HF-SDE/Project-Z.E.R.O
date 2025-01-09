@@ -16,7 +16,7 @@ import { APIResponse, Status } from '@api-types/general.types';
 import config from '@config';
 import prisma from '@prisma-instance';
 import { Session } from '@prisma/client';
-import { LoginSchema, TokenSchema } from '@schemas/auth';
+import { LoginSchema, TokenSchema } from '@schemas/auth.schema';
 
 /**
  * Generates a JSON Web Token (JWT) for the given user.

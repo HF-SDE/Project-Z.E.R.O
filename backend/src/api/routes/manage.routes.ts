@@ -12,12 +12,12 @@ import { isAllowed } from '@middlewares/isAllowed.mw';
 import { transformPatch, transformPermissions } from '@middlewares/manage.mw';
 import { validateParams } from '@middlewares/validate.mw';
 import { User } from '@prisma/client';
-import { getPermissionSchema } from '@schemas/permission';
+import { getPermissionSchema } from '@schemas/permission.schema';
 import {
   createUserSchema,
   getUserSchema,
   updateUserSchema,
-} from '@schemas/user';
+} from '@schemas/user.schema';
 
 const router = Router();
 

@@ -7,7 +7,7 @@ import {
   ChangePasswordBase64Schema,
   ChangePasswordSchema,
   jwtTokenSchema,
-} from '@schemas/profile';
+} from '@schemas/profile.schema';
 
 /**
  * Service to change a user's password

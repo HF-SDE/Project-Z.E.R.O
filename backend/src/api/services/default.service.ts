@@ -8,6 +8,7 @@ import Joi from 'joi';
 import { APIResponse, IAPIResponse, Status } from '@api-types/general.types';
 import prisma, { errorResponse, prismaModels } from '@prisma-instance';
 import { Prisma } from '@prisma/client';
+import { UuidSchema } from '@schemas/general.schema';
 import { capitalize } from '@utils/Utils';
 
 /**
