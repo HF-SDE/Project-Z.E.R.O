@@ -79,7 +79,7 @@ export async function create(
  * @async
  * @param {prismaModels} prismaModel - The Prisma model to update the record from.
  * @param {string} id - The id of the record to update.
- * @param {any} data - The data to update the record with.
+ * @param {unknown} data - The data to update the record with.
  * @param {Joi.ObjectSchema} schema - The schema to validate the data against.
  * @returns {Promise<APIResponse>} A promise that resolves to an object containing the record data, status, and message.
  */
@@ -97,7 +97,18 @@ export async function update(
   if (err) return err;
 
   try {
-    await prismaType.update({ where: { id }, data: validatedData });
+    if (Array.isArray(validatedData)) {
+      const transactionCollection = [];
+      for (const item of validatedData) {
+        const { uuid, ...restItem } = item;
+        transactionCollection.push(
+          prismaType.update({ where: { uuid }, data: restItem }),
+        );
+      }
+      await prisma.$transaction(transactionCollection);
+    } else {
+      await prismaType.update({ where: { id }, data: validatedData });
+    }
 
     return {
       status: Status.Updated,
@@ -147,7 +158,7 @@ export async function deleteRecord(
  * @param {prismaModels} prismaModel - The Prisma model to validate the data against.
  * @param {unknown} data - The data to validate.
  * @param {Joi.ObjectSchema | Joi.ArraySchema} schema - The schema to validate the data against.
- * @returns {IAPIResponse} An object containing the status and message.
+ * @returns {err?: IAPIResponse; prismaType?: any; validatedData?: unknown} An object containing
  */
 function Validate(
   prismaModel: prismaModels,
