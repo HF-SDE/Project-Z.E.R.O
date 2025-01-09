@@ -134,7 +134,7 @@ export async function deleteRecord(
   id: string,
   idType: 'id' | 'uuid' = 'id',
 ): Promise<IAPIResponse> {
-  const { err, prismaType } = Validate(prismaModel);
+  const { err, prismaType } = Validate(prismaModel, id, UuidSchema);
   if (err) return err;
 
   try {
@@ -158,13 +158,13 @@ export async function deleteRecord(
  * Function to validate the data
  * @param {prismaModels} prismaModel - The Prisma model to validate the data against.
  * @param {unknown} data - The data to validate.
- * @param {Joi.ObjectSchema | Joi.ArraySchema} schema - The schema to validate the data against.
+ * @param {Joi.AnySchema} schema - The schema to validate the data against.
  * @returns {err?: IAPIResponse; prismaType?: any; validatedData?: unknown} An object containing
  */
 export function Validate(
   prismaModel: prismaModels,
   data?: unknown,
-  schema?: Joi.ObjectSchema | Joi.ArraySchema,
+  schema?: Joi.AnySchema,
 ): { err?: IAPIResponse; prismaType?: any; validatedData?: unknown } {
   if (!Object.prototype.hasOwnProperty.call(prisma, prismaModel)) {
     return {
