@@ -65,6 +65,11 @@ async function generatePSQL() {
         permissionGroupId: await findPermissionGroup('Location'),
         description: 'Create new location',
       },
+      {
+        code: 'location:update',
+        permissionGroupId: await findPermissionGroup('Location'),
+        description: 'Update location information',
+      },
     ],
   });
 
