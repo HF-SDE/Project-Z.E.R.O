@@ -88,7 +88,7 @@ export async function update(
   prismaModel: prismaModels,
   id: string,
   data: unknown,
-  schema: Joi.ObjectSchema,
+  schema: Joi.ArraySchema,
 ): Promise<APIResponse> {
   const { err, prismaType, validatedData } = Validate(
     prismaModel,
@@ -114,18 +114,22 @@ export async function update(
  * Service to delete a record
  * @async
  * @param {prismaModels} prismaModel - The Prisma model to delete the record from.
- * @param {string} id - The id of the record to delete.
+ * @param {string} uuid - The id of the record to delete.
  * @returns {Promise<IAPIResponse>} A promise that resolves to an object containing the record data, status, and message.
  */
 export async function deleteRecord(
   prismaModel: prismaModels,
-  id: string,
+  uuid: string,
 ): Promise<IAPIResponse> {
-  const { err, prismaType } = Validate(prismaModel);
+  const { err, prismaType, validatedData } = Validate(
+    prismaModel,
+    uuid,
+    UuidSchema,
+  );
   if (err) return err;
 
   try {
-    await prismaType.delete({ where: { id } });
+    await prismaType.delete({ where: { validatedData } });
 
     return {
       status: Status.Deleted,
@@ -147,7 +151,7 @@ export async function deleteRecord(
 function Validate(
   prismaModel: prismaModels,
   data?: unknown,
-  schema?: Joi.ObjectSchema,
+  schema?: Joi.AnySchema,
 ): { err?: IAPIResponse; prismaType?: any; validatedData?: unknown } {
   if (!Object.prototype.hasOwnProperty.call(prisma, prismaModel)) {
     return {
