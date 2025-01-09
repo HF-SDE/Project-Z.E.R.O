@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { createRecord, deleteRecord, getAll, updateRecord } from '@controllers/default.controller';
 import { verifyJWT } from '@middlewares/authenticate.mw';
 import { isAllowed } from '@middlewares/isAllowed.mw';
-import { createAlertSchema, getAlertSchema, updateAlertSchema } from '@schemas/alert';
+import { createAlertSchema, getAlertSchema, updateAlertSchema } from '@schemas/alert.schema';
 
 const router = Router();
 
