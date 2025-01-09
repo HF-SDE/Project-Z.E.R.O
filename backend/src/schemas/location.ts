@@ -4,3 +4,7 @@ export const getLocationSchema = Joi.object({
     id: Joi.string().guid({version: 'uuidv4', separator: '-'}),
     name: Joi.string().min(3).max(255),
 });
+
+export const createLocationSchema = Joi.object({
+    name: Joi.string().min(3).max(255).required(),
+});
