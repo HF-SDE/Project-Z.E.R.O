@@ -114,20 +114,20 @@ export async function update(
  * @async
  * @param {prismaModels} prismaModel - The Prisma model to delete the record from.
  * @param {string} id - The id of the record to delete.
- * @param {string} [idType] - Indecate if id is a id or a uuid.
+ * @param {"id" | "uuid"} [idType='id'] - Default is id. Indecate if id is a id or a uuid.
  * @returns {Promise<IAPIResponse>} A promise that resolves to an object containing the record data, status, and message.
  */
 export async function deleteRecord(
   prismaModel: prismaModels,
   id: string,
-  idType: "id" | "uuid"
+  idType: 'id' | 'uuid' = 'id',
 ): Promise<IAPIResponse> {
   const { err, prismaType } = Validate(prismaModel);
   if (err) return err;
 
   try {
     if (idType === 'id') {
-        await prismaType.delete({ where: { id } });
+      await prismaType.delete({ where: { id } });
     } else {
       await prismaType.delete({ where: { uuid: id } });
     }
