@@ -94,16 +94,17 @@ export function updateRecord(
 
 /**
  * Controller to delete a record
- * @param {prismaModels} model - The Prisma model to delete the record from.
+ * @param {"id" | "uuid"} [idType='id'] - Default is id. Indecate if id is a id or a uuid.
+ * @param {prismaModels} [model] - The Prisma model to delete the record from.
  * @returns {ExpressFunction} The response object
  */
-export function deleteRecord(model?: prismaModels): ExpressFunction {
+export function deleteRecord(idType: "id" | "uuid" = 'id', model?: prismaModels): ExpressFunction {
   return async (req, res) => {
     const id = (req.params.id || req.query.id) as string;
 
     if (!model) model = getModel(req);
 
-    const response = await DefaultService.deleteRecord(model, id);
+    const response = await DefaultService.deleteRecord(model, id, idType);
 
     res.status(getHttpStatusCode(response.status)).json(response).end();
   };
