@@ -108,10 +108,10 @@ async function generatePSQL() {
   await prisma.location.createMany({
     data: [
       {
-        name: 'Location 1',
+        name: 'Stue',
       },
       {
-        name: 'Location 2',
+        name: 'Gang',
       },
     ],
   });
