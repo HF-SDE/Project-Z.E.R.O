@@ -161,7 +161,7 @@ export async function deleteRecord(
  * @param {Joi.ObjectSchema | Joi.ArraySchema} schema - The schema to validate the data against.
  * @returns {err?: IAPIResponse; prismaType?: any; validatedData?: unknown} An object containing
  */
-function Validate(
+export function Validate(
   prismaModel: prismaModels,
   data?: unknown,
   schema?: Joi.ObjectSchema | Joi.ArraySchema,
