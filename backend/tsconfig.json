@@ -37,6 +37,5 @@
     "src/passport.ts",
     "src/**/*",
     "eslint.config.mjs",
-    "prisma/generated/schemas/**/*"
   ]
 }

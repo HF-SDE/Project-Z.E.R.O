@@ -1,38 +1,44 @@
 import Joi from '@/joi';
-import { StatusSchema } from '@schemas/prisma/schemas/enums';
-import { DeviceUncheckedCreateInputSchemaObject } from '@schemas/prisma/schemas/objects';
+
+const uuid = Joi.string().uuid();
+const name = Joi.string().min(3).max(255);
+const frequency = Joi.number().max(2147483647);
+const status = Joi.string()
+  .valid('active', 'inactive', 'maintenance')
+  .insensitive();
 
 export const createSchema = Joi.object({
-  ...DeviceUncheckedCreateInputSchemaObject,
-  uuid: Joi.string().uuid(),
-  locationUuid: Joi.string().uuid().required(),
-});
+  name,
+  frequency,
+  locationUuid: uuid,
+}).options({ presence: 'required' });
 
 export const searchParamsSchema = Joi.object({
-  id: Joi.string().uuid(),
-  uuid: Joi.string().uuid(),
-  name: Joi.string(),
-  Location: Joi.object({
-    uuid: Joi.string().uuid(),
-    name: Joi.string(),
-  }),
+  id: uuid,
+  uuid,
+  name,
+  Location: Joi.object({ uuid, name }),
   location: Joi.alternatives()
-    .try(Joi.string().uuid(), Joi.string())
-    .custom(getType),
-  status: StatusSchema.insensitive(),
+    .try(uuid, name)
+    .custom((value: string) => ({
+      key: uuid.validate(value).error ? 'name' : 'uuid',
+      value,
+    })),
+  status,
 })
   .rename('id', 'uuid', { ignoreUndefined: true, override: true })
   .custom(getSearchQuery);
 
-// eslint-disable-next-line jsdoc/require-jsdoc
-function getType(value: string): object {
-  try {
-    Joi.assert(value, Joi.string().uuid());
-    return { key: 'uuid', value };
-  } catch {
-    return { key: 'name', value };
-  }
-}
+export const updateSchema = Joi.array().items(
+  Joi.object({
+    uuid: uuid.required(),
+    name,
+    frequency,
+    status,
+    locationUuid: uuid,
+  }),
+);
+
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 function getSearchQuery(value: { location?: string; Location: any }): object {
@@ -44,13 +50,3 @@ function getSearchQuery(value: { location?: string; Location: any }): object {
 
   return value;
 }
-
-export const updateSchema = Joi.array().items(
-  Joi.object({
-    uuid: Joi.string().uuid().required(),
-    name: Joi.string(),
-    frequency: Joi.number().max(2147483647),
-    status: StatusSchema.insensitive(),
-    locationUuid: Joi.string().uuid(),
-  }),
-);
