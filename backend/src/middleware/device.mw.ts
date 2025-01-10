@@ -1,7 +1,9 @@
 import argon2 from 'argon2';
 import { NextFunction, Request, Response } from 'express';
 
+import { Status } from '@api-types/general.types';
 import { PrismaClient } from '@prisma/client';
+import { UuidSchema } from '@schemas/general.schema';
 
 import { unauthorizedResponse } from './authenticate.mw';
 
@@ -45,7 +47,20 @@ export async function useApiKey(
     return;
   }
 
-  const device = await prisma.device.findUnique({ where: { uuid: deviceId } });
+  const validate = UuidSchema.validate(deviceId);
+
+  if (validate.error) {
+    res.status(400).json({
+      status: Status.InvalidDetails,
+      message: '[device-id] must be a valid GUID',
+    });
+
+    return;
+  }
+
+  const device = await prisma.device.findUnique({
+    where: { uuid: validate.value },
+  });
 
   if (!device) {
     res.status(401).json(unauthorizedResponse);
@@ -55,6 +70,7 @@ export async function useApiKey(
   const verifyToken = await argon2.verify(device.token as string, apiKey);
 
   if (verifyToken) {
+    delete req.query.id;
     req.query.uuid = deviceId;
 
     next();

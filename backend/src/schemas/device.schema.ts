@@ -1,9 +1,6 @@
 import Joi from '@/joi';
 import { StatusSchema } from '@schemas/prisma/schemas/enums';
-import {
-  DeviceUncheckedCreateInputSchemaObject,
-  DeviceUncheckedUpdateInputSchemaObject,
-} from '@schemas/prisma/schemas/objects';
+import { DeviceUncheckedCreateInputSchemaObject } from '@schemas/prisma/schemas/objects';
 
 export const createSchema = Joi.object({
   ...DeviceUncheckedCreateInputSchemaObject,
@@ -50,8 +47,10 @@ function getSearchQuery(value: { location?: string; Location: any }): object {
 
 export const updateSchema = Joi.array().items(
   Joi.object({
-    ...DeviceUncheckedUpdateInputSchemaObject,
     uuid: Joi.string().uuid().required(),
+    name: Joi.string(),
+    frequency: Joi.number().max(2147483647),
+    status: StatusSchema.insensitive(),
     locationUuid: Joi.string().uuid(),
   }),
 );
