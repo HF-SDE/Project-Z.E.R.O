@@ -12,7 +12,7 @@ const defaultOmit = {
 const prisma = new PrismaClient({
   omit: {
     alert: defaultOmit,
-    device: defaultOmit,
+    device: { ...defaultOmit, token: true },
     location: defaultOmit,
     permission: defaultOmit,
     user: defaultOmit,

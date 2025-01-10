@@ -6,6 +6,11 @@ import { getHttpStatusCode } from '@utils/Utils';
 
 import '../passport';
 
+export const unauthorizedResponse = {
+  status: Status.Unauthorized,
+  message: 'Unauthorized',
+};
+
 /**
  * Verifies the JWT token in the request header.
  * @param {Request} req - The request object containing the JWT token.
@@ -23,11 +28,6 @@ export function verifyJWT(
     'jwt',
     { session: false },
     (err: number, user: Express.User) => {
-      const unauthorizedResponse = {
-        status: Status.Unauthorized,
-        message: 'Unauthorized',
-      };
-
       if (err) return res.status(err).json(unauthorizedResponse);
 
       if (!user) {
