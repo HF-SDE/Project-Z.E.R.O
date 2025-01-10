@@ -126,7 +126,7 @@ export async function update(
  * @async
  * @param {prismaModels} prismaModel - The Prisma model to delete the record from.
  * @param {string} id - The id of the record to delete.
- * @param {"id" | "uuid"} [idType='id'] - Default is id. Indecate if id is a id or a uuid.
+ * @param {"id" | "uuid"} [idType] - Default is id. Indecate if id is a id or a uuid.
  * @returns {Promise<IAPIResponse>} A promise that resolves to an object containing the record data, status, and message.
  */
 export async function deleteRecord(
@@ -154,18 +154,24 @@ export async function deleteRecord(
   }
 }
 
+interface IValidateResponse {
+  err?: IAPIResponse;
+  prismaType?: any;
+  validatedData?: unknown;
+}
+
 /**
  * Function to validate the data
  * @param {prismaModels} prismaModel - The Prisma model to validate the data against.
  * @param {unknown} data - The data to validate.
  * @param {Joi.AnySchema} schema - The schema to validate the data against.
- * @returns {err?: IAPIResponse; prismaType?: any; validatedData?: unknown} An object containing
+ * @returns {IValidateResponse} An object containing
  */
 export function Validate(
   prismaModel: prismaModels,
   data?: unknown,
   schema?: Joi.AnySchema,
-): { err?: IAPIResponse; prismaType?: any; validatedData?: unknown } {
+): IValidateResponse {
   if (!Object.prototype.hasOwnProperty.call(prisma, prismaModel)) {
     return {
       err: {
