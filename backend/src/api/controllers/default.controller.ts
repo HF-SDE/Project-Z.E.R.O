@@ -11,6 +11,11 @@ function getModel(req: Request): prismaModels {
   return req.baseUrl.replace('/', '') as prismaModels;
 }
 
+interface IGetAllConfig {
+  model?: prismaModels;
+  prismaConfig?: RequestConfig;
+}
+
 /**
  * Controller to get all
  * @param {schema} schema - The schema to validate the query object.
@@ -19,14 +24,17 @@ function getModel(req: Request): prismaModels {
  */
 export function getAll(
   schema: Joi.ObjectSchema,
-  model?: prismaModels,
+  { model, prismaConfig = {} }: IGetAllConfig = {},
 ): ExpressFunction {
   return async (req, res) => {
     model ??= getModel(req);
 
-    const config = { where: req.query };
+    const config = {
+      where: req.query,
+      ...prismaConfig,
+    };
 
-    const response = await DefaultService.getAll(model, config, schema);
+    const response = await DefaultService.getAll(model, schema, config);
 
     res.status(getHttpStatusCode(response.status)).json(response).end();
   };

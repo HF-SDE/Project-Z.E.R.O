@@ -21,8 +21,8 @@ import { capitalize } from '@utils/Utils';
  */
 export async function getAll(
   prismaModel: prismaModels,
-  config: Record<string, unknown> = {},
   schema: Joi.ObjectSchema,
+  config: Record<string, unknown> = {},
 ): Promise<APIResponse<any>> {
   const { err, prismaType, validatedData } = Validate(
     prismaModel,
