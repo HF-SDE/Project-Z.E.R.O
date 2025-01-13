@@ -1,6 +1,5 @@
 import { Router } from 'express';
 
-import { LocationWithOutCreateAtAndUpdatedAt } from '@api-types/location.types';
 import {
   createRecord,
   deleteRecord,
@@ -21,10 +20,7 @@ router.use('/', verifyJWT);
 router.get(
   '/',
   isAllowed(['location:view']),
-  getAll<
-    LocationWithOutCreateAtAndUpdatedAt,
-    LocationWithOutCreateAtAndUpdatedAt
-  >(getLocationSchema, 'location'),
+  getAll(getLocationSchema, 'location'),
 );
 
 router.post(

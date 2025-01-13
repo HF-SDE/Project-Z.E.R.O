@@ -19,14 +19,22 @@ interface IGetAllConfig {
 /**
  * Controller to get all
  * @param {schema} schema - The schema to validate the query object.
- * @param {prismaModels} [model] - [Optional] - The Prisma model to get the records from.
+ * @param {IGetAllConfig | prismaModels} configOrModel - The Prisma model to get the records from.
  * @returns {ExpressFunction} The response object
  */
 export function getAll(
   schema: Joi.ObjectSchema,
-  { model, prismaConfig = {} }: IGetAllConfig = {},
+  configOrModel?: IGetAllConfig | prismaModels,
 ): ExpressFunction {
   return async (req, res) => {
+    let model: prismaModels | undefined;
+    let prismaConfig: RequestConfig | undefined;
+
+    if (typeof configOrModel === 'object') {
+      model = configOrModel.model;
+      prismaConfig = configOrModel.prismaConfig;
+    } else model = configOrModel;
+
     model ??= getModel(req);
 
     const config = {
@@ -47,7 +55,7 @@ export function getAll(
  * @returns {ExpressFunction} The response object
  */
 export function createRecord(
-  schema: Joi.ObjectSchema,
+  schema: Joi.ObjectSchema | Joi.ArraySchema,
   model?: prismaModels,
 ): ExpressFunction {
   return async (req, res) => {
@@ -86,7 +94,10 @@ export function updateRecord(
  * @param {prismaModels} [model] - The Prisma model to delete the record from.
  * @returns {ExpressFunction} The response object
  */
-export function deleteRecord(idType: "id" | "uuid" = 'id', model?: prismaModels): ExpressFunction {
+export function deleteRecord(
+  idType: 'id' | 'uuid' = 'id',
+  model?: prismaModels,
+): ExpressFunction {
   return async (req, res) => {
     const id = (req.params.id || req.query.id || req.query.uuid) as string;
 

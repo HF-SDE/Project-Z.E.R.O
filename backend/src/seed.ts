@@ -20,6 +20,7 @@ async function generatePSQL() {
       { name: 'Device' },
       { name: 'Location' },
       { name: 'Alert' },
+      { name: 'Data' },
     ],
   });
 
@@ -116,6 +117,11 @@ async function generatePSQL() {
         permissionGroupId: await findPermissionGroup('Alert'),
         description: 'Update alert information',
       },
+      {
+        code: 'data:view',
+        permissionGroupId: await findPermissionGroup('Data'),
+        description: 'View data information',
+      },
     ],
   });
 
@@ -158,7 +164,7 @@ async function generatePSQL() {
   const technicianPermissionTransaction = [];
 
   const technicianPermissions = await prisma.permission.findMany({
-    where: { PermissionGroup: { name: 'Device' } },
+    where: { PermissionGroup: { OR: [{ name: 'Device' }, { name: 'Data' }] } },
   });
 
   for (const permission of technicianPermissions) {

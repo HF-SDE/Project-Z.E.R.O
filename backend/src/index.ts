@@ -6,12 +6,13 @@ import helmet from 'helmet';
 import passport from 'passport';
 
 import config from '@config';
+import alertRoutes from '@routes/alert.routes';
 import authRoutes from '@routes/auth.routes';
 import deviceRoutes from '@routes/device.routes';
+import locationRoutes from '@routes/location.routes';
 import manageRoutes from '@routes/manage.routes';
 import profileRoutes from '@routes/profile.routes';
-import locationRoutes from '@routes/location.routes';
-import alertRoutes from '@routes/alert.routes';
+import timeSeriesRoutes from '@routes/timeSeries.routes';
 
 import './passport';
 
@@ -40,6 +41,7 @@ app.use('/profile', profileRoutes);
 app.use('/device', deviceRoutes);
 app.use('/location', locationRoutes);
 app.use('/alert', alertRoutes);
+app.use('/data', timeSeriesRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
