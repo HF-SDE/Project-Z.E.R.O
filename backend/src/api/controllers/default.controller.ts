@@ -47,7 +47,7 @@ export function getAll(
  * @returns {ExpressFunction} The response object
  */
 export function createRecord(
-  schema: Joi.ObjectSchema,
+  schema: Joi.ObjectSchema | Joi.ArraySchema,
   model?: prismaModels,
 ): ExpressFunction {
   return async (req, res) => {

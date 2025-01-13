@@ -15,8 +15,8 @@ import { capitalize } from '@utils/Utils';
  * Service to get all records from a collection
  * @async
  * @param {prismaModels} prismaModel - The Prisma model to get the records from.
- * @param {Record<string, unknown>} config - The parameters to filter the records by.
  * @param {Joi.ObjectSchema} schema - The schema to validate the query object.
+ * @param {Record<string, unknown>} config - The parameters to filter the records by.
  * @returns {Promise<APIResponse<any>>} A promise that resolves to an object containing the data, status, and message.
  */
 export async function getAll(
@@ -47,13 +47,13 @@ export async function getAll(
  * @async
  * @param {prismaModels} prismaModel - The Prisma model to create the record with.
  * @param {any} data - The data to create a record with.
- * @param {Joi.ObjectSchema} schema - The schema to validate the data against.
+ * @param {Joi.ObjectSchema | Joi.ArraySchema} schema - The schema to validate the data against.
  * @returns {Promise<IAPIResponse>} A promise that resolves to an object containing the record data, status, and message.
  */
 export async function create(
   prismaModel: prismaModels,
   data: unknown,
-  schema: Joi.ObjectSchema,
+  schema: Joi.ObjectSchema | Joi.ArraySchema,
 ): Promise<IAPIResponse> {
   const { err, prismaType, validatedData } = Validate(
     prismaModel,
@@ -62,8 +62,11 @@ export async function create(
   );
   if (err) return err;
 
+  const query = Array.isArray(validatedData) ? 'createMany' : 'create';
+
   try {
-    await prismaType.create({ data: validatedData });
+    // eslint-disable-next-line security/detect-object-injection
+    await prismaType[query]({ data: validatedData });
 
     return {
       status: Status.Created,
@@ -176,7 +179,7 @@ export function Validate(
     return {
       err: {
         status: Status.Failed,
-        message: `Something went wrong on our end`,
+        message: `Model '${prismaModel}' was not found in prisma`,
       },
     };
   }
