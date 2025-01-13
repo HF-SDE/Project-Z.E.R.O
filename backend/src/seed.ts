@@ -1,6 +1,7 @@
 import { hash } from 'argon2';
 
-import { PrismaClient } from '@prisma/client';
+import { faker } from '@faker-js/faker';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 // Use crypto to generate random hex strings
 
@@ -14,7 +15,12 @@ const prisma = new PrismaClient();
 async function generatePSQL() {
   // Create Permission Groups
   await prisma.permissionGroup.createMany({
-    data: [{ name: 'Administrator' }, { name: 'Device' }, { name: 'Location' }, { name: 'Alert' }],
+    data: [
+      { name: 'Administrator' },
+      { name: 'Device' },
+      { name: 'Location' },
+      { name: 'Alert' },
+    ],
   });
 
   // Create Permission
@@ -180,6 +186,107 @@ async function generatePSQL() {
       },
     ],
   });
+
+  // Create device
+  await prisma.device.createMany({
+    data: [
+      {
+        name: 'Device 1',
+        frequency: 120,
+        locationUuid: await findLocation('Stue'),
+      },
+      {
+        name: 'Device 2',
+        frequency: 120,
+        locationUuid: await findLocation('Gang'),
+      },
+    ],
+  });
+
+  // Create alert
+  await prisma.alert.createMany({
+    data: [
+      {
+        deviceId: await findDevice('Device 1'),
+        type: 'ERROR',
+        description: 'Temperature is too high',
+        threshold: 30,
+        identifier: 'CELSIUS',
+        name: 'TEMPERATURE_TO_HIGH',
+      },
+      {
+        deviceId: await findDevice('Device 2'),
+        type: 'ERROR',
+        description: 'Temperature is too low',
+        threshold: 20,
+        identifier: 'CELSIUS',
+        name: 'TEMPERATURE_TO_LOW',
+      },
+    ],
+  });
+
+  // Create Data
+  const timeseriesData: Prisma.TimeseriesCreateManyInput[] = [];
+
+  for (let index = 0; (index = 100); index++) {
+    if (Math.floor(Math.random() * 1) === 0) {
+      timeseriesData.push({
+        deviceId: await findDevice('Device 1'),
+        value: faker.number.float({ max: 100 }),
+        identifier: 'CELSIUS',
+        locationId: await findLocation('Stue'),
+      });
+    } else {
+      timeseriesData.push({
+        deviceId: await findDevice('Device 2'),
+        value: faker.number.float({ max: 100 }),
+        identifier: 'CELSIUS',
+        locationId: await findLocation('Gang'),
+      });
+    }
+  }
+
+  await prisma.timeseries.createMany({
+    data: timeseriesData,
+  });
+
+  /**
+   * Find device id by name
+   * @async
+   * @param {string} name - Device name
+   * @returns {Promise<string>} - Device uuid
+   */
+  async function findDevice(name: string): Promise<string> {
+    try {
+      const result = await prisma.device.findFirst({
+        where: { name },
+      });
+
+      if (result) return result.uuid;
+      throw new Error('Device not found');
+    } catch (error: unknown) {
+      return (error as Error).message;
+    }
+  }
+
+  /**
+   * Find location id by name
+   * @async
+   * @param {string} name - Location name
+   * @returns {Promise<string>} - Location uuid
+   */
+  async function findLocation(name: string): Promise<string> {
+    try {
+      const result = await prisma.location.findFirst({
+        where: { name },
+      });
+
+      if (result) return result.uuid;
+      throw new Error('Location not found');
+    } catch (error: unknown) {
+      return (error as Error).message;
+    }
+  }
 
   /**
    * Find permission group id by name
