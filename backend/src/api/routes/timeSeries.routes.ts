@@ -21,7 +21,7 @@ router.use('/', verifyJWT);
 router.get(
   '/',
   isAllowed('data:view'),
-  getAll(searchParamsSchema, { model: 'timeseries' }),
+  getAll(searchParamsSchema, 'timeseries'),
 );
 
 export default router;
