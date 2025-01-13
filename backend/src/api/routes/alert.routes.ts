@@ -8,7 +8,14 @@ import { createAlertSchema, getAlertSchema, updateAlertSchema } from '@schemas/a
 const router = Router();
 
 router.use('/', verifyJWT);
-router.get('/', isAllowed(['alert:view']), getAll(getAlertSchema, 'alert'));
+router.get('/', getAll(getAlertSchema, {model: 'alert', prismaConfig: {include: {
+    Device: {
+        select: {
+            uuid: true,
+            name: true,
+        },
+    }
+}}}));
 router.post('/', isAllowed(['alert:create']), createRecord(createAlertSchema, 'alert'));
 router.patch('/', isAllowed(['alert:update']), updateRecord(updateAlertSchema, 'alert'));
 router.delete('/', isAllowed(['alert:delete']), deleteRecord('uuid', 'alert'));
