@@ -234,7 +234,7 @@ async function generatePSQL() {
   // Create Data
   const timeseriesData: Prisma.TimeseriesCreateManyInput[] = [];
 
-  for (let index = 0; (index = 100); index++) {
+  for (let index = 0; (index = 20); index++) {
     if (Math.floor(Math.random() * 1) === 0) {
       timeseriesData.push({
         deviceId: await findDevice('Device 1'),
