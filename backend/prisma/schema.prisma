@@ -19,6 +19,7 @@ enum Identifier {
   CELSIUS
   FAHRENHEIT
   PERCENTAGE
+  ON_OFF
 }
 
 enum AlertType {
