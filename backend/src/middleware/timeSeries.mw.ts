@@ -50,6 +50,15 @@ export async function addDeviceDetails(
     return;
   }
 
+  if (!req.body || !Array.isArray(req.body)) {
+    res.status(getHttpStatusCode(Status.InvalidDetails)).json({
+      status: Status.InvalidDetails,
+      message: 'Request body should be an array',
+    });
+
+    return;
+  }
+
   req.body.map((element) => {
     element.deviceId = deviceId;
     element.locationId = device.locationUuid;

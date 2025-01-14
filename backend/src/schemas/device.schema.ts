@@ -8,6 +8,7 @@ const status = Joi.string()
   .insensitive();
 
 export const createSchema = Joi.object({
+  uuid,
   name,
   frequency,
   locationUuid: uuid,
@@ -38,7 +39,6 @@ export const updateSchema = Joi.array().items(
     locationUuid: uuid,
   }),
 );
-
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 function getSearchQuery(value: { location?: string; Location: any }): object {
