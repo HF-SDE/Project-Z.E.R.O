@@ -50,6 +50,7 @@ export async function addDeviceDetails(
     return;
   }
 
+  console.log(req.body);
   if (!req.body || !Array.isArray(req.body)) {
     res.status(getHttpStatusCode(Status.InvalidDetails)).json({
       status: Status.InvalidDetails,
