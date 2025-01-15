@@ -2,6 +2,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 import { rateLimit } from 'express-rate-limit';
+import expressWs from 'express-ws';
 import helmet from 'helmet';
 import passport from 'passport';
 
@@ -24,7 +25,22 @@ const limiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
 });
 
-const app = express();
+const { app } = expressWs(express());
+
+import { PrismaClient } from '@prisma/client';
+import { verifyApiKey } from '@middlewares/authenticate.mw';
+const prisma = new PrismaClient();
+//! this is a test. to be refactored
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+app.ws('/ws', verifyApiKey, async (ws, req) => {
+  ws.send("Connected!");
+
+  const device = await prisma.device.findUnique({ where: { uuid: req.headers['device-id'] as string } });
+
+  console.log(device);
+
+  ws.on('message', (msg) => console.log(msg));
+});
 
 app.set('trust proxy', 1);
 app.set('json spaces', 4);
