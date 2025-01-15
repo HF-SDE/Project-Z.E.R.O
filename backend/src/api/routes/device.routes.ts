@@ -6,8 +6,7 @@ import {
   updateRecord,
 } from '@controllers/default.controller';
 import { createDevice, resetApiKey } from '@controllers/device.controller';
-import { verifyJWT } from '@middlewares/authenticate.mw';
-import { useApiKey } from '@middlewares/device.mw';
+import { verifyApiKey, verifyJWT } from '@middlewares/authenticate.mw';
 import { isAllowed } from '@middlewares/isAllowed.mw';
 import {
   createSchema,
@@ -17,7 +16,7 @@ import {
 
 const router = Router();
 
-router.get('/', useApiKey, getAll(searchParamsSchema));
+router.get('/', verifyApiKey, getAll(searchParamsSchema));
 
 router.use('/', verifyJWT);
 
