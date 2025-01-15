@@ -5,7 +5,7 @@ import {
   getAll,
   updateRecord,
 } from '@controllers/default.controller';
-import { createDevice } from '@controllers/device.controller';
+import { createDevice, resetApiKey } from '@controllers/device.controller';
 import { verifyJWT } from '@middlewares/authenticate.mw';
 import { useApiKey } from '@middlewares/device.mw';
 import { isAllowed } from '@middlewares/isAllowed.mw';
@@ -26,4 +26,5 @@ router.post('/', isAllowed('device:create'), createDevice(createSchema));
 router.patch('/', isAllowed('device:update'), updateRecord(updateSchema));
 router.delete('/:id', isAllowed('device:delete'), deleteRecord());
 
+router.post('/reset/:uuid', isAllowed('device:update'), resetApiKey());
 export default router;

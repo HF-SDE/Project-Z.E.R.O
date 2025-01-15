@@ -22,9 +22,9 @@ export async function useApiKey(
   next: NextFunction,
 ): Promise<void> {
   const apiKey = req.headers['x-api-key'] as string;
-  const deviceId = req.headers['device-id'] as string;
+  const deviceUuid = req.headers['device-id'] as string;
 
-  if (!deviceId && !apiKey) {
+  if (!deviceUuid && !apiKey) {
     next('route');
     return;
   }
@@ -34,32 +34,29 @@ export async function useApiKey(
       status: 'Unauthorized',
       message: 'x-api-key header is required when deviceId is provided',
     });
-
     return;
   }
 
-  if (!deviceId) {
+  if (!deviceUuid) {
     res.status(401).json({
       status: 'Unauthorized',
-      message: 'deviceId header is required when x-api-key is provided',
+      message: 'device-id header is required when x-api-key is provided',
     });
-
     return;
   }
 
-  const validate = UuidSchema.validate(deviceId);
+  const validate = UuidSchema.validate(deviceUuid);
 
   if (validate.error) {
     res.status(400).json({
       status: Status.InvalidDetails,
       message: '[device-id] must be a valid GUID',
     });
-
     return;
   }
 
   const device = await prisma.device.findUnique({
-    where: { uuid: validate.value },
+    where: { uuid: validate.value }, // Ensure querying by uuid
   });
 
   if (!device) {
@@ -71,8 +68,7 @@ export async function useApiKey(
 
   if (verifyToken) {
     delete req.query.id;
-    req.query.uuid = deviceId;
-
+    req.query.uuid = deviceUuid; // Set the uuid query parameter
     next();
     return;
   } else {

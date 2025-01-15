@@ -5,6 +5,7 @@ import Joi from 'joi';
 import { APIResponse, IAPIResponse, Status } from '@api-types/general.types';
 import prisma, { errorResponse } from '@prisma-instance';
 import { Prisma } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 import { Validate } from './default.service';
 
@@ -45,5 +46,58 @@ export async function create(
   } catch (error) {
     const prismaError = error as Prisma.PrismaClientKnownRequestError;
     return errorResponse(prismaError, 'device', 'CreationFailed');
+  }
+}
+
+/**
+ * Service to reset the API key for a device
+ * @param {string} deviceId - The UUID of the device to reset the API key for.
+ * @returns {Promise<IAPIResponse>} A promise that resolves to an object containing the new API key, status, and message.
+ */
+export async function resetApiKey(
+  deviceUuid: string,
+): Promise<APIResponse<IDeviceResponse>> {
+  try {
+    console.log(`Resetting API key for device UUID: ${deviceUuid}`); // Debugging log
+    const device = await prisma.device.findUnique({
+      where: { uuid: deviceUuid }, // Query by 'uuid' instead of 'id'
+    });
+
+    if (!device) {
+      console.log(`Device with UUID ${deviceUuid} not found`); // Debugging log
+      return {
+        data: null,
+        status: Status.NotFound,
+        message: 'Device not found',
+      };
+    }
+
+    const newApiKey = new UUID().toString();
+    const hashedNewApiKey = await argon2.hash(newApiKey);
+
+    await prisma.device.update({
+      where: { uuid: deviceUuid }, // Update by 'uuid' instead of 'id'
+      data: { token: hashedNewApiKey },
+    });
+
+    return {
+      data: { 'api-key': newApiKey },
+      status: Status.Success,
+      message: 'API key reset successfully',
+    };
+  } catch (err) {
+    console.error('Error resetting API key:', err); // Debugging log
+    if (err instanceof PrismaClientKnownRequestError) {
+      return {
+        data: null,
+        status: Status.ApiKeyResetFailed,
+        message: 'Prisma error: Failed to reset API key',
+      };
+    }
+    return {
+      data: null,
+      status: Status.ApiKeyResetFailed,
+      message: 'Failed to reset API key',
+    };
   }
 }

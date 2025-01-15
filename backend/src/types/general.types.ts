@@ -25,6 +25,7 @@ export enum Status {
   WsFailed = 'Failed WebSocket',
   WsForbidden = 'Forbidden WebSocket',
   wsInvalidDetails = 'Invalid Details WebSocket',
+  ApiKeyResetFailed = 'ApiKeyResetFailed',
 }
 export interface APIResponse<T = null | undefined> {
   status: Status;
