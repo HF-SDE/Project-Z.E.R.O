@@ -1,11 +1,12 @@
-// import argon2 from 'argon2';
-// import { UUID } from 'bson';
+import argon2 from 'argon2';
+import { UUID } from 'bson';
 import Joi from 'joi';
 
 import { APIResponse, IAPIResponse, Status } from '@api-types/general.types';
-import prisma, { errorResponse } from '@prisma-instance';
+import prisma, { errorResponse, prismaModels } from '@prisma-instance';
 import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import * as DefaultService from '@services/default.service';
 
 import { Validate } from './default.service';
 
@@ -43,6 +44,70 @@ export async function create(
     const prismaError = error as Prisma.PrismaClientKnownRequestError;
     return errorResponse(prismaError, 'device', 'CreationFailed');
   }
+}
+
+/**
+ * Service to get the devices
+ * @param {string} deviceUuid - The UUID of the device to reset the API key for.
+ * @returns {Promise<IAPIResponse<IDeviceResponse>>} A promise that resolves to an object containing the new API key, status, and message.
+ */
+export async function getAll(
+  prismaModel: prismaModels,
+  schema: Joi.ObjectSchema,
+  config: Record<string, unknown> = {},
+): Promise<APIResponse<any>> {
+  const response = await DefaultService.getAll(prismaModel, schema, config);
+
+  for (const device of response.data) {
+    if (device.status === 'AWAITING') {
+      const newStatus = 'ACTIVE';
+
+      try {
+        // Create a new token
+        const randomUUID = new UUID();
+        const hashedUUID = await argon2.hash(randomUUID.toString());
+
+        // Update the status and token of the device in the DB
+        await prisma.device.update({
+          where: { uuid: device.uuid as string },
+          data: {
+            token: hashedUUID,
+            status: newStatus,
+          },
+        });
+
+        // Change the response
+        device.token = randomUUID;
+        device.status = newStatus;
+      } catch (error) {
+        console.error('Error updating device:', error);
+      }
+    }
+  }
+
+  // if (response.data[0].status === 'AWAITING') {
+  //   const newStatus = 'ACTIVE';
+
+  //   try {
+  //     // Create a new token
+  //     const randomUUID = new UUID();
+  //     const hashedUUID = await argon2.hash(randomUUID.toString());
+
+  //     // Update the status and token of the device in the DB
+  //     await prisma.device.update({
+  //       where: { uuid: response.data[0].uuid as string },
+  //       data: {
+  //         token: hashedUUID,
+  //         status: newStatus,
+  //       },
+  //     });
+
+  //     // Change the response
+  //     response.data[0].token = randomUUID;
+  //     response.data[0].status = newStatus;
+  //   } catch {}
+  // }
+  return response;
 }
 
 /**

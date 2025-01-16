@@ -1,12 +1,9 @@
-import argon2 from 'argon2';
-import { UUID } from 'bson';
 import { Request, Response } from 'express';
 import Joi from 'joi';
 
 import { ExpressFunction } from '@api-types/general.types';
-import prisma, { prismaModels } from '@prisma-instance';
+import { prismaModels } from '@prisma-instance';
 import { Prisma } from '@prisma/client';
-import * as DefaultService from '@services/default.service';
 import * as deviceService from '@services/device.service';
 import { getHttpStatusCode } from '@utils/Utils';
 
@@ -61,30 +58,9 @@ export function getDevices(
       ...prismaConfig,
     };
 
-    const response = await DefaultService.getAll(model, schema, config);
+    const response = await deviceService.getAll(model, schema, config);
 
-    if (response.data[0].status === 'AWAITING') {
-      const newStatus = 'ACTIVE';
-
-      try {
-        // Create a new token
-        const randomUUID = new UUID();
-        const hashedUUID = await argon2.hash(randomUUID.toString());
-
-        // Update the status and token of the device in the DB
-        await prisma.device.update({
-          where: { uuid: response.data[0].uuid as string },
-          data: {
-            token: hashedUUID,
-            status: newStatus,
-          },
-        });
-
-        // Change the response
-        response.data[0].token = randomUUID;
-        response.data[0].status = newStatus;
-      } catch {}
-    }
+    res.status(getHttpStatusCode(response.status)).json(response).end();
   };
 }
 /**
