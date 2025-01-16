@@ -26,4 +26,5 @@ router.patch('/', isAllowed('device:update'), updateRecord(updateSchema));
 router.delete('/:id', isAllowed('device:delete'), deleteRecord());
 
 router.post('/reset/:uuid', isAllowed('device:update'), resetApiKey());
+
 export default router;

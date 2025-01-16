@@ -51,8 +51,8 @@ export async function create(
 
 /**
  * Service to reset the API key for a device
- * @param {string} deviceId - The UUID of the device to reset the API key for.
- * @returns {Promise<IAPIResponse>} A promise that resolves to an object containing the new API key, status, and message.
+ * @param {string} deviceUuid - The UUID of the device to reset the API key for.
+ * @returns {Promise<IAPIResponse<IDeviceResponse>>} A promise that resolves to an object containing the new API key, status, and message.
  */
 export async function resetApiKey(
   deviceUuid: string,
