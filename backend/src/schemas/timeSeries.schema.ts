@@ -5,7 +5,7 @@ const name = Joi.string().min(3).max(255);
 const uuid = Joi.string().uuid();
 const id = Joi.number().integer();
 const identifier = Joi.string()
-  .valid('CELSIUS', 'FAHRENHEIT', 'PERCENTAGE')
+  .valid('CELSIUS', 'FAHRENHEIT', 'PERCENTAGE', 'ON_OFF')
   .insensitive();
 
 const dataObject = {

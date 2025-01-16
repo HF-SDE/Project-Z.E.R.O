@@ -25,6 +25,7 @@ export function createDevice(schema: Joi.ObjectSchema): ExpressFunction {
   };
 }
 
+<<<<<<< HEAD
 interface IGetAllConfig {
   model?: prismaModels;
   prismaConfig?: RequestConfig;
@@ -85,6 +86,18 @@ export function getDevices(
         response.data[0].status = newStatus;
       } catch {}
     }
+=======
+/**
+ * Controller to reset the API key for a device
+ * @returns {ExpressFunction} The response object with the new API key.
+ */
+export function resetApiKey(): ExpressFunction {
+  return async (req, res) => {
+    const deviceUuid = req.params.uuid;
+
+    // Call the service function to reset the API key
+    const response = await deviceService.resetApiKey(deviceUuid);
+>>>>>>> 1c1566cb74af1eeae9323630624f0611c45be77d
 
     res.status(getHttpStatusCode(response.status)).json(response).end();
   };

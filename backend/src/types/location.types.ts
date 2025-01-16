@@ -1,4 +1,4 @@
 export interface LocationWithOutCreateAtAndUpdatedAt {
-    id: string;
-    name: string;
+  id: string;
+  name: string;
 }

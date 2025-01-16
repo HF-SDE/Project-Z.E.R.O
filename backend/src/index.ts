@@ -2,6 +2,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 import { rateLimit } from 'express-rate-limit';
+import expressWs from 'express-ws';
 import helmet from 'helmet';
 import passport from 'passport';
 
@@ -13,6 +14,7 @@ import locationRoutes from '@routes/location.routes';
 import manageRoutes from '@routes/manage.routes';
 import profileRoutes from '@routes/profile.routes';
 import timeSeriesRoutes from '@routes/timeSeries.routes';
+import tsAlertsRoutes from '@routes/tsAlerts.routes';
 
 import './passport';
 
@@ -23,7 +25,7 @@ const limiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
 });
 
-const app = express();
+const { app } = expressWs(express());
 
 app.set('trust proxy', 1);
 app.set('json spaces', 4);
@@ -42,6 +44,7 @@ app.use('/device', deviceRoutes);
 app.use('/location', locationRoutes);
 app.use('/alert', alertRoutes);
 app.use('/data', timeSeriesRoutes);
+app.use('/tsalert', tsAlertsRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
