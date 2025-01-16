@@ -6,6 +6,8 @@ import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 import { Validate } from './default.service';
+import { UUID } from 'bson';
+import argon2 from 'argon2';
 
 interface IDeviceResponse {
   'api-key': string;
