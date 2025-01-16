@@ -3,11 +3,13 @@ import { Router } from 'express';
 import { deleteRecord, getAll } from '@controllers/default.controller';
 import {
   createDevice,
+  getDevices,
   resetApiKey,
   updateDevice,
   websocketController,
 } from '@controllers/device.controller';
 import { verifyApiKey, verifyJWT } from '@middlewares/authenticate.mw';
+import { useApiKey } from '@middlewares/device.mw';
 import { isAllowed } from '@middlewares/isAllowed.mw';
 import {
   createSchema,
@@ -17,7 +19,7 @@ import {
 
 const router = Router();
 
-router.get('/', verifyApiKey, getAll(searchParamsSchema));
+router.get('/', useApiKey, getDevices(searchParamsSchema));
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.ws('/', verifyApiKey, websocketController());

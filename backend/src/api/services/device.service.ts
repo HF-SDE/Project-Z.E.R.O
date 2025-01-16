@@ -5,9 +5,10 @@ import { WebSocket } from 'ws';
 
 import { APIResponse, IAPIResponse, Status } from '@api-types/general.types';
 import { getWss } from '@app';
-import prisma, { errorResponse } from '@prisma-instance';
+import prisma, { errorResponse, prismaModels } from '@prisma-instance';
 import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import * as DefaultService from '@services/default.service';
 
 import { Validate } from './default.service';
 
@@ -33,15 +34,11 @@ export async function create(
   if (err) return err;
 
   try {
-    const randomUUID = new UUID();
-    const hashedUUID = await argon2.hash(randomUUID.toString());
-
     await prisma.device.create({
-      data: { ...validatedData, token: hashedUUID },
+      data: { ...validatedData },
     });
 
     return {
-      data: { 'api-key': randomUUID.toString() },
       status: Status.Created,
       message: `Created new device`,
     };
@@ -49,6 +46,70 @@ export async function create(
     const prismaError = error as Prisma.PrismaClientKnownRequestError;
     return errorResponse(prismaError, 'device', 'CreationFailed');
   }
+}
+
+/**
+ * Service to get the devices
+ * @param {string} deviceUuid - The UUID of the device to reset the API key for.
+ * @returns {Promise<IAPIResponse<IDeviceResponse>>} A promise that resolves to an object containing the new API key, status, and message.
+ */
+export async function getAll(
+  prismaModel: prismaModels,
+  schema: Joi.ObjectSchema,
+  config: Record<string, unknown> = {},
+): Promise<APIResponse<any>> {
+  const response = await DefaultService.getAll(prismaModel, schema, config);
+
+  for (const device of response.data) {
+    if (device.status === 'AWAITING') {
+      const newStatus = 'ACTIVE';
+
+      try {
+        // Create a new token
+        const randomUUID = new UUID();
+        const hashedUUID = await argon2.hash(randomUUID.toString());
+
+        // Update the status and token of the device in the DB
+        await prisma.device.update({
+          where: { uuid: device.uuid as string },
+          data: {
+            token: hashedUUID,
+            status: newStatus,
+          },
+        });
+
+        // Change the response
+        device.token = randomUUID;
+        device.status = newStatus;
+      } catch (error) {
+        console.error('Error updating device:', error);
+      }
+    }
+  }
+
+  // if (response.data[0].status === 'AWAITING') {
+  //   const newStatus = 'ACTIVE';
+
+  //   try {
+  //     // Create a new token
+  //     const randomUUID = new UUID();
+  //     const hashedUUID = await argon2.hash(randomUUID.toString());
+
+  //     // Update the status and token of the device in the DB
+  //     await prisma.device.update({
+  //       where: { uuid: response.data[0].uuid as string },
+  //       data: {
+  //         token: hashedUUID,
+  //         status: newStatus,
+  //       },
+  //     });
+
+  //     // Change the response
+  //     response.data[0].token = randomUUID;
+  //     response.data[0].status = newStatus;
+  //   } catch {}
+  // }
+  return response;
 }
 
 /**
@@ -74,16 +135,16 @@ export async function resetApiKey(
       };
     }
 
-    const newApiKey = new UUID().toString();
-    const hashedNewApiKey = await argon2.hash(newApiKey);
+    // const newApiKey = new UUID().toString();
+    // const hashedNewApiKey = await argon2.hash(newApiKey);
 
     await prisma.device.update({
       where: { uuid: deviceUuid }, // Update by 'uuid' instead of 'id'
-      data: { token: hashedNewApiKey },
+      data: { token: null, status: 'AWAITING' },
     });
 
     return {
-      data: { 'api-key': newApiKey },
+      data: null, // { 'api-key': newApiKey },
       status: Status.Success,
       message: 'API key reset successfully',
     };
@@ -111,7 +172,7 @@ export async function resetApiKey(
  * @returns {void} A promise that resolves when the websocket connection is closed.
  */
 export function websocket(ws: WebSocket, deviceId?: string): void {
-  console.log("Device connected. Uuid:", deviceId);
+  console.log('Device connected. Uuid:', deviceId);
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   getWss().on('device-update', async (uuid: string) => {
     const device = await prisma.device.findUnique({ where: { uuid } });

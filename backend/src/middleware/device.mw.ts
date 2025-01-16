@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import { Status } from '@api-types/general.types';
 import { PrismaClient } from '@prisma/client';
 import { UuidSchema } from '@schemas/general.schema';
+import { getHttpStatusCode } from '@utils/Utils';
 
 import { unauthorizedResponse } from './authenticate.mw';
 
@@ -29,14 +30,6 @@ export async function useApiKey(
     return;
   }
 
-  if (!apiKey) {
-    res.status(401).json({
-      status: 'Unauthorized',
-      message: 'x-api-key header is required when deviceId is provided',
-    });
-    return;
-  }
-
   if (!deviceUuid) {
     res.status(401).json({
       status: 'Unauthorized',
@@ -45,34 +38,69 @@ export async function useApiKey(
     return;
   }
 
-  const validate = UuidSchema.validate(deviceUuid);
+  try {
+    const validate = UuidSchema.validate(deviceUuid);
 
-  if (validate.error) {
-    res.status(400).json({
-      status: Status.InvalidDetails,
-      message: '[device-id] must be a valid GUID',
+    if (validate.error) {
+      res.status(getHttpStatusCode(Status.InvalidDetails)).json({
+        status: Status.InvalidDetails,
+        message: '[device-id] must be a valid GUID',
+      });
+      return;
+    }
+
+    const device = await prisma.device.findUnique({
+      where: { uuid: validate.value },
     });
-    return;
-  }
 
-  const device = await prisma.device.findUnique({
-    where: { uuid: validate.value }, // Ensure querying by uuid
-  });
+    if (!apiKey && device?.status !== 'AWAITING') {
+      res.status(401).json({
+        status: 'Unauthorized',
+        message: 'x-api-key header is required when deviceId is provided',
+      });
 
-  if (!device) {
-    res.status(401).json(unauthorizedResponse);
-    return;
-  }
+      return;
+    }
 
-  const verifyToken = await argon2.verify(device.token as string, apiKey);
+    if (validate.error) {
+      res.status(400).json({
+        status: Status.InvalidDetails,
+        message: '[device-id] must be a valid GUID',
+      });
+      return;
+    }
 
-  if (verifyToken) {
-    delete req.query.id;
-    req.query.uuid = deviceUuid; // Set the uuid query parameter
-    next();
-    return;
-  } else {
-    res.status(401).json(unauthorizedResponse);
-    return;
+    if (!device) {
+      res.status(401).json(unauthorizedResponse);
+      return;
+    }
+
+    let hasAccess = false;
+
+    if (device.status === 'AWAITING') {
+      hasAccess = true;
+    } else {
+      const verifyToken = await argon2.verify(device.token as string, apiKey);
+
+      if (verifyToken) {
+        hasAccess = true;
+      }
+    }
+
+    if (hasAccess) {
+      delete req.query.id;
+      req.query.uuid = deviceUuid; // Set the uuid query parameter
+      next();
+      return;
+    } else {
+      res.status(401).json(unauthorizedResponse);
+      return;
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: Status.Failed,
+      message: 'Something went wrong on our end',
+    });
   }
 }
