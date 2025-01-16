@@ -29,15 +29,6 @@ export async function useApiKey(
     return;
   }
 
-  if (!apiKey) {
-    res.status(401).json({
-      status: 'Unauthorized',
-      message: 'x-api-key header is required when deviceId is provided',
-    });
-
-    return;
-  }
-
   if (!deviceId) {
     res.status(401).json({
       status: 'Unauthorized',
@@ -49,6 +40,19 @@ export async function useApiKey(
 
   const validate = UuidSchema.validate(deviceId);
 
+  const device = await prisma.device.findUnique({
+    where: { uuid: validate.value as string },
+  });
+
+  if (!apiKey && device?.status != 'AWAITING') {
+    res.status(401).json({
+      status: 'Unauthorized',
+      message: 'x-api-key header is required when deviceId is provided',
+    });
+
+    return;
+  }
+
   if (validate.error) {
     res.status(400).json({
       status: Status.InvalidDetails,
@@ -58,18 +62,24 @@ export async function useApiKey(
     return;
   }
 
-  const device = await prisma.device.findUnique({
-    where: { uuid: validate.value },
-  });
-
   if (!device) {
     res.status(401).json(unauthorizedResponse);
     return;
   }
 
-  const verifyToken = await argon2.verify(device.token as string, apiKey);
+  let hasAccess = false;
 
-  if (verifyToken) {
+  if (device.status === 'AWAITING') {
+    hasAccess = true;
+  } else {
+    const verifyToken = await argon2.verify(device.token as string, apiKey);
+
+    if (verifyToken) {
+      hasAccess = true;
+    }
+  }
+
+  if (hasAccess) {
     delete req.query.id;
     req.query.uuid = deviceId;
 

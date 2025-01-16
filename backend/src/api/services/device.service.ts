@@ -1,5 +1,3 @@
-import argon2 from 'argon2';
-import { UUID } from 'bson';
 import Joi from 'joi';
 
 import { APIResponse, IAPIResponse, Status } from '@api-types/general.types';
@@ -30,15 +28,11 @@ export async function create(
   if (err) return err;
 
   try {
-    const randomUUID = new UUID();
-    const hashedUUID = await argon2.hash(randomUUID.toString());
-
     await prisma.device.create({
-      data: { ...validatedData, token: hashedUUID },
+      data: { ...validatedData },
     });
 
     return {
-      data: { 'api-key': randomUUID.toString() },
       status: Status.Created,
       message: `Created new device`,
     };
