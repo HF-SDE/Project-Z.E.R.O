@@ -4,7 +4,7 @@
   "private": true,
   "main": "./src/index.ts",
   "scripts": {
-    "build:tsc": "tsc --project ./tsconfig.build.json",
+    "build:tsc": "tsc --project ./tsconfig.json",
     "lint": "eslint src/**",
     "start": "TS_NODE_PROJECT='./dist' node -r tsconfig-paths/register ./dist",
     "dev": "nodemon -L",
