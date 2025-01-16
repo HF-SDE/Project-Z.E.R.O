@@ -1,3 +1,5 @@
+// import argon2 from 'argon2';
+// import { UUID } from 'bson';
 import Joi from 'joi';
 
 import { APIResponse, IAPIResponse, Status } from '@api-types/general.types';
@@ -6,8 +8,6 @@ import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 import { Validate } from './default.service';
-import { UUID } from 'bson';
-import argon2 from 'argon2';
 
 interface IDeviceResponse {
   'api-key': string;
@@ -68,16 +68,16 @@ export async function resetApiKey(
       };
     }
 
-    const newApiKey = new UUID().toString();
-    const hashedNewApiKey = await argon2.hash(newApiKey);
+    // const newApiKey = new UUID().toString();
+    // const hashedNewApiKey = await argon2.hash(newApiKey);
 
     await prisma.device.update({
       where: { uuid: deviceUuid }, // Update by 'uuid' instead of 'id'
-      data: { token: hashedNewApiKey },
+      data: { token: null, status: 'AWAITING' },
     });
 
     return {
-      data: { 'api-key': newApiKey },
+      data: null, // { 'api-key': newApiKey },
       status: Status.Success,
       message: 'API key reset successfully',
     };
