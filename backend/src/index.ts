@@ -1,11 +1,10 @@
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import express from 'express';
 import { rateLimit } from 'express-rate-limit';
-import expressWs from 'express-ws';
 import helmet from 'helmet';
 import passport from 'passport';
 
+import app from '@app';
 import config from '@config';
 import alertRoutes from '@routes/alert.routes';
 import authRoutes from '@routes/auth.routes';
@@ -24,8 +23,6 @@ const limiter = rateLimit({
   standardHeaders: 'draft-7', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
 });
-
-const { app } = expressWs(express());
 
 app.set('trust proxy', 1);
 app.set('json spaces', 4);

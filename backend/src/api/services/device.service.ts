@@ -1,8 +1,10 @@
 import argon2 from 'argon2';
 import { UUID } from 'bson';
 import Joi from 'joi';
+import { WebSocket } from 'ws';
 
 import { APIResponse, IAPIResponse, Status } from '@api-types/general.types';
+import { getWss } from '@app';
 import prisma, { errorResponse } from '@prisma-instance';
 import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -100,4 +102,28 @@ export async function resetApiKey(
       message: 'Failed to reset API key',
     };
   }
+}
+
+/**
+ * Websocket service for device routes.
+ * @param {WebSocket} ws - The websocket connection.
+ * @param {string} deviceId - The UUID of the device.
+ * @returns {void} A promise that resolves when the websocket connection is closed.
+ */
+export function websocket(ws: WebSocket, deviceId?: string): void {
+  console.log("Device connected. Uuid:", deviceId);
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  getWss().on('device-update', async (uuid: string) => {
+    const device = await prisma.device.findUnique({ where: { uuid } });
+
+    if (!device) {
+      ws.send('Device not found');
+      ws.close();
+      return;
+    }
+
+    if (uuid === device.uuid) ws.send(JSON.stringify(device));
+  });
+
+  ws.on('message', (msg) => console.log(msg));
 }
