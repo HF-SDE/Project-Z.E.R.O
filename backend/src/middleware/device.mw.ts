@@ -43,7 +43,7 @@ export async function useApiKey(
     where: { uuid: validate.value as string },
   });
 
-  if (!apiKey && device?.status != 'AWAITING') {
+  if (!apiKey && device?.status !== 'AWAITING') {
     res.status(401).json({
       status: 'Unauthorized',
       message: 'x-api-key header is required when deviceId is provided',

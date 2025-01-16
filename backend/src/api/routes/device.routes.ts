@@ -10,7 +10,8 @@ import {
   getDevices,
   resetApiKey,
 } from '@controllers/device.controller';
-import { verifyApiKey, verifyJWT } from '@middlewares/authenticate.mw';
+import { verifyJWT } from '@middlewares/authenticate.mw';
+import { useApiKey } from '@middlewares/device.mw';
 import { isAllowed } from '@middlewares/isAllowed.mw';
 import {
   createSchema,
@@ -20,7 +21,7 @@ import {
 
 const router = Router();
 
-router.get('/', verifyApiKey, getDevices(searchParamsSchema));
+router.get('/', useApiKey, getDevices(searchParamsSchema));
 
 router.use('/', verifyJWT);
 
