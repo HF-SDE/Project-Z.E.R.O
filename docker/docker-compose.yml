@@ -12,13 +12,14 @@ services:
       - /usr/src/app/node_modules
     ports:
       - "3000:3000"
-    expose:
-      - "3000"
     depends_on:
       - "backend"
     command: npm run dev
     env_file:
       - ../config/environment-variables/.env.frontend.dev
+    networks:
+      - internal
+      - public
   
   backend:
     container_name: backend
