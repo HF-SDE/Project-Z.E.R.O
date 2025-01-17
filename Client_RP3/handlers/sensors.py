@@ -22,3 +22,6 @@ def read_sensors():
     except Exception as e:
         print(f"Error reading sensors: {e}")
         return last_temp, last_hum, last_light, last_sound
+
+def read_button():
+    return  digitalRead(button_sensor)

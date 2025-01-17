@@ -7,14 +7,18 @@ import os
 
 
 token = ""
+server_device_info = None
 
 def control_api_access():
     global screen_color
     try:
         response = requests.get(f"{base_url}/health", timeout=5)
+        if response.status_code != 200:
+            raise Exception("The response status was not 200")
+        
         return response.status_code == 200
     except Exception as e:
-        print(f"API Error: {e}")
+        print(f"API Access Error: {e}")
         refresh_display(color=[255, 0, 0])
         return False
     
