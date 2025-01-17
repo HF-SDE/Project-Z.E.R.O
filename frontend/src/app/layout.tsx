@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../styles/globals.css";
+import StoreProvider from "./StoreProvider";
+import { ThemeProvider } from 'next-themes';
+import Head from "next/head";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,11 +27,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+      <StoreProvider>
+        <ThemeProvider attribute="class" defaultTheme='light'>
+          <Head>
+            <title>IOT Magement</title>
+            <meta name="description" content="UICentral App developed for AO" />
+            <link rel="icon" href="/favicon.ico" />
+          </Head>
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          >
+
+            {children}
+          </body>
+        </ThemeProvider>
+      </StoreProvider>
+    </html >
   );
 }

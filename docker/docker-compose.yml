@@ -1,6 +1,25 @@
 name: IOT
 
 services:
+  frontend:
+    container_name: frontend
+    build:
+      context: ../frontend/
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - ../frontend/:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"
+    depends_on:
+      - "backend"
+    command: npm run dev
+    env_file:
+      - ../config/environment-variables/.env.frontend.dev
+  
   backend:
     container_name: backend
     build:
