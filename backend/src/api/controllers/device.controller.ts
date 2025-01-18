@@ -110,11 +110,11 @@ export function resetApiKey(): ExpressFunction {
  * @returns {WebsocketFunction} A promise that resolves when the websocket connection is closed.
  */
 export function websocketController(): WebsocketFunction {
-  return (ws, req) => {
+  return async (ws, req) => {
     const deviceId = req.headers['device-id'] as string;
     
     ws.on('close', () => console.log('Device disconnected. Uuid:', deviceId));
     
-    deviceService.websocket(ws, deviceId);
+    await deviceService.websocket(ws, deviceId);
   };
 }
