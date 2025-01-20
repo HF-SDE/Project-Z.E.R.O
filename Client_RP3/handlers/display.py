@@ -1,6 +1,6 @@
 import time
 import datetime
-from helpers.config import get_button_night_mode_duration, get_night_mode_start, get_night_mode_stop
+from helpers.config import get_setting
 
 from grovepi import *
 from grove_rgb_lcd import *
@@ -42,15 +42,15 @@ def refresh_display(color=None, text=None):
         # Refresh display color
         current_time = datetime.datetime.now()
 
-        night_start = datetime.datetime.strptime(get_night_mode_start(), "%H:%M").time()
-        night_stop = datetime.datetime.strptime(get_night_mode_stop(), "%H:%M").time()
+        night_start = datetime.datetime.strptime(get_setting("night_mode_start"), "%H:%M").time()
+        night_stop = datetime.datetime.strptime(get_setting("night_mode_stop"), "%H:%M").time()
 
 
         # Calculate the time elapsed since the button was last pressed
         time_elapsed_since_button = time.time() - last_button_time
 
         if ((night_start <= current_time.time() <= night_stop) and (
-            time_elapsed_since_button > get_button_night_mode_duration()
+            time_elapsed_since_button > get_setting("button_night_mode_duration")
         )) or display_text is None:
             setRGB(0, 0, 0)
         else:

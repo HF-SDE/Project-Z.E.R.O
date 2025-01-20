@@ -1,4 +1,4 @@
-from helpers.config import initialize_config, get_excluded_pages, get_button_night_mode_duration, get_night_mode_start, get_night_mode_stop, get_page_refresh_interval
+from helpers.config import initialize_config, get_setting
 from helpers.sensors import init_sensors, read_sensors, read_button
 from helpers.api import init_token, control_api_access, send_data_to_api
 from helpers.pages import Pages
@@ -17,6 +17,8 @@ def main():
             # Loads the config file
             initialize_config()
 
+            print(get_setting("base_url"))
+
             # Blue starting screen
             refresh_display(color=[0, 0, 32], text="Starting...")
 
@@ -32,7 +34,7 @@ def main():
             init_websocket()
 
             # Initialize pages
-            pages = Pages(start=0, total_pages=6, exclude_pages=get_excluded_pages())
+            pages = Pages(start=0, total_pages=6, exclude_pages=get_setting("excluded_pages"))
 
             light_mode_activated = False
             last_button_state = 0
@@ -57,9 +59,9 @@ def main():
 
                 if button_status == 0 and last_button_state == 1:
                     if not light_mode_activated and (
-                            datetime.datetime.now().time() >= datetime.datetime.strptime(get_night_mode_start(),
+                            datetime.datetime.now().time() >= datetime.datetime.strptime(get_setting("night_mode_start"),
                                                                                          "%H:%M").time() and datetime.datetime.now().time() <= datetime.datetime.strptime(
-                        get_night_mode_stop(), "%H:%M").time()):
+                        get_setting("night_mode_stop"), "%H:%M").time()):
                         # If the screen is in dark mode and the first button press happens, activate light mode
                         light_mode_activated = True
                         button_pressed()
@@ -77,7 +79,7 @@ def main():
                 last_button_state = button_status
 
                 # Reset light mode
-                if light_mode_activated and (time.time() - get_last_button_time() > get_button_night_mode_duration()):
+                if light_mode_activated and (time.time() - get_last_button_time() > get_setting("button_night_mode_duration")):
                     light_mode_activated = False
 
                 # Read sensors every second
@@ -85,11 +87,11 @@ def main():
                 if current_time - last_sensor_time >= 1:
                     #print("Read sensor")
                     read_sensors()
-                    #send_data_to_api()
+                    send_data_to_api()
                     last_sensor_time = current_time
 
                 # Refresh the current page every 5 seconds
-                if current_time - last_refresh_time >= get_page_refresh_interval():
+                if current_time - last_refresh_time >= get_setting("page_refresh_interval"):
                     pages.refresh_page()
                     last_refresh_time = current_time
                 refresh_display()

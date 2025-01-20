@@ -1,4 +1,4 @@
-from helpers.sensors import get_last_temp, get_last_hum, get_last_light, get_last_sound
+from helpers.sensors import get_sensor_value
 from helpers.display import refresh_display
 import re
 import uuid
@@ -45,10 +45,12 @@ def set_page(page_number):
         print(f"Device ID: {device_id}")
         refresh_display(text=device_id)
     elif page_number == 3:
-        refresh_display(text="Temperature:    " + str(get_last_temp()) + "c")
+        refresh_display(text="Temperature:    " + str(get_sensor_value("TEMPERATURE")) + "c")
     elif page_number == 4:
-        refresh_display(text="Humidity:       " + str(get_last_hum()) + "%")
+        refresh_display(text="Humidity:       " + str(get_sensor_value("HUMIDITY")) + "%")
     elif page_number == 5:
-        refresh_display(text="Light level:    " + str(get_last_light()))
+        refresh_display(text="Light level:    " + str(get_sensor_value("LIGHT_LEVEL")) + "%")
     elif page_number == 6:
-        refresh_display(text="Sound level:    " + str(get_last_sound()))
+        refresh_display(text="Sound level:    " + str(get_sensor_value("SOUND_LEVEL")) + "%")
+
+
