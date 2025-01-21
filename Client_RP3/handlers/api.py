@@ -1,27 +1,28 @@
 import requests
-from config import base_url, token_file_path
-from sensors import last_temp, last_hum, last_light, last_sound
-from display import  refresh_display
-from utils import get_device_id
+from helpers.config import get_setting
+from helpers.sensors import get_sensor_value
+from helpers.display import refresh_display
+from helpers.utils import get_device_id
 import os
-
 
 token = ""
 server_device_info = None
 
+
 def control_api_access():
     global screen_color
     try:
-        response = requests.get(f"{base_url}/health", timeout=5)
+        response = requests.get(get_setting("base_url") + "/health", timeout=5)
         if response.status_code != 200:
             raise Exception("The response status was not 200")
-        
+
         return response.status_code == 200
     except Exception as e:
         print(f"API Access Error: {e}")
         refresh_display(color=[255, 0, 0])
         return False
-    
+
+
 def get_device_info():
     """
     Makes a request to the API to get device information.
@@ -29,7 +30,7 @@ def get_device_info():
     global server_device_info
 
     try:
-        url = f"{base_url}/device"
+        url = get_setting("base_url") + "/device"
         headers = {
             "device-id": get_device_id(),
         }
@@ -48,6 +49,7 @@ def get_device_info():
     except requests.RequestException as e:
         print(f"Error making API request: {e}")
         return None
+
 
 def init_token():
     """
@@ -68,11 +70,11 @@ def init_token():
         # Set the token from the API response
         token_from_api_call = server_device_info["data"][0]["token"]
 
-    if os.path.exists(token_file_path) and token_from_api_call is None:
+    if os.path.exists(get_setting("token_file_path")) and token_from_api_call is None:
         # Token file exists and the server has not sent a new one, read the token
         print("From file")
         try:
-            with open(token_file_path, "r") as f:
+            with open(get_setting("token_file_path"), "r") as f:
                 token = f.read().strip()
                 print(f"Token loaded from file: {token}")
         except Exception as e:
@@ -84,15 +86,18 @@ def init_token():
         print("From api")
         try:
             token = token_from_api_call
-            with open(token_file_path, "w") as f:
+            with open(get_setting("token_file_path"), "w") as f:
                 f.write(token_from_api_call)
-                print(f"Token saved to file: {token_file_path}")
+                print(f"Token saved to file: " + get_setting("token_file_path"))
         except Exception as e:
             print(f"Error writing token file: {e}")
             raise Exception("Error writing token file")
             token = ""
     else:
         raise Exception("No token from \nAPI or in file")
+    print("Token has ben initialized")
+
+
 
 def send_data_to_api():
     try:
@@ -102,30 +107,32 @@ def send_data_to_api():
         }
         data = [
             {
-                "value": last_temp,
+                "value": get_sensor_value("TEMPERATURE"),
                 "identifier": "CELSIUS",
                 "name": "TEMPERATURE"
             },
             {
-                "value": last_hum,
+                "value": get_sensor_value("HUMIDITY"),
                 "identifier": "PERCENTAGE",
                 "name": "HUMIDITY"
             },
             {
-                "value": ((last_light / 1000) * 100),
+                "value": get_sensor_value("LIGHT_LEVEL"),
                 "identifier": "PERCENTAGE",
                 "name": "LIGHT_LEVEL"
             },
             {
-                "value": ((last_sound / 1000) * 100),
+                "value": get_sensor_value("SOUND_LEVEL"),
                 "identifier": "PERCENTAGE",
                 "name": "SOUND_LEVEL"
             }
-            
-            
+
         ]
-        response = requests.post(base_url + "/data", json=data, headers=headers, timeout=5)
+        response = requests.post(get_setting("base_url") + "/data", json=data, headers=headers, timeout=5)
 
     except Exception as e:
         print(e)
         refresh_display(color=[255, 150, 0])
+
+def get_token():
+    return token

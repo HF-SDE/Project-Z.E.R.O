@@ -1,5 +1,5 @@
-from sensors import last_temp, last_hum, last_light, last_sound
-from display import refresh_display
+from helpers.sensors import get_sensor_value
+from helpers.display import refresh_display
 import re
 import uuid
 import socket
@@ -9,10 +9,12 @@ def get_local_ip():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         s.connect(("8.8.8.8", 80))
         return s.getsockname()[0]
-    
+
+
 def get_mac():
     mac = ''.join(re.findall('..', '%012x' % uuid.getnode()))
     return mac
+
 
 def get_device_id():
     global device_id
@@ -43,12 +45,12 @@ def set_page(page_number):
         print(f"Device ID: {device_id}")
         refresh_display(text=device_id)
     elif page_number == 3:
-        refresh_display(text="Temperature:    " + str(last_temp) + "c")
+        refresh_display(text="Temperature:    " + str(get_sensor_value("TEMPERATURE")) + "c")
     elif page_number == 4:
-        refresh_display(text="Humidity:       " + str(last_hum) + "%")
+        refresh_display(text="Humidity:       " + str(get_sensor_value("HUMIDITY")) + "%")
     elif page_number == 5:
-        refresh_display(text="Light level:    " + str(last_light))
-    elif page_number == 7:
-        refresh_display(text="Sound level:    " + str(last_sound))
+        refresh_display(text="Light level:    " + str(get_sensor_value("LIGHT_LEVEL")) + "%")
+    elif page_number == 6:
+        refresh_display(text="Sound level:    " + str(get_sensor_value("SOUND_LEVEL")) + "%")
 
 

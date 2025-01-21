@@ -1,7 +1,7 @@
-from utils import set_page
+from helpers.utils import set_page
 
 class Pages:
-    def __init__(self, start=0, total_pages=5, exclude_pages=None):
+    def __init__(self, start=0, total_pages=6, exclude_pages=None):
         self.current_page = start
         self.total_pages = total_pages
         self.exclude_pages = exclude_pages if exclude_pages else []
