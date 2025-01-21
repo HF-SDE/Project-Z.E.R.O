@@ -4,10 +4,13 @@ from dotenv import load_dotenv
 settings = {}
 
 def initialize_config():
-    dotenv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.env')
-    load_dotenv(dotenv_path)
-
     global settings
+
+    # Set the path for where the env file is
+    dotenv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.env')
+
+    # Loads the env file
+    load_dotenv(dotenv_path)
 
     # Configuration values
     settings["base_url"] = os.getenv("API_BASE_URL")
@@ -18,7 +21,7 @@ def initialize_config():
     settings["page_refresh_interval"] = float(os.getenv("PAGE_REFRESH_INTERVAL", 5))
     settings["excluded_pages"] = [int(x.strip()) for x in os.getenv("EXCLUDED_PAGES", "0,1,2").split(",")]
 
-    # Inputs
+    # Sensors
     settings["dht_sensor"] = int(os.getenv("DHT_SENSOR", 7))
     settings["sound_sensor"] = int(os.getenv("SOUND_SENSOR", 0))
     settings["light_sensor"] = int(os.getenv("LIGHT_SENSOR", 1))
@@ -27,5 +30,8 @@ def initialize_config():
     print("Config loaded")
 
 def get_setting(key):
+    """
+    This get the value from the environment variable given a key.
+    """
     return settings.get(key)
 
