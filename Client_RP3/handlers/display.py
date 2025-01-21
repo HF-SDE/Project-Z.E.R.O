@@ -12,13 +12,19 @@ last_button_time = time.time()
 
 
 def button_pressed():
+    """
+    This is called when the button was pressed.
+    """
     global last_button_time
     last_button_time = time.time()
 
 def get_last_button_time():
+    """
+    This is called to get the last button pressed time.
+    """
     return last_button_time
 
-def refresh_display(color=None, text=None):
+def refresh_display(color=None, text=None, is_error=False):
     """
     Refresh the display with optional color and text arguments.
     If not provided, use the last set values.
@@ -42,6 +48,7 @@ def refresh_display(color=None, text=None):
         # Refresh display color
         current_time = datetime.datetime.now()
 
+        # Load the night mode start and stop from the settings
         night_start = datetime.datetime.strptime(get_setting("night_mode_start"), "%H:%M").time()
         night_stop = datetime.datetime.strptime(get_setting("night_mode_stop"), "%H:%M").time()
 
@@ -49,11 +56,13 @@ def refresh_display(color=None, text=None):
         # Calculate the time elapsed since the button was last pressed
         time_elapsed_since_button = time.time() - last_button_time
 
-        if ((night_start <= current_time.time() <= night_stop) and (
+        if (((night_start <= current_time.time() <= night_stop) and (
             time_elapsed_since_button > get_setting("button_night_mode_duration")
-        )) or display_text is None:
+        )) or display_text is None) and is_error is False:
+            # Turn of the display if it is in night mode
             setRGB(0, 0, 0)
         else:
+            # If it is not in night mode set the display to the stored color
             setRGB(display_color[0], display_color[1], display_color[2])
             
 
