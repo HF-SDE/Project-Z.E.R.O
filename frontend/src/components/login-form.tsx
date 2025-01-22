@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@components/ui/button";
 import {
   Card,
@@ -7,12 +8,54 @@ import {
 } from "@components/ui/card";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
+import { useUser } from "@hooks/useUser";
 import { cn } from "@lib/utils";
+import { loginUser } from "core/redux/actions/user.actions";
+import { stat } from "fs";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  ComponentPropsWithoutRef,
+  FormEvent,
+  useEffect,
+  useState,
+} from "react";
+import { useDispatch } from "react-redux";
 
 export function LoginForm({
   className,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}: ComponentPropsWithoutRef<"div">) {
+  const [state, setState] = useState({
+    username: "",
+    password: "",
+  });
+
+  const user = useUser();
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const pathname = usePathname()
+
+  useEffect(() => {
+    if (user.AUTHENTICATED) {
+      if (pathname.at(0) === "/") {
+        router.push(pathname.toString());
+      }
+      router.push("/dashboard");
+    } else {
+      console.warn("User is not authenticated");
+    }
+  }, [user.AUTHENTICATED]);
+
+  /**
+   * Handle the login form submission
+   * @param {FormEvent<HTMLFormElement>} event
+   */
+  async function onLogin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    console.log("login")
+    dispatch(loginUser(state.username, state.password));
+  }
+
   return (
     <Card className={cn("flex flex-col gap-6", className)} {...props}>
       <CardHeader>
@@ -21,10 +64,15 @@ export function LoginForm({
           Enter your email below to login to your account
         </CardDescription>
       </CardHeader>
-      <form className="flex flex-col gap-6 p-6 pt-0">
+      <form className="flex flex-col gap-6 p-6 pt-0" onSubmit={onLogin}>
         <fieldset className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Label htmlFor="username">username</Label>
+          <Input
+            id="username"
+            type="text"
+            required
+            onChange={(e) => setState({ ...state, username: e.target.value })}
+          />
         </fieldset>
         <fieldset className="grid gap-2">
           <div className="flex items-center">
@@ -33,7 +81,12 @@ export function LoginForm({
               Forgot your password?
             </p>
           </div>
-          <Input id="password" type="password" required />
+          <Input
+            id="password"
+            type="password"
+            required
+            onChange={(e) => setState({ ...state, password: e.target.value })}
+          />
         </fieldset>
         <Button type="submit" className="w-full">
           Login
