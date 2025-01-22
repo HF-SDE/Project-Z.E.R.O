@@ -1,52 +1,54 @@
 import math
 from grovepi import *
 from helpers.config import get_setting
+import threading
+
 
 # Dictionary to store sensors
 sensor_data = {
     "TEMPERATURE": {
-        "value": 0,
+        "value": -9999,
         "identifier": "CELSIUS",
         "display_label": lambda value: f"Temperature:    {value}'C"
     },
     "HUMIDITY": {
-        "value": 0,
+        "value": -1,
         "identifier": "PERCENTAGE",
         "display_label": lambda value: f"Humidity:       {value}%"
     },
     "LIGHT_LEVEL": {
-        "value": 0,
+        "value": -1,
         "identifier": "PERCENTAGE",
         "display_label": lambda value: f"Light Level:    {value}%"
     },
     "SOUND_LEVEL": {
-        "value": 0,
+        "value": -1,
         "identifier": "PERCENTAGE",
         "display_label": lambda value: f"Sound Level:    {value}%"
     }
 }
 
 
-def init_sensors():
-    """
-    This is for initializing sensors setting
-    """
-    pinMode(get_setting("button_sensor"), "INPUT")
-    print("Sensors has ben initialized")
-
 def read_sensors():
     """
-    This is for reading the value of the sensors and storing it in the sensors dictionary
+    Read values from sensors and update sensor data.
     """
     try:
-        # Read the sensors and set the values
-        temp, hum = dht(get_setting("dht_sensor"), 1)
-        sensor_data["TEMPERATURE"]["value"] = temp if not math.isnan(temp) else get_sensor_value("TEMPERATURE")
-        sensor_data["HUMIDITY"]["value"]  = hum if not math.isnan(hum) else get_sensor_value("HUMIDITY")
-        light = analogRead(get_setting("light_sensor"))
-        sound = analogRead(get_setting("sound_sensor"))
+        dht_sensor_pin = get_setting("dht_sensor")
+        light_sensor_pin = get_setting("light_sensor")
+        sound_sensor_pin = get_setting("sound_sensor")
 
-        # Update sensor values with calculated percentages
+        if not all(isinstance(pin, int) for pin in [dht_sensor_pin, light_sensor_pin, sound_sensor_pin]):
+            raise ValueError("One or more sensor pins are invalid.")
+
+        # Read DHT sensor
+        temp, hum = dht(dht_sensor_pin, 1)
+        sensor_data["TEMPERATURE"]["value"] = temp if not math.isnan(temp) else get_sensor_value("TEMPERATURE")
+        sensor_data["HUMIDITY"]["value"] = hum if not math.isnan(hum) else get_sensor_value("HUMIDITY")
+
+        # Read light and sound sensors
+        light = analogRead(light_sensor_pin)
+        sound = analogRead(sound_sensor_pin)
         sensor_data["LIGHT_LEVEL"]["value"] = round((light / 1000) * 100, 2)
         sensor_data["SOUND_LEVEL"]["value"] = round((sound / 1000) * 100, 2)
 
@@ -54,6 +56,16 @@ def read_sensors():
     except Exception as e:
         print(f"Error reading sensors: {e}")
         return sensor_data
+
+
+def init_sensors():
+    """
+    This is for initializing sensors setting
+    """
+    pinMode(get_setting("button_sensor"), "INPUT")
+    read_sensors()
+    print("Sensors has ben initialized")
+
 
 def read_button():
     """

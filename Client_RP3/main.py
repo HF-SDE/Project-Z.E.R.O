@@ -1,3 +1,9 @@
+import time
+import datetime
+import threading
+import sys
+import os
+
 from helpers.config import initialize_config, get_setting
 from helpers.sensors import init_sensors, read_sensors, read_button, sensor_count
 from helpers.api import init_token, control_api_access, send_data_to_api, get_device_info
@@ -5,15 +11,31 @@ from helpers.pages import Pages
 from helpers.display import button_pressed, refresh_display, get_last_button_time
 from helpers.websocket import init_websocket
 from helpers.utils import special_pages_count
-import time
-import datetime
+
+error_message = None
+
+def send_data():
+    global error_message
+    while True:
+        try:
+            send_data_to_api()
+            pass
+        except Exception as e:
+            error_message = "Error sending data to the API"
+
+        time.sleep((int(get_device_info()["frequency"]) / 1000))
+
+
 
 
 # Main entry point
 def main():
+    global error_message
     while True:
         try:
             print("Starting program")
+            error_message = None
+
 
             # Loads the config file
             initialize_config()
@@ -46,7 +68,16 @@ def main():
 
             print("Starting loop")
 
+
+
+            # Start the thread that is responsible for sending the collected data to the api
+            loop_thread_send_data = threading.Thread(target=send_data)
+            loop_thread_send_data.start()
+
+
             while True:
+                if error_message:
+                    raise Exception(error_message)
                 # Logic for button press and page navigation
                 button_status = read_button()
 
@@ -80,14 +111,14 @@ def main():
                 if light_mode_activated and (time.time() - get_last_button_time() > get_setting("button_night_mode_duration")):
                     light_mode_activated = False
 
-                # Read sensors every given interval
+                # Read sensors every given interval, I would have put it in the send data thread but the grovepi library can not handle that
+                # Reading the sensors in the interval of the send data frequency or the page refresh interval depending on the lowest one
                 current_time = time.time()
-                if current_time - last_sensor_time >= (int(get_device_info()["frequency"]) / 1000):
+                if current_time - last_sensor_time >= min((int(get_device_info()["frequency"]) / 1000), get_setting("page_refresh_interval")):
                     read_sensors()
-                    send_data_to_api()
                     last_sensor_time = current_time
 
-                # Refresh the current page every 5 seconds
+                # Refresh the current page every given interval in the config
                 if current_time - last_refresh_time >= get_setting("page_refresh_interval"):
                     pages.refresh_page()
                     last_refresh_time = current_time

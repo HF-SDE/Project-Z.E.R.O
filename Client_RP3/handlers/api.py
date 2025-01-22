@@ -1,6 +1,6 @@
 import requests
 from helpers.config import get_setting
-from helpers.sensors import get_sensor_value, get_api_format
+from helpers.sensors import get_api_format
 from helpers.display import refresh_display
 from helpers.utils import get_device_id
 import os
@@ -13,7 +13,6 @@ def control_api_access():
     """
     This is for controlling that the program can contact the api
     """
-    global screen_color
     try:
         response = requests.get(get_setting("base_url") + "/health", timeout=5)
         if response.status_code != 200:
@@ -46,7 +45,7 @@ def get_device_info_from_api():
         # Make the api call
         response = requests.get(url, timeout=5, headers=headers)
 
-        # Return a answer based on the status code
+        # Return an answer based on the status code
         if response.status_code == 200:
             response_body = response.json()
             if (
@@ -88,8 +87,8 @@ def init_token():
                 #print(f"Token loaded from file")
         except Exception as e:
             print(f"Error reading token file: {e}")
-            raise Exception("Error reading token file")
             token = ""
+            raise Exception("Error reading token file")
     elif token_from_api_call is not None:
         # Token file does not exist in a file or the server has sent a new token, fetch token from API
         try:
@@ -121,7 +120,7 @@ def send_data_to_api():
         }
         
         # Calling the API with the sensor data
-        response = requests.post(get_setting("base_url") + "/data", json=get_api_format(), headers=headers, timeout=5)
+        requests.post(get_setting("base_url") + "/data", json=get_api_format(), headers=headers, timeout=5)
 
     except Exception as e:
         print(e)

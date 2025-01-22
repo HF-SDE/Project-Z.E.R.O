@@ -51,7 +51,6 @@ export function LoginForm({
    */
   async function onLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    console.log("login")
     dispatch(loginUser(state.username, state.password));
   }
 
