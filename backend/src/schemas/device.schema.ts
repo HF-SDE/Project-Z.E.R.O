@@ -4,7 +4,7 @@ const uuid = Joi.string().uuid();
 const name = Joi.string().min(3).max(255);
 const frequency = Joi.number().max(2147483647);
 const status = Joi.string()
-  .valid('active', 'inactive', 'maintenance')
+  .valid('ACTIVE', 'INACTIVE', 'MAINTENANCE')
   .insensitive();
 
 export const createSchema = Joi.object({

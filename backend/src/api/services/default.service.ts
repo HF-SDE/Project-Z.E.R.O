@@ -19,11 +19,11 @@ import { capitalize } from '@utils/Utils';
  * @param {Record<string, unknown>} config - The parameters to filter the records by.
  * @returns {Promise<APIResponse<any>>} A promise that resolves to an object containing the data, status, and message.
  */
-export async function getAll(
+export async function getAll<T = any>(
   prismaModel: prismaModels,
   schema: Joi.ObjectSchema,
   config: Record<string, unknown> = {},
-): Promise<APIResponse<any>> {
+): Promise<APIResponse<T[]>> {
   const { err, prismaType, validatedData } = Validate(
     prismaModel,
     config.where,
@@ -33,7 +33,7 @@ export async function getAll(
 
   config.where = validatedData;
 
-  const results = await prismaType.findMany(config);
+  const results = await prismaType.findMany(config) as T[];
 
   return {
     data: results,

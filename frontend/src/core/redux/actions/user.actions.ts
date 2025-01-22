@@ -1,9 +1,9 @@
 import { ActionCreator } from "redux";
-import { userSlice } from "../reducers/user.reducer";
-import { AppThunkAction } from "../store";
-import { IUser } from "../../types/user.types";
-import backendAxios from "../../api/backendAxios";
+import backendAxios from "core/api/backendAxios";
 import { permissionSlice } from "../reducers/permissions.reducer";
+import { IUser } from "@types";
+import { AppThunkAction } from "../store";
+import { userSlice } from "../reducers/user.reducer";
 
 export const loginUser: ActionCreator<AppThunkAction> = (email: string, password: string) => async (dispatch) => {
 	let accessToken = "";
