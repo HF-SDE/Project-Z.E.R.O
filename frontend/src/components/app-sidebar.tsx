@@ -52,7 +52,7 @@ const data = {
   ],
   navMain: [
     {
-      title: "Playground",
+      title: "Home",
       url: "#",
       icon: SquareTerminal,
       isActive: true,
@@ -72,7 +72,7 @@ const data = {
       ],
     },
     {
-      title: "Models",
+      title: "Devices",
       url: "#",
       icon: Bot,
       items: [
@@ -91,7 +91,7 @@ const data = {
       ],
     },
     {
-      title: "Documentation",
+      title: "Statistics",
       url: "#",
       icon: BookOpen,
       items: [
@@ -114,7 +114,7 @@ const data = {
       ],
     },
     {
-      title: "Settings",
+      title: "Locations",
       url: "#",
       icon: Settings2,
       items: [
