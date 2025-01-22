@@ -5,22 +5,30 @@ import { IUser } from "@types";
 import { AppThunkAction } from "../store";
 import { userSlice } from "../reducers/user.reducer";
 
-export const loginUser: ActionCreator<AppThunkAction> = (email: string, password: string) => async (dispatch) => {
+
+/**
+ * Logs in a user and retrieves their data and permissions
+ *
+ * @param {string} username 
+ * @param {string} password 
+ * @returns {(dispatch: any) => any} 
+ */
+export const loginUser: ActionCreator<AppThunkAction> = (username: string, password: string) => async (dispatch) => {
 	let accessToken = "";
 	try {
 
 		dispatch(userSlice.actions.AUTHENTICATING());
 
-		const authResponse = await backendAxios.post(`auth/login`, {
-			email,
-			password,
-		}, { withCredentials: true });
+		const authResponse = await backendAxios.post(`/login`, {
+			username,
+			password: btoa(password),
+		});
 
 		dispatch(
-			userSlice.actions.ACCESS_TOKEN_RECIEVED({ TOKEN: authResponse.data.accessToken })
+			userSlice.actions.ACCESS_TOKEN_RECIEVED({ TOKEN: `${authResponse.data.data.accessToken.authType} ${authResponse.data.data.accessToken.token}` })
 		);
-		backendAxios.defaults.headers.common.Authorization = authResponse.data.accessToken;
-		accessToken = authResponse.data.accessToken;
+		backendAxios.defaults.headers.common.Authorization = `${authResponse.data.data.accessToken.authType} ${authResponse.data.data.accessToken.token}`;
+		accessToken = `${authResponse.data.data.accessToken.authType} ${authResponse.data.data.accessToken.token}`;
 	} catch (error: any) {
 		if (error.response) {
 			console.warn('Authentication failed', error.response);
@@ -28,14 +36,14 @@ export const loginUser: ActionCreator<AppThunkAction> = (email: string, password
 
 		dispatch(
 			userSlice.actions.AUTH_FAILED({
-				ERROR: "Email eller adgangskode var forkert.",
+				ERROR: "Username eller adgangskode var forkert.",
 			})
 		);
 		return;
 	}
 
 	try {
-		const userResponse = await backendAxios.get("user/fromauth", {
+		const userResponse = await backendAxios.get("/profile/settings", {
 			headers: {
 				Authorization: accessToken,
 			},
@@ -53,7 +61,7 @@ export const loginUser: ActionCreator<AppThunkAction> = (email: string, password
 
 		dispatch(
 			userSlice.actions.AUTH_FAILED({
-				ERROR: "Kunne ikke hente bruger information, kontakt pgu@ao.dk",
+				ERROR: "Kunne ikke hente bruger information, Contact our support",
 			})
 		);
 		return;
@@ -78,7 +86,7 @@ export const loginUser: ActionCreator<AppThunkAction> = (email: string, password
 
 		dispatch(
 			userSlice.actions.AUTH_FAILED({
-				ERROR: "Kunne ikke hente bruger rettigheder, kontakt pgu@ao.dk",
+				ERROR: "Kunne ikke hente bruger rettigheder, Contact our support",
 			})
 		);
 		return;

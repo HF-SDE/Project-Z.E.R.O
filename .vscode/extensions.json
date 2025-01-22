@@ -14,6 +14,8 @@
     "ms-azuretools.vscode-docker",
     "expresssnippets.vscode-express-snippets",
     "vitest.explorer",
-    "streetsidesoftware.code-spell-checker"
+    "streetsidesoftware.code-spell-checker",
+    "bradlc.vscode-tailwindcss",
+    "austenc.tailwind-docs"
   ]
 }

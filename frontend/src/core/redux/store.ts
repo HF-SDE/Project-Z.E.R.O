@@ -1,4 +1,4 @@
-import { UnknownAction, combineReducers } from "redux";
+import { AnyAction, UnknownAction, combineReducers } from "redux";
 import { ThunkAction } from "redux-thunk";
 import { configureStore } from "@reduxjs/toolkit";
 import {
@@ -48,5 +48,5 @@ export type AppThunkAction<ReturnType = Promise<void>> = ThunkAction<
   ReturnType,
   AppState,
   unknown,
-  UnknownAction
+  AnyAction | UnknownAction
 >;
