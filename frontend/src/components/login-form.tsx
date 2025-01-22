@@ -18,7 +18,7 @@ export function LoginForm({
       <CardHeader>
         <CardTitle className="text-2xl">Login</CardTitle>
         <CardDescription>
-          Enter your email below to login to your accoun
+          Enter your email below to login to your account
         </CardDescription>
       </CardHeader>
       <form className="flex flex-col gap-6 p-6 pt-0">
