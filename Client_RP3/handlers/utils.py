@@ -9,9 +9,12 @@ def get_local_ip():
     """
     This is for getting the local ip address of the device
     """
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.connect(("8.8.8.8", 80))
-        return s.getsockname()[0]
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
+    except:
+        return None
 
 
 def get_mac():
