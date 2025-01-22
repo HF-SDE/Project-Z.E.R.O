@@ -5,15 +5,23 @@ import { IUser } from "@types";
 import { AppThunkAction } from "../store";
 import { userSlice } from "../reducers/user.reducer";
 
-export const loginUser: ActionCreator<AppThunkAction> = (email: string, password: string) => async (dispatch) => {
+
+/**
+ * Logs in a user and retrieves their data and permissions
+ *
+ * @param {string} username 
+ * @param {string} password 
+ * @returns {(dispatch: any) => any} 
+ */
+export const loginUser: ActionCreator<AppThunkAction> = (username: string, password: string) => async (dispatch) => {
 	let accessToken = "";
 	try {
 
 		dispatch(userSlice.actions.AUTHENTICATING());
 
-		const authResponse = await backendAxios.post(`auth/login`, {
-			email,
-			password,
+		const authResponse = await backendAxios.post(`/login`, {
+			username,
+			password: btoa(password),
 		}, { withCredentials: true });
 
 		dispatch(
@@ -28,7 +36,7 @@ export const loginUser: ActionCreator<AppThunkAction> = (email: string, password
 
 		dispatch(
 			userSlice.actions.AUTH_FAILED({
-				ERROR: "Email eller adgangskode var forkert.",
+				ERROR: "Username eller adgangskode var forkert.",
 			})
 		);
 		return;
@@ -53,7 +61,7 @@ export const loginUser: ActionCreator<AppThunkAction> = (email: string, password
 
 		dispatch(
 			userSlice.actions.AUTH_FAILED({
-				ERROR: "Kunne ikke hente bruger information, kontakt pgu@ao.dk",
+				ERROR: "Kunne ikke hente bruger information, Contact our support",
 			})
 		);
 		return;
@@ -78,7 +86,7 @@ export const loginUser: ActionCreator<AppThunkAction> = (email: string, password
 
 		dispatch(
 			userSlice.actions.AUTH_FAILED({
-				ERROR: "Kunne ikke hente bruger rettigheder, kontakt pgu@ao.dk",
+				ERROR: "Kunne ikke hente bruger rettigheder, Contact our support",
 			})
 		);
 		return;
