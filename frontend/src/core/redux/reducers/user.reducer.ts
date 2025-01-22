@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { HYDRATE } from "next-redux-wrapper";
 import { AppState } from "../store";
 
 export interface IUserState {
@@ -63,13 +62,6 @@ export const userSlice = createSlice({
 			state.LOADING = true;
 		}
 	},
-
-    extraReducers: (builder) => {
-        builder.addCase(HYDRATE, (state, { payload }: any) => ({
-            ...state,
-            ...payload.user
-        }));
-    }
 });
 
 export const selectUser = (state: AppState) => state[userSlice.name];

@@ -1,6 +1,6 @@
 import websocket
 import asyncio
-from helpers.api import  get_device_info, get_token
+from helpers.api import  get_token
 ws = websocket.WebSocket()
 
 async def on_message(message):
@@ -17,10 +17,10 @@ async def websocket_client():
 
 def init_websocket():
     try:
-        print("Initializing websocket")
+        pass
+        #print("Initializing websocket")
         #asyncio.get_event_loop().run_until_complete(websocket_client())
         #ws.connect(f"ws://10.130.64.251/api/device", header=[f"x-api-key: {get_token()}", f"device-id: {get_device_info()}"])
-        print("Successfully connected to websocket")
+        #print("Successfully connected to websocket")
     except Exception as e:
         pass
-
