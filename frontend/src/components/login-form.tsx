@@ -34,6 +34,7 @@ export function LoginForm({
   const router = useRouter();
   const pathname = usePathname()
 
+  // Check if the user is authenticated and redirect them to the dashboard
   useEffect(() => {
     if (user.AUTHENTICATED) {
       if (pathname.at(0) === "/") {
@@ -51,6 +52,7 @@ export function LoginForm({
    */
   async function onLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     dispatch(loginUser(state.username, state.password));
   }
 
