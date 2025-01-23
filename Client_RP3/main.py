@@ -5,16 +5,6 @@ import sys
 import os
 import subprocess
 
-from helpers.config import initialize_config, get_setting
-from helpers.sensors import init_sensors, read_sensors, read_button, sensor_count
-from helpers.api import init_token, control_api_access, send_data_to_api, get_device_info
-from helpers.pages import Pages
-from helpers.display import button_pressed, refresh_display, get_last_button_time
-from helpers.websocket import init_websocket
-from helpers.utils import special_pages_count
-
-error_message = None
-
 def install_packages():
     """Install required packages automatically."""
     try:
@@ -36,6 +26,19 @@ def install_packages():
     except Exception as e:
         print(f"An error occurred while installing packages: {e}")
         sys.exit(1)
+
+install_packages()
+
+from helpers.config import initialize_config, get_setting
+from helpers.sensors import init_sensors, read_sensors, read_button, sensor_count
+from helpers.api import init_token, control_api_access, send_data_to_api, get_device_info
+from helpers.pages import Pages
+from helpers.display import button_pressed, refresh_display, get_last_button_time
+from helpers.websocket import init_websocket
+from helpers.utils import special_pages_count
+
+error_message = None
+
 
 def send_data():
     time.sleep(5)
@@ -157,5 +160,4 @@ def main():
 
 
 if __name__ == "__main__":
-    install_packages()
     main()
