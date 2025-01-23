@@ -11,8 +11,7 @@ import { Label } from "@components/ui/label";
 import { useUser } from "@hooks/useUser";
 import { cn } from "@lib/utils";
 import { loginUser } from "core/redux/actions/user.actions";
-import { stat } from "fs";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ComponentPropsWithoutRef,
   FormEvent,
@@ -52,7 +51,6 @@ export function LoginForm({
    */
   async function onLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    console.log("login")
     dispatch(loginUser(state.username, state.password));
   }
 

@@ -1,0 +1,23 @@
+Step 1:
+    Transfer the content of Client_RP3 folder to a folder on /home/pi/Client_RP3
+
+Step 2:
+    Rename the .env.example to .env
+
+Step 3:
+    Make the desired changes to the .env file
+
+Step 4: 
+    Open a terminal and type 'crontab -e'
+
+Step 5:
+    Add the following line to the end of the file '@reboot python3 /home/pi/Client_RP3/main.py' if you have changed the name of the file placement please remember to change it here also
+
+Step 6:
+    Save the changes
+
+Step 7:
+    Reboot the device with the following command 'sudo reboot'
+
+Step 8:
+    Verify that the program starts up

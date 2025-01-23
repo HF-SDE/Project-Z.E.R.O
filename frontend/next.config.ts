@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   env: {
-    URL: process.env.SERVER_API_URL ?? "http://localhost:3001/api/",
+    URL: process.env.SERVER_API_URL ?? "http://localhost/api/",
   },
 };
 

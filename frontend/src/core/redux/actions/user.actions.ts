@@ -22,13 +22,13 @@ export const loginUser: ActionCreator<AppThunkAction> = (username: string, passw
 		const authResponse = await backendAxios.post(`/login`, {
 			username,
 			password: btoa(password),
-		}, { withCredentials: true });
+		});
 
 		dispatch(
-			userSlice.actions.ACCESS_TOKEN_RECIEVED({ TOKEN: authResponse.data.accessToken })
+			userSlice.actions.ACCESS_TOKEN_RECIEVED({ TOKEN: `${authResponse.data.data.accessToken.authType} ${authResponse.data.data.accessToken.token}` })
 		);
-		backendAxios.defaults.headers.common.Authorization = authResponse.data.accessToken;
-		accessToken = authResponse.data.accessToken;
+		backendAxios.defaults.headers.common.Authorization = `${authResponse.data.data.accessToken.authType} ${authResponse.data.data.accessToken.token}`;
+		accessToken = `${authResponse.data.data.accessToken.authType} ${authResponse.data.data.accessToken.token}`;
 	} catch (error: any) {
 		if (error.response) {
 			console.warn('Authentication failed', error.response);
@@ -43,7 +43,7 @@ export const loginUser: ActionCreator<AppThunkAction> = (username: string, passw
 	}
 
 	try {
-		const userResponse = await backendAxios.get("user/fromauth", {
+		const userResponse = await backendAxios.get("/profile/settings", {
 			headers: {
 				Authorization: accessToken,
 			},
