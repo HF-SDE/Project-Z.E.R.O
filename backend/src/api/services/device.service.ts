@@ -3,9 +3,8 @@ import { UUID } from 'bson';
 import Joi from 'joi';
 import { WebSocket } from 'ws';
 
-import eventEmitter from '@/eventEmitter';
 import { APIResponse, IAPIResponse, Status } from '@api-types/general.types';
-// import { getWss } from '@app';
+import { getWss } from '@app';
 import prisma, { errorResponse, prismaModels } from '@prisma-instance';
 import { Device, Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -194,9 +193,9 @@ export async function websocket(
 
   ws.send(JSON.stringify(device));
 
-  // getWss().on('device-update', async (uuid: string) => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  eventEmitter.on('device-update', async (uuid: string) => {
+  getWss().on('device-update', async (uuid: string) => {
+    uuid = new UUID(uuid).toString();
     const updatedDevice = await prisma.device.findUnique({ where: { uuid } });
 
     if (!updatedDevice) {
@@ -205,7 +204,9 @@ export async function websocket(
       return;
     }
 
-    if (uuid === updatedDevice.uuid) ws.send(JSON.stringify(updatedDevice));
+    const updatedDeviceUuid = new UUID(updatedDevice.uuid).toString();
+
+    if (uuid === updatedDeviceUuid) ws.send(JSON.stringify(updatedDevice));
   });
 
   ws.on('message', (msg) => console.log(msg));
