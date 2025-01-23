@@ -83,13 +83,14 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-slate-100 focus:text-slate-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 dark:focus:bg-slate-800 dark:focus:text-slate-50",
+      "relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors duration-200 ease-in-out hover:bg-blue-100 hover:text-blue-900 focus:bg-blue-200 focus:text-blue-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:hover:bg-blue-800 dark:hover:text-blue-50 dark:focus:bg-blue-700 dark:focus:text-white",
       inset && "pl-8",
       className
     )}
     {...props}
   />
 ));
+
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
 
 const DropdownMenuCheckboxItem = React.forwardRef<

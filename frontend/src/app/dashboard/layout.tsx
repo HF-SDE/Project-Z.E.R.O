@@ -32,16 +32,28 @@ import { Bell } from "@components/Icons/Bell"; // Notification Bell Icon
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <main className="flex flex-col">
-        {/* Topbar with dynamic background */}
-        <div className="flex items-center gap-4 p-4 w-full bg-white dark:bg-gray-800">
+      {/* Sidebar: Fixed and full height */}
+      <AppSidebar
+        className="fixed top-0 left-0 h-full w-64 bg-gray-800 dark:bg-gray-900 z-20"
+        style={{
+          borderColor: `hsl(var(--sidebar-border))`,
+        }}
+      />
+      <main className="flex flex-col dark:bg-slate-900">
+        {/* Topbar: Positioned starting after the sidebar */}
+        <div
+          className="fixed top-0 left-64 z-10 flex items-center gap-4 p-4 w-[calc(100%-16rem)] shadow-md"
+          style={{
+            backgroundColor: `hsl(var(--background))`,
+            color: `hsl(var(--foreground))`,
+          }}
+        >
           {/* Sidebar Trigger */}
           <SidebarTrigger />
 
           {/* Breadcrumb */}
           <Breadcrumb className="flex-1">
-            <BreadcrumbList className="text-slate-950 dark:text-slate-50">
+            <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink href="#">Home</BreadcrumbLink>
               </BreadcrumbItem>
@@ -59,16 +71,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {/* Dark Mode Toggle */}
           <ModeToggle />
 
-          {/* Middle Dropdown to show the Data Table (Notification Bell Icon) */}
+          {/* Notification Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center justify-center p-2 rounded-full bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 transition-all">
+              <button className="flex items-center justify-center p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all">
                 <Bell className="h-6 w-6 text-gray-800 dark:text-white" />
               </button>
             </DropdownMenuTrigger>
-
             <DropdownMenuContent align="end">
-              {/* Data Table inside the dropdown */}
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -102,10 +112,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Profile Avatar (rightmost icon) */}
+          {/* Profile Avatar */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 transition-all">
+              <button className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors duration-200 ease-in-out">
                 <Avatar>
                   <AvatarImage
                     src="/path/to/your/profile-pic.jpg"
@@ -122,9 +132,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        {/* Main content */}
-        <div className="flex-1 p-4">{children}</div>{" "}
-        {/* Page content will be displayed here */}
+
+        {/* Content: Padding to avoid overlap */}
+        <div className="ml-64 pt-[4rem] p-4">{children}</div>
       </main>
     </SidebarProvider>
   );

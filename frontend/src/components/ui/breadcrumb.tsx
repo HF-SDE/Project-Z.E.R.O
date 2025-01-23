@@ -50,14 +50,16 @@ const BreadcrumbLink = React.forwardRef<
   return (
     <Comp
       ref={ref}
+      // style={{ color: `hsl(var(--foreground))` }}
       className={cn(
-        "transition-colors hover:text-slate-950 dark:hover:text-slate-50",
+        "transition-colors duration-200 ease-in-out hover:text-slate-950 dark:hover:text-slate-50",
         className
       )}
       {...props}
     />
   );
 });
+
 BreadcrumbLink.displayName = "BreadcrumbLink";
 
 const BreadcrumbPage = React.forwardRef<
@@ -65,6 +67,7 @@ const BreadcrumbPage = React.forwardRef<
   React.ComponentPropsWithoutRef<"span">
 >(({ className, ...props }, ref) => (
   <span
+    // style={{ color: `hsl(var(--foreground))` }}
     ref={ref}
     role="link"
     aria-disabled="true"
