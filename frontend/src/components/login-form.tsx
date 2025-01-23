@@ -63,6 +63,7 @@ export function LoginForm({
         <CardDescription>
           Enter your email below to login to your account
         </CardDescription>
+        {user.ERROR !== "" ? <h3 className="text-red-500 text-center">{user.ERROR}</h3> : <h3 className="h-6"></h3>}
       </CardHeader>
       <form className="flex flex-col gap-6 p-6 pt-0" onSubmit={onLogin}>
         <fieldset className="grid gap-2">
@@ -84,6 +85,7 @@ export function LoginForm({
           <Input
             id="password"
             type="password"
+            min={8}
             required
             onChange={(e) => setState({ ...state, password: e.target.value })}
           />
