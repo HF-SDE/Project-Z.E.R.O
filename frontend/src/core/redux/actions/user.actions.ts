@@ -36,7 +36,7 @@ export const loginUser: ActionCreator<AppThunkAction> = (username: string, passw
 
 		dispatch(
 			userSlice.actions.AUTH_FAILED({
-				ERROR: "Username eller adgangskode var forkert.",
+				ERROR: "Username or password is wrong.",
 			})
 		);
 		return;
@@ -61,7 +61,7 @@ export const loginUser: ActionCreator<AppThunkAction> = (username: string, passw
 
 		dispatch(
 			userSlice.actions.AUTH_FAILED({
-				ERROR: "Kunne ikke hente bruger information, Contact our support",
+				ERROR: "Couldn't get user information, Contact our support",
 			})
 		);
 		return;
@@ -86,7 +86,7 @@ export const loginUser: ActionCreator<AppThunkAction> = (username: string, passw
 
 		dispatch(
 			userSlice.actions.AUTH_FAILED({
-				ERROR: "Kunne ikke hente bruger rettigheder, Contact our support",
+				ERROR: "Couldn't get users permissions, Contact our support",
 			})
 		);
 		return;
