@@ -3,8 +3,9 @@ import { UUID } from 'bson';
 import Joi from 'joi';
 import { WebSocket } from 'ws';
 
+import eventEmitter from '@/eventEmitter';
 import { APIResponse, IAPIResponse, Status } from '@api-types/general.types';
-import { getWss } from '@app';
+// import { getWss } from '@app';
 import prisma, { errorResponse, prismaModels } from '@prisma-instance';
 import { Device, Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -193,8 +194,9 @@ export async function websocket(
 
   ws.send(JSON.stringify(device));
 
+  // getWss().on('device-update', async (uuid: string) => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  getWss().on('device-update', async (uuid: string) => {
+  eventEmitter.on('device-update', async (uuid: string) => {
     const updatedDevice = await prisma.device.findUnique({ where: { uuid } });
 
     if (!updatedDevice) {

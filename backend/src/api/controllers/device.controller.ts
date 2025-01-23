@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
 
+import eventEmitter from '@/eventEmitter';
 import {
   ExpressFunction,
   Status,
   WebsocketFunction,
 } from '@api-types/general.types';
-import { getWss } from '@app';
+// import { getWss } from '@app';
 import { prismaModels } from '@prisma-instance';
 import { Prisma } from '@prisma/client';
 import * as defaultService from '@services/default.service';
@@ -42,7 +43,8 @@ export function updateDevice(
     const response = await defaultService.update('device', '', data, schema);
 
     if (response.status === Status.Updated && data) {
-      data.map(({ uuid }) => getWss().emit('device-update', uuid));
+      // data.map(({ uuid }) => getWss().emit('device-update', uuid));
+      data.map(({ uuid }) => eventEmitter.emit('device-update', uuid));
     }
 
     res.status(getHttpStatusCode(response.status)).json(response).end();
@@ -112,9 +114,9 @@ export function resetApiKey(): ExpressFunction {
 export function websocketController(): WebsocketFunction {
   return async (ws, req) => {
     const deviceId = req.headers['device-id'] as string;
-    
+
     ws.on('close', () => console.log('Device disconnected. Uuid:', deviceId));
-    
+
     await deviceService.websocket(ws, deviceId);
   };
 }
