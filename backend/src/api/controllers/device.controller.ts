@@ -112,9 +112,9 @@ export function resetApiKey(): ExpressFunction {
 export function websocketController(): WebsocketFunction {
   return async (ws, req) => {
     const deviceId = req.headers['device-id'] as string;
-    
+
     ws.on('close', () => console.log('Device disconnected. Uuid:', deviceId));
-    
+
     await deviceService.websocket(ws, deviceId);
   };
 }
