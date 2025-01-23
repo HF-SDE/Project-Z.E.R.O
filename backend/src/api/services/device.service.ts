@@ -195,6 +195,7 @@ export async function websocket(
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   getWss().on('device-update', async (uuid: string) => {
+    uuid = new UUID(uuid).toString();
     const updatedDevice = await prisma.device.findUnique({ where: { uuid } });
 
     if (!updatedDevice) {
@@ -203,7 +204,9 @@ export async function websocket(
       return;
     }
 
-    if (uuid === updatedDevice.uuid) ws.send(JSON.stringify(updatedDevice));
+    const updatedDeviceUuid = new UUID(updatedDevice.uuid).toString();
+
+    if (uuid === updatedDeviceUuid) ws.send(JSON.stringify(updatedDevice));
   });
 
   ws.on('message', (msg) => console.log(msg));

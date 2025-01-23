@@ -20,6 +20,10 @@ def initialize_config():
     settings["button_night_mode_duration"] = float(os.getenv("BUTTON_NIGHT_MODE_DURATION", 5))
     settings["page_refresh_interval"] = float(os.getenv("PAGE_REFRESH_INTERVAL", 5))
     settings["excluded_pages"] = [int(x.strip()) for x in os.getenv("EXCLUDED_PAGES", "0,1,2").split(",")]
+    settings["wifi_ssid"] = os.getenv("WIFI_SSID", None)
+    settings["wifi_password"] = os.getenv("WIFI_PASSWORD", None)
+
+
 
     # Sensors
     settings["dht_sensor"] = int(os.getenv("DHT_SENSOR", 7))
