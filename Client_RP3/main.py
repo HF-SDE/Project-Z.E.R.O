@@ -3,6 +3,31 @@ import datetime
 import threading
 import sys
 import os
+import subprocess
+
+def install_packages():
+    """Install required packages automatically."""
+    try:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        requirements_file = os.path.join(script_dir, 'requirements.txt')
+
+        # Check if the requirements file exists
+        if not os.path.exists(requirements_file):
+            print(f"Error: {requirements_file} not found.")
+            sys.exit(1)
+
+        # Read the requirements file
+        with open(requirements_file, 'r') as file:
+            required_packages = [line.strip() for line in file if line.strip() and not line.startswith('#')]
+
+        # Install each package
+        for package in required_packages:
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
+    except Exception as e:
+        print(f"An error occurred while installing packages: {e}")
+        sys.exit(1)
+
+install_packages()
 
 from helpers.config import initialize_config, get_setting
 from helpers.sensors import init_sensors, read_sensors, read_button, sensor_count
@@ -14,7 +39,9 @@ from helpers.utils import special_pages_count
 
 error_message = None
 
+
 def send_data():
+    time.sleep(5)
     global error_message
     while True:
         try:

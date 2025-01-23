@@ -13,7 +13,8 @@ def initialize_config():
     load_dotenv(dotenv_path)
 
     # Configuration values
-    settings["base_url"] = os.getenv("API_BASE_URL")
+    settings["api_base_url"] = os.getenv("API_BASE_URL")
+    settings["websocket_base_url"] = os.getenv("WEBSOCKET_BASE_URL", None)
     settings["token_file_path"] = os.getenv("TOKE_FILE_PATH", "token")
     settings["night_mode_start"] = os.getenv("NIGHT_MODE_START", "18:00")
     settings["night_mode_stop"] = os.getenv("NIGHT_MODE_STOP", "07:00")

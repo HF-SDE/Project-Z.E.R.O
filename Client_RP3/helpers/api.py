@@ -14,7 +14,7 @@ def control_api_access():
     This is for controlling that the program can contact the api
     """
     try:
-        response = requests.get(get_setting("base_url") + "/health", timeout=5)
+        response = requests.get(get_setting("api_base_url") + "/health", timeout=5)
         if response.status_code != 200:
             raise Exception("The response status was not 200")
 
@@ -24,6 +24,9 @@ def control_api_access():
         refresh_display(color=[255, 0, 0], is_error=True)
         return False
 
+def set_server_device_info(new_server_device_info):
+    global server_device_info
+    server_device_info = new_server_device_info
 
 def get_device_info_from_api():
     """
@@ -33,7 +36,7 @@ def get_device_info_from_api():
     #print("Getting the device information.")
     try:
         # Get the base url from config and add the device endpoint
-        url = get_setting("base_url") + "/device"
+        url = get_setting("api_base_url") + "/device"
 
         # Make the headers for the request
         headers = {
@@ -120,7 +123,7 @@ def send_data_to_api():
         }
         
         # Calling the API with the sensor data
-        requests.post(get_setting("base_url") + "/data", json=get_api_format(), headers=headers, timeout=5)
+        requests.post(get_setting("api_base_url") + "/data", json=get_api_format(), headers=headers, timeout=5)
 
     except Exception as e:
         print(e)
