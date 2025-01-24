@@ -12,7 +12,6 @@ import {
   TokenRequestBody,
 } from '@api-types/auth.types';
 import { APIResponse, Status } from '@api-types/general.types';
-//import { JwtPayload } from 'jsonwebtoken';
 import config from '@config';
 import prisma from '@prisma-instance';
 import { Session } from '@prisma/client';
@@ -32,7 +31,7 @@ function generateToken(
   expiration: string,
   secret: string,
 ): string {
-  return jwt.sign(user, secret + (ip || ''), { expiresIn: expiration });
+  return jwt.sign(user, secret + (ip || ""), { expiresIn: expiration });
 }
 
 /**
@@ -232,7 +231,7 @@ export async function refreshUserTokens(
   try {
     userTemp = jwt.verify(
       tokenBody.token,
-      config.REFRESH_TOKEN_SECRET + tokenBody.ip,
+      config.REFRESH_TOKEN_SECRET  + tokenBody.ip,
     ) as unknown as UserToken;
   } catch {
     // Handle the verification failure gracefully
@@ -307,7 +306,7 @@ function getCacheKey(username: string, ipAddress: string): string {
  * Adds a failed login attempt for a given username and IP address.
  * Tracks the time of the failed attempt and manages the attempt window.
  * @param {string} username - The username of the user attempting to log in.
- * @param {string} ipAddress - The IP address from which the login attempt is made.
+//  * @param {string} ipAddress - The IP address from which the login attempt is made.
  * @returns {Promise<void>}
  */
 async function addFailedAttempt(

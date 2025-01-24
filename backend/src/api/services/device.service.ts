@@ -8,6 +8,7 @@ import { getWss } from '@app';
 import prisma, { errorResponse, prismaModels } from '@prisma-instance';
 import { Device, Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { includeLocation } from '@routes/device.routes';
 import * as DefaultService from '@services/default.service';
 
 import { Validate } from './default.service';
@@ -183,7 +184,10 @@ export async function websocket(
   ws: WebSocket,
   deviceId?: string,
 ): Promise<void> {
-  const device = await prisma.device.findUnique({ where: { uuid: deviceId } });
+  const device = await prisma.device.findUnique({
+    where: { uuid: deviceId },
+    ...includeLocation.prismaConfig,
+  });
 
   if (!device) {
     ws.send('Device not found');

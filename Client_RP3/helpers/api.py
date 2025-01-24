@@ -17,23 +17,27 @@ def control_api_access():
         response = requests.get(get_setting("api_base_url") + "/health", timeout=5)
         if response.status_code != 200:
             raise Exception("The response status was not 200")
+        else:
+            print("Access to API confirmed")
 
         return response.status_code == 200
     except Exception as e:
         print(f"API Access Error: {e}")
-        refresh_display(color=[255, 0, 0], is_error=True)
-        return False
+        raise Exception("API is not \nresponding")
+        #refresh_display(color=[255, 0, 0], is_error=True)
+
 
 def set_server_device_info(new_server_device_info):
     global server_device_info
     server_device_info = new_server_device_info
+
 
 def get_device_info_from_api():
     """
     Makes a request to the API to get device information.
     """
     global server_device_info
-    #print("Getting the device information.")
+    # print("Getting the device information.")
     try:
         # Get the base url from config and add the device endpoint
         url = get_setting("api_base_url") + "/device"
@@ -76,7 +80,6 @@ def init_token():
     # Call the device info to se if it returns the first token or a new one
     get_device_info_from_api()
 
-
     if server_device_info and "token" in server_device_info:
         # Set the token from the API response. The server has returned a token
         token_from_api_call = server_device_info["token"]
@@ -87,7 +90,7 @@ def init_token():
             with open(get_setting("token_file_path"), "r") as f:
                 token = f.read().strip()
                 token_loaded_from = "file"
-                #print(f"Token loaded from file")
+                # print(f"Token loaded from file")
         except Exception as e:
             print(f"Error reading token file: {e}")
             token = ""
@@ -98,7 +101,7 @@ def init_token():
             token = token_from_api_call
             with open(get_setting("token_file_path"), "w") as f:
                 f.write(token_from_api_call)
-                #print(f"Token saved to file")
+                # print(f"Token saved to file")
                 token_loaded_from = "API and has ben saved to file"
 
         except Exception as e:
@@ -108,7 +111,6 @@ def init_token():
     else:
         raise Exception("No token from \nAPI or in file")
     print(f"Token has ben initialized from {token_loaded_from}")
-
 
 
 def send_data_to_api():
@@ -121,17 +123,19 @@ def send_data_to_api():
             "device-id": get_device_id(),
             "x-api-key": token
         }
-        
+
         # Calling the API with the sensor data
         requests.post(get_setting("api_base_url") + "/data", json=get_api_format(), headers=headers, timeout=5)
 
     except Exception as e:
         print(e)
         raise Exception("Error sending sensor data to API")
-        #refresh_display(color=[255, 150, 0], is_error=True)
+        # refresh_display(color=[255, 150, 0], is_error=True)
+
 
 def get_token():
     return token
+
 
 def get_device_info():
     if server_device_info is None:

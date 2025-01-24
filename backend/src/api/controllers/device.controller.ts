@@ -101,6 +101,10 @@ export function resetApiKey(): ExpressFunction {
     // Call the service function to reset the API key
     const response = await deviceService.resetApiKey(deviceUuid);
 
+    if (response.status === Status.Success) {
+      getWss().emit('device-update', deviceUuid);
+    }
+
     res.status(getHttpStatusCode(response.status)).json(response).end();
   };
 }
