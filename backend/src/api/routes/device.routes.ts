@@ -17,7 +17,7 @@ import {
   updateSchema,
 } from '@schemas/device.schema';
 
-const includeLocation = {
+export const includeLocation = {
   prismaConfig: { include: { Location: true }, omit: { locationUuid: true } },
 };
 
