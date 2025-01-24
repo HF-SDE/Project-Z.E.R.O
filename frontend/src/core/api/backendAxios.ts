@@ -1,4 +1,5 @@
 import axios from "axios";
+import { APIResponse } from "core/types/api.types";
 import { RequestInit } from "next/dist/server/web/spec-extension/request";
 const backendAxios = axios.create({
   baseURL: process.env.CLIENT_API_URL,
@@ -10,7 +11,7 @@ export async function backendCall(
   method: RequestInit["method"],
   headers?: RequestInit["headers"],
   data?: any
-): Promise<string> {
+): Promise<APIResponse<[]>> {
   const baseUrl = process.env.SERVER_API_URL;
   if (!baseUrl) {
     console.error("Error: Environment variable URL is undefined.");
