@@ -1,18 +1,16 @@
 import time
-import datetime
 import threading
-import sys
-import os
 
 # This is to install the required packages
 from helpers.installer import install_packages
-#install_packages()
+install_packages()
 
 from helpers.config import initialize_config, get_setting
-from helpers.sensors import init_sensors, read_sensors, read_button, sensor_count
+from helpers.sensors import init_sensors, read_sensors
 from helpers.api import init_token, control_api_access, send_data_to_api, get_device_info
-from helpers.pages import Pages, special_pages_count
-from helpers.display import button_pressed, refresh_display, get_last_button_time
+from helpers.pages import Pages
+from helpers.display import refresh_display
+from helpers.button import button_control
 from helpers.websocket import init_websocket
 
 error_message = None
@@ -60,12 +58,10 @@ def main():
             init_token()
             init_websocket()
 
-            # Initialize pages
+            # Init the page controller
             pages = Pages()
 
-            light_mode_activated = False
-            last_button_state = 0
-            button_hold_start = None
+            # Declare variables
             last_sensor_time = time.time()
 
             # All has been initialized change screen color to green
@@ -84,38 +80,11 @@ def main():
 
                 if get_device_info()["status"] != "ACTIVE":
                     raise  Exception("Device is not \nactive!")
+
                 # Logic for button press and page navigation
-                button_status = read_button()
-
-                if button_status == 1 and last_button_state == 0:
-                    # Button press started, track hold duration
-                    button_hold_start = time.time()
-
-
-                if button_status == 0 and last_button_state == 1:
-                    if not light_mode_activated and (
-                            datetime.datetime.now().time() >= datetime.datetime.strptime(get_setting("night_mode_start"),
-                                                                                         "%H:%M").time() and datetime.datetime.now().time() <= datetime.datetime.strptime(
-                        get_setting("night_mode_stop"), "%H:%M").time()):
-                        # If the screen is in dark mode and the first button press happens, activate light mode
-                        light_mode_activated = True
-                        button_pressed()
-                    else:
-                        # Proceed to navigate to the next page
-                        pages.next_page()
-                        button_pressed()
-
-                if button_status == 1 and button_hold_start and (time.time() - button_hold_start >= 5):
-                    # This is for restarting the program if the button is held for 5 sec
-                    print("Button held for 5 seconds, restarting loop")
-                    refresh_display(color=[0, 0, 32], text="Restarting...")
-                    break  # Restart the outer loop
-
-                last_button_state = button_status
-
-                # Reset light mode
-                if light_mode_activated and (time.time() - get_last_button_time() > get_setting("button_night_mode_duration")):
-                    light_mode_activated = False
+                restart = button_control(pages)
+                if restart is True:
+                    break
 
                 # Read sensors every given interval, I would have put it in the send data thread but the grovepi library can not handle that
                 # Reading the sensors in the interval of the send data frequency or the page refresh interval depending on the lowest one
@@ -124,7 +93,10 @@ def main():
                     read_sensors()
                     last_sensor_time = current_time
 
+                # Refresh the data on the page
                 pages.refresh_page()
+
+                # Refresh the display
                 refresh_display()
 
         except Exception as e:
