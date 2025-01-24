@@ -6,15 +6,14 @@ import os
 
 # This is to install the required packages
 from helpers.installer import install_packages
-install_packages()
+#install_packages()
 
 from helpers.config import initialize_config, get_setting
 from helpers.sensors import init_sensors, read_sensors, read_button, sensor_count
 from helpers.api import init_token, control_api_access, send_data_to_api, get_device_info
-from helpers.pages import Pages
+from helpers.pages import Pages, special_pages_count
 from helpers.display import button_pressed, refresh_display, get_last_button_time
 from helpers.websocket import init_websocket
-from helpers.utils import special_pages_count
 
 error_message = None
 
@@ -80,6 +79,9 @@ def main():
             while True:
                 if error_message:
                     raise Exception(error_message)
+
+                if get_device_info()["status"] != "ACTIVE":
+                    raise  Exception("Device is not active")
                 # Logic for button press and page navigation
                 button_status = read_button()
 
