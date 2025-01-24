@@ -17,6 +17,10 @@ from helpers.websocket import init_websocket
 
 error_message = None
 
+def set_error_message(message):
+    global error_message
+    error_message = message
+
 def send_data():
     time.sleep(5)
     global error_message
@@ -38,6 +42,8 @@ def main():
     while True:
         try:
             print("Starting program")
+
+            # Clear the last error message on fresh start
             error_message = None
 
             # Loads the config file
@@ -47,9 +53,7 @@ def main():
             refresh_display(color=[0, 0, 32], text="Starting...")
 
             # Control that the device has access to the api
-            has_api_access = control_api_access()
-            if not has_api_access:
-                raise Exception("API is not responding")
+            control_api_access()
 
             # Initialize sensors, API & websockets
             init_sensors()
@@ -57,14 +61,12 @@ def main():
             init_websocket()
 
             # Initialize pages
-            number_of_pages = special_pages_count() + sensor_count()
-            pages = Pages(start=0, total_pages=number_of_pages, exclude_pages=get_setting("excluded_pages"))
+            pages = Pages()
 
             light_mode_activated = False
             last_button_state = 0
             button_hold_start = None
             last_sensor_time = time.time()
-            last_refresh_time = time.time()
 
             # All has been initialized change screen color to green
             refresh_display(color=[0, 64, 0])
@@ -81,7 +83,7 @@ def main():
                     raise Exception(error_message)
 
                 if get_device_info()["status"] != "ACTIVE":
-                    raise  Exception("Device is not active")
+                    raise  Exception("Device is not \nactive!")
                 # Logic for button press and page navigation
                 button_status = read_button()
 
@@ -122,10 +124,7 @@ def main():
                     read_sensors()
                     last_sensor_time = current_time
 
-                # Refresh the current page every given interval in the config
-                if current_time - last_refresh_time >= get_setting("page_refresh_interval"):
-                    pages.refresh_page()
-                    last_refresh_time = current_time
+                pages.refresh_page()
                 refresh_display()
 
         except Exception as e:

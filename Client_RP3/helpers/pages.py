@@ -2,44 +2,18 @@ from helpers.display import refresh_display
 from helpers.utils import get_local_ip, get_mac, get_device_id
 from helpers.sensors import sensor_count, get_display_format
 from helpers.api import  get_device_info
+from helpers.config import get_setting
 
-
-class Pages:
-    """
-    This class manages what page to display on the screen.
-    """
-    def __init__(self, start=0, total_pages=3, exclude_pages=None):
-        """
-        This is for initializing the pages settings
-        """
-        self.current_page = start
-        self.total_pages = total_pages - 1
-        self.exclude_pages = exclude_pages if exclude_pages else []
-        set_page(self.current_page)
-
-    def next_page(self):
-        """
-        This is for switching view to the next page
-        """
-        self.current_page = (self.current_page + 1) % (self.total_pages + 1)
-        set_page(self.current_page)
-
-    def refresh_page(self):
-        """
-        This is for refreshing the page in case of value change by the sensor
-        """
-        if self.current_page not in self.exclude_pages:
-            set_page(self.current_page)
-
+import time
 
 special_pages = {
-    0: lambda: "Device name:    " + get_device_info()["name"],
-    1: lambda: "Device location:" + "Demo_Location", #get_device_info()["location"]["name"],
-    2: lambda: "Device name:    " + get_device_info()["name"],
+    0: lambda: "Device name:    " + get_device_info().get("name", "Unknown"),
+    1: lambda: "Device location:" + get_device_info().get("Location", {}).get("name", "Unknown"),
     2: lambda: "IP:             " + get_local_ip(),
     3: lambda: "MAC Address:    " + get_mac(),
     4: lambda: get_device_id()
 }
+
 
 
 def set_page(page_number):
@@ -63,3 +37,37 @@ def set_page(page_number):
 
 def special_pages_count():
     return len(special_pages)
+
+
+class Pages:
+    """
+    This class manages what page to display on the screen.
+    """
+    def __init__(self, start=0, total_pages=(special_pages_count() + sensor_count()), exclude_pages=get_setting("excluded_pages")):
+        """
+        This is for initializing the pages settings
+        """
+        self.current_page = start
+        self.total_pages = total_pages - 1
+        self.exclude_pages = (
+            list(set(exclude_pages or []).union(special_pages.keys()))
+        )
+        self.last_refresh = time.time()
+        set_page(self.current_page)
+
+    def next_page(self):
+        """
+        This is for switching view to the next page
+        """
+        self.current_page = (self.current_page + 1) % (self.total_pages + 1)
+        self.last_refresh = time.time()
+        set_page(self.current_page)
+
+    def refresh_page(self):
+        """
+        This is for refreshing the page in case of value change by the sensor
+        """
+        if (self.current_page in self.exclude_pages) or (time.time() - self.last_refresh >  get_setting("page_refresh_interval")):
+            self.last_refresh = time.time()
+            set_page(self.current_page)
+

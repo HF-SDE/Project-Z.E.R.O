@@ -17,12 +17,14 @@ def control_api_access():
         response = requests.get(get_setting("api_base_url") + "/health", timeout=5)
         if response.status_code != 200:
             raise Exception("The response status was not 200")
+        else:
+            print("Access to API confirmed")
 
         return response.status_code == 200
     except Exception as e:
         print(f"API Access Error: {e}")
-        refresh_display(color=[255, 0, 0], is_error=True)
-        return False
+        raise Exception("API is not \nresponding")
+        #refresh_display(color=[255, 0, 0], is_error=True)
 
 
 def set_server_device_info(new_server_device_info):
