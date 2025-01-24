@@ -39,7 +39,7 @@ const data = {
     },
     {
       title: "Devices",
-      url: "#",
+      url: "/dashboard/device",
       icon: Bot,
     },
     {
