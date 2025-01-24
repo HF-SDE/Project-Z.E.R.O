@@ -1,3 +1,6 @@
+"use client";
+
+import * as React from "react";
 import { SidebarProvider, SidebarTrigger } from "@components/ui/sidebar";
 import { AppSidebar } from "@components/app-sidebar";
 import {
@@ -16,7 +19,6 @@ import {
   DropdownMenuItem,
 } from "@components/ui/dropdown-menu"; // Dropdown Menu components
 import { ModeToggle } from "@components/ui/theme-toggle"; // Light/Dark Mode Toggle
-
 import {
   Table,
   TableHeader,
@@ -30,26 +32,36 @@ import {
 import { Bell } from "@components/Icons/Bell"; // Notification Bell Icon
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const [sidebarOpen, setSidebarOpen] = React.useState(true);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
     <SidebarProvider>
       {/* Sidebar: Fixed and full height */}
       <AppSidebar
-        className="fixed top-0 left-0 h-full w-64 bg-gray-800 dark:bg-gray-900 z-20"
+        className={`fixed top-0 left-0 h-full ${
+          sidebarOpen ? "w-64" : "w-16"
+        } bg-gray-800 dark:bg-gray-900 z-20`}
         style={{
           borderColor: `hsl(var(--sidebar-border))`,
         }}
       />
-      <main className="flex flex-col dark:bg-slate-900">
+      <div className="flex flex-col min-h-screen w-full">
         {/* Topbar: Positioned starting after the sidebar */}
         <div
-          className="fixed top-0 left-64 z-10 flex items-center gap-4 p-4 w-[calc(100%-16rem)] shadow-md"
+          className="fixed top-0 z-10 flex items-center gap-4 p-4 transition-all duration-300"
           style={{
             backgroundColor: `hsl(var(--background))`,
             color: `hsl(var(--foreground))`,
+            left: sidebarOpen ? "16rem" : "3rem", // Adjust the left position based on sidebar state
+            width: `calc(100% - ${sidebarOpen ? "16rem" : "3rem"})`, // Adjust the width of the topbar dynamically
           }}
         >
           {/* Sidebar Trigger */}
-          <SidebarTrigger />
+          <SidebarTrigger onClick={toggleSidebar} />
 
           {/* Breadcrumb */}
           <Breadcrumb className="flex-1">
@@ -134,8 +146,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Content: Padding to avoid overlap */}
-        <div className="ml-64 pt-[4rem] p-4">{children}</div>
-      </main>
+        <main className="mt-[4.5rem] pt-[4rem] p-4 flex-grow w-full dark:bg-slate-900">{children}</main>
+      </div>
     </SidebarProvider>
   );
 }
