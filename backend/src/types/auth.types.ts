@@ -19,13 +19,13 @@ export type LoginAttemptsCache = {
 export interface LoginRequestBody {
   username: string;
   password: string;
-  // ip: string;
+  ip: string;
 }
 
 /** Interface for the token request body */
 export interface TokenRequestBody {
   token: string;
-  // ip: string;
+  ip: string;
 }
 
 /**

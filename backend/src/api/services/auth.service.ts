@@ -20,31 +20,31 @@ import { LoginSchema, TokenSchema } from '@schemas/auth.schema';
 /**
  * Generates a JSON Web Token (JWT) for the given user.
  * @param {UserToken} user - The user object to encode in the token payload.
-//  * @param {string | null} ip - The IP address to include in the secret for additional security, or null if not available.
+ * @param {string | null} ip - The IP address to include in the secret for additional security, or null if not available.
  * @param {string} expiration - The expiration time for the token, e.g., "1h", "30m", etc.
  * @param {string} secret - The secret key used to sign the JWT.
  * @returns {string} The generated JWT token.
  */
 function generateToken(
   user: UserToken,
-  // ip: string | null,
+  ip: string | null,
   expiration: string,
   secret: string,
 ): string {
-  return jwt.sign(user, secret, { expiresIn: expiration });
+  return jwt.sign(user, secret + (ip || ""), { expiresIn: expiration });
 }
 
 /**
  * Generates new access and refresh tokens for the user and stores them in the database.
  * If a session is not provided, a new session will be created.
  * @param {Omit<UserToken, "jti">} user - The user for whom tokens are being generated.
-//  * @param {string} ip - The request object containing the user's IP address.
+ * @param {string} ip - The request object containing the user's IP address.
  * @param {Session} [session] - Optional session to associate the tokens with. If not provided, a new session will be created.
  * @returns {Promise<{ accessToken: { token: string, authType: string } }>} An object containing the new access token.
  */
 export async function generateUserTokens(
   user: Omit<UserToken, 'jti'>,
-  // ip: string,
+  ip: string,
   session?: Session,
 ): Promise<AccessResult> {
   const newId = new UUID();
@@ -71,7 +71,7 @@ export async function generateUserTokens(
       username: user.username,
       permissions: permissionCodes,
     },
-    // ip,
+    ip,
     config.ACCESS_TOKEN_EXPIRATION,
     config.ACCESS_TOKEN_SECRET,
   );
@@ -81,7 +81,7 @@ export async function generateUserTokens(
       sub: user.sub,
       username: user.username,
     },
-    // ip,
+    ip,
     config.REFRESH_TOKEN_EXPIRATION,
     config.REFRESH_TOKEN_SECRET,
   );
@@ -165,7 +165,7 @@ export async function getRefreshToken(tokenBody: TokenRequestBody) {
   try {
     user = jwt.verify(
       tokenBody.token,
-      config.ACCESS_TOKEN_SECRET,
+      config.ACCESS_TOKEN_SECRET + tokenBody.ip,
       {
         ignoreExpiration: true,
       },
@@ -231,7 +231,7 @@ export async function refreshUserTokens(
   try {
     userTemp = jwt.verify(
       tokenBody.token,
-      config.REFRESH_TOKEN_SECRET,
+      config.REFRESH_TOKEN_SECRET  + tokenBody.ip,
     ) as unknown as UserToken;
   } catch {
     // Handle the verification failure gracefully
@@ -276,7 +276,7 @@ export async function refreshUserTokens(
         sub: user?.sub || '',
         username: user?.username || '',
       },
-      // tokenBody.ip,
+      tokenBody.ip,
       tokensInDb?.session,
     );
     return result;
@@ -295,11 +295,11 @@ const mutex = new Mutex();
 /**
  * Generates a cache key based on the username and IP address.
  * @param {string} username - The username of the user attempting to log in.
-//  * @param {string} ipAddress - The IP address from which the login attempt is made.
+ * @param {string} ipAddress - The IP address from which the login attempt is made.
  * @returns {string} The generated cache key in the format "username-ipAddress".
  */
-function getCacheKey(username: string): string {
-  return `${username}`;
+function getCacheKey(username: string, ipAddress: string): string {
+  return `${username}-${ipAddress}`;
 }
 
 /**
@@ -311,9 +311,9 @@ function getCacheKey(username: string): string {
  */
 async function addFailedAttempt(
   username: string,
-  // ipAddress: string,
+  ipAddress: string,
 ): Promise<void> {
-  const key = getCacheKey(username);
+  const key = getCacheKey(username, ipAddress);
 
   const now = new Date();
 
@@ -338,14 +338,14 @@ async function addFailedAttempt(
 /**
  * Clears failed login attempts for a given username and IP address upon successful login.
  * @param {string} username - The username of the user who successfully logged in.
-//  * @param {string} ipAddress - The IP address from which the successful login is made.
+ * @param {string} ipAddress - The IP address from which the successful login is made.
  * @returns {Promise<void>}
  */
 async function clearFailedAttempts(
   username: string,
-  // ipAddress: string,
+  ipAddress: string,
 ): Promise<void> {
-  const key = getCacheKey(username);
+  const key = getCacheKey(username, ipAddress);
 
   await mutex.runExclusive(() => {
     // Clear the failed attempts for the username and IP
@@ -358,11 +358,11 @@ async function clearFailedAttempts(
 /**
  * Checks if an account is locked due to too many failed login attempts.
  * @param {string} username - The username of the user attempting to log in.
-//  * @param {string} ipAddress - The IP address from which the login attempt is made.
+ * @param {string} ipAddress - The IP address from which the login attempt is made.
  * @returns {boolean} Returns true if the account is locked, otherwise false.
  */
-function isAccountLocked(username: string): boolean {
-  const key = getCacheKey(username);
+function isAccountLocked(username: string, ipAddress: string): boolean {
+  const key = getCacheKey(username, ipAddress);
   if (!Object.prototype.hasOwnProperty.call(loginAttempts, key)) {
     return false;
   }
@@ -407,7 +407,7 @@ export async function login(
     }
 
     // Check if the account should be locked due to too many failed attempts
-    if (isAccountLocked(userData.username)) {
+    if (isAccountLocked(userData.username, userData.ip)) {
       return {
         status: Status.TooManyRequests,
         message: 'Too many failed login attempts. Please try again later.',
@@ -425,7 +425,7 @@ export async function login(
         'local',
         async (err: any, user: Express.User | false) => {
           if (err || !user) {
-            await addFailedAttempt(userData.username);
+            await addFailedAttempt(userData.username, userData.ip);
             return resolve({
               status: Status.InvalidCredentials,
               message: 'Wrong username or password',
@@ -434,13 +434,13 @@ export async function login(
 
           // Proceed with login and token generation
           try {
-            await clearFailedAttempts(userData.username);
+            await clearFailedAttempts(userData.username, userData.ip);
             const result: AccessResult = await generateUserTokens(
               {
                 sub: user.id,
                 username: user.username,
               },
-              // userData.ip,
+              userData.ip,
             );
 
             resolve({

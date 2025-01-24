@@ -37,7 +37,7 @@ export async function login(
   const userObject: LoginRequestBody = {
     username,
     password,
-    // ip: getClientIp(req),
+    ip: getClientIp(req),
   };
 
   const response = await AuthService.login(userObject);
@@ -58,7 +58,7 @@ export async function logout(
   const { token } = req.body;
   const response = await AuthService.logout({
     token,
-    // ip: getClientIp(req),
+    ip: getClientIp(req),
   });
 
   res.status(getHttpStatusCode(response.status)).json(response).end();
@@ -77,7 +77,7 @@ export async function getAccessToken(
   const { token } = req.body;
   const response = await AuthService.accessToken({
     token,
-    // ip: getClientIp(req),
+    ip: getClientIp(req),
   });
 
   res.status(getHttpStatusCode(response.status)).json(response).end();
@@ -115,7 +115,7 @@ export async function getRefreshToken(
 
   const response = await AuthService.refreshToken({
     token,
-    // ip: getClientIp(req),
+    ip: getClientIp(req),
   });
 
   res.status(getHttpStatusCode(response.status)).json(response).end();
