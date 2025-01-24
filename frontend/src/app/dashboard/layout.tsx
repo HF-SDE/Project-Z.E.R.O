@@ -49,7 +49,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           borderColor: `hsl(var(--sidebar-border))`,
         }}
       />
-      <main className="flex flex-col dark:bg-slate-900 min-h-screen">
+      <div className="flex flex-col min-h-screen w-full">
         {/* Topbar: Positioned starting after the sidebar */}
         <div
           className="fixed top-0 z-10 flex items-center gap-4 p-4 transition-all duration-300"
@@ -146,8 +146,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Content: Padding to avoid overlap */}
-        <div className="ml-64 pt-[4rem] p-4 flex-grow">{children}</div>
-      </main>
+        <main className="mt-[4.5rem] pt-[4rem] p-4 flex-grow w-full dark:bg-slate-900">{children}</main>
+      </div>
     </SidebarProvider>
   );
 }
