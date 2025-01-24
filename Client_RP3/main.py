@@ -3,42 +3,19 @@ import datetime
 import threading
 import sys
 import os
-import subprocess
 
-def install_packages():
-    """Install required packages automatically."""
-    try:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        requirements_file = os.path.join(script_dir, 'requirements.txt')
-
-        # Check if the requirements file exists
-        if not os.path.exists(requirements_file):
-            print(f"Error: {requirements_file} not found.")
-            sys.exit(1)
-
-        # Read the requirements file
-        with open(requirements_file, 'r') as file:
-            required_packages = [line.strip() for line in file if line.strip() and not line.startswith('#')]
-
-        # Install each package
-        for package in required_packages:
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
-    except Exception as e:
-        print(f"An error occurred while installing packages: {e}")
-        sys.exit(1)
-
-install_packages()
+# This is to install the required packages
+from helpers.installer import install_packages
+#install_packages()
 
 from helpers.config import initialize_config, get_setting
 from helpers.sensors import init_sensors, read_sensors, read_button, sensor_count
 from helpers.api import init_token, control_api_access, send_data_to_api, get_device_info
-from helpers.pages import Pages
+from helpers.pages import Pages, special_pages_count
 from helpers.display import button_pressed, refresh_display, get_last_button_time
 from helpers.websocket import init_websocket
-from helpers.utils import special_pages_count
 
 error_message = None
-
 
 def send_data():
     time.sleep(5)
@@ -62,7 +39,6 @@ def main():
         try:
             print("Starting program")
             error_message = None
-
 
             # Loads the config file
             initialize_config()
@@ -95,8 +71,6 @@ def main():
 
             print("Starting loop")
 
-
-
             # Start the thread that is responsible for sending the collected data to the api
             loop_thread_send_data = threading.Thread(target=send_data)
             loop_thread_send_data.start()
@@ -105,6 +79,9 @@ def main():
             while True:
                 if error_message:
                     raise Exception(error_message)
+
+                if get_device_info()["status"] != "ACTIVE":
+                    raise  Exception("Device is not active")
                 # Logic for button press and page navigation
                 button_status = read_button()
 
