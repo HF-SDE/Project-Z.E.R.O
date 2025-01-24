@@ -4,7 +4,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   env: {
-    URL: process.env.SERVER_API_URL ?? "http://localhost/api/",
+    SERVER_API_URL: process.env.SERVER_API_URL ?? "http://reverse-proxy/api/",
+    CLIENT_API_URL: process.env.CLIENT_API_URL ?? "http://localhost/api/",
   },
 };
 

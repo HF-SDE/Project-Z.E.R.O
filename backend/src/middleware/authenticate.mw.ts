@@ -34,6 +34,7 @@ export function verifyJWT(
   res: Response,
   next: NextFunction,
 ): void {
+  console.log("body", req);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   passport.authenticate(
     'jwt',
