@@ -55,10 +55,3 @@ jobs:
         run: |
           sudo docker compose -f ./docker/docker-compose.prod.yml up --build --force-recreate -d
           sudo docker image prune -f
-
-      # Step 6: Run seed file
-      - name: Run seed file
-        run: |
-          cd backend
-          npx prisma db push
-          npx prisma db seed
