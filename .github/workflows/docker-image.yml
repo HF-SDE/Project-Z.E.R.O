@@ -34,7 +34,15 @@ jobs:
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> ./config/environment-variables/.env.db.prod
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> ./config/environment-variables/.env.db.prod
 
-      # Step 4: Run Docker Compose
+      # Step 4: Generate .env.frontend file
+      - name: Generate .env.frontend file
+        run: |
+          echo "# FRONTEND" > ./config/environment-variables/.env.frontend.prod
+          echo "CLIENT_API_URL=${{ secrets.CLIENT_API_URL }}" >> ./config/environment-variables/.env.frontend.prod
+          echo "SERVER_API_URL=${{ secrets.SERVER_API_URL }}" >> ./config/environment-variables/.env.frontend.prod
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> ./config/environment-variables/.env.frontend.prod
+
+      # Step 5: Run Docker Compose
       - name: Run Docker Compose
         run: |
           docker compose -f ./docker/docker-compose.prod.yml up --build --force-recreate
