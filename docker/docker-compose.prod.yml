@@ -1,29 +1,52 @@
-name: iot
+name: IOT
 
 services:
+  frontend:
+    container_name: frontend
+    build:
+      context: ../frontend/
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - ../frontend/:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - "backend"
+    command: npm run dev
+    env_file:
+      - ../config/environment-variables/.env.frontend.prod
+    networks:
+      - internal
+      - public
+
   backend:
     container_name: backend
     build:
       context: ../backend/
-      dockerfile: Dockerfile.production
+      dockerfile: Dockerfile
+      target: base
     expose:
       - "3001"
+    command: ["npm", "run", "dev"]
     depends_on:
       - db
     env_file:
       - ../config/environment-variables/.env.backend.prod
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+    volumes:
+      - ../backend/src:/usr/src/app/src
+    configs:
+      - source: backend_nodemon
+        target: /usr/src/app/nodemon.json
     networks:
       - internal
 
   db:
     container_name: db
-    image: postgres:latest
+    image: timescale/timescaledb:latest-pg17
+    expose:
+      - "5432"
     ports:
       - 5432:5432
     env_file:
@@ -31,8 +54,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
+      - public
       - internal
-    
+
   reverse-proxy:
     container_name: reverse-proxy
     build:
@@ -42,20 +66,12 @@ services:
       - 80:80
     depends_on:
       - backend
-    # configs:
-    #   - source: nginx_config
-    #     target: /etc/nginx/nginx.conf
-    volumes:
-      - ../config/nginx.conf:/etc/nginx/nginx.conf
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+    configs:
+      - source: nginx_config
+        target: /etc/nginx/nginx.conf
     networks:
-      - internal
       - public
+      - internal
 
 networks:
   public:
@@ -65,10 +81,10 @@ networks:
     internal: true
 
 volumes:
-  mongo1_data: {}
-  mongo1_config: {}
   postgres_data: {}
 
-# configs:
-#   nginx_config:
-#     file: ../config/nginx.conf
+configs:
+  nginx_config:
+    file: ../config/nginx.conf
+  backend_nodemon:
+    file: ../backend/nodemon.json
