@@ -53,5 +53,5 @@ jobs:
       # Step 5: Run Docker Compose
       - name: Run Docker Compose
         run: |
-          docker compose -f ./docker/docker-compose.prod.yml up --build --force-recreate
-          docker image prune -f
+          sudo docker compose -f ./docker/docker-compose.prod.yml up --build --force-recreate
+          sudo docker image prune -f
