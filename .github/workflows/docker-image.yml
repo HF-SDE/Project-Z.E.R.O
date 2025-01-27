@@ -11,6 +11,17 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Set up Docker permissions
+        run: |
+          sudo usermod -aG docker $USER
+          sudo systemctl restart docker
+
+      - name: Check Docker version
+        run: docker --version
+
+      - name: Run Docker Compose
+        run: docker-compose -f ./docker/docker-compose.prod.yml up --build --force-recreate
+        
       # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
