@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: raspberrypi
+    runs-on: self-hosted
 
     steps:
       # Step 1: Checkout the code
