@@ -1,26 +1,6 @@
 name: iot
 
 services:
-  frontend:
-    container_name: frontend
-    build:
-      context: ../frontend/
-      dockerfile: Dockerfile
-      target: dev
-    volumes:
-      - ../frontend/:/usr/src/app
-      - /usr/src/app/node_modules
-    ports:
-      - "3000:3000"
-    depends_on:
-      - "backend"
-    command: npm run dev
-    env_file:
-      - ../config/environment-variables/.env.frontend.prod
-    networks:
-      - internal
-      - public
-
   backend:
     container_name: backend
     build:
@@ -85,6 +65,6 @@ volumes:
 
 configs:
   nginx_config:
-    file: ../config/nginx.conf
+    file: ../config/nginx.conf.prod
   backend_nodemon:
     file: ../backend/nodemon.json
