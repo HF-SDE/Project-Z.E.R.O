@@ -1,6 +1,6 @@
 import { TestFunction, expect } from 'vitest';
 
-import { APIResponse } from '@api-types/general.types';
+import { APIResponse, Status } from '@api-types/general.types';
 
 type ServiceFunction<T> = (...args: any[]) => Promise<APIResponse<T>>;
 
@@ -9,6 +9,7 @@ type IService<T = any> = Partial<{
   create: ServiceFunction<T>;
   update: ServiceFunction<T>;
   deleteRecord: ServiceFunction<T>;
+  softDeleteRecord: ServiceFunction<T>;
 }>;
 
 type FunctionWithArgs<T> = T extends (...args: infer P) => any
@@ -38,22 +39,21 @@ export default function createTestCases<T extends IService>(
       return async () => {
         const response = await service.getAll!(...args);
 
-        expect(response.status).toBe(200);
-        if (Array.isArray(response.data)) {
-          expect(response.data).toBeInstanceOf(Array);
-        } else {
-          expect(response.data).toBeInstanceOf(Object);
-        }
+        expect(response).toEqual({
+          data: expect.arrayContaining([]),
+          status: Status.Found,
+          message: expect.any(String),
+        });
       };
     }) as FunctionWithArgs<T['getAll']>;
   }
 
   if (service.create && typeof service.create === 'function') {
-    testCases.createTest = ((...args: any[]): TestFunction => {
+    testCases.createTest = ((...args): TestFunction => {
       return async () => {
         const response = await service.create!(...args);
 
-        expect(response.status).toBe(201);
+        expect(response.status).toBe(Status.Created);
       };
     }) as FunctionWithArgs<T['create']>;
   }
@@ -63,7 +63,7 @@ export default function createTestCases<T extends IService>(
       return async () => {
         const response = await service.update!(...args);
 
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(Status.Updated);
       };
     }) as FunctionWithArgs<T['update']>;
   }
@@ -73,9 +73,22 @@ export default function createTestCases<T extends IService>(
       return async () => {
         const response = await service.deleteRecord!(...args);
 
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(Status.Deleted);
       };
     }) as FunctionWithArgs<T['deleteRecord']>;
+  }
+
+  if (
+    service.softDeleteRecord &&
+    typeof service.softDeleteRecord === 'function'
+  ) {
+    testCases.softDeleteRecordTest = ((...args): TestFunction => {
+      return async () => {
+        const response = await service.softDeleteRecord!(...args);
+
+        expect(response.status).toBe(Status.Deleted);
+      };
+    }) as FunctionWithArgs<T['softDeleteRecord']>;
   }
 
   return testCases;

@@ -29,7 +29,7 @@ export function isPort(value: unknown): value is Port {
  * @property {Port} PORT - The port number on which the server will listen.
  * @see {@link isPort} For checking if a value is a valid port.
  * @property {number} RATE_LIMIT_COUNT - The maximum number of requests allowed within a specified time frame from a ip.
- * @property {number} RATE_LIMIT_RESET_MINUTES - The time frame (in minutes) for resetting the rate limit count.
+ * @property {number} RATE_LIMIT_RESET_SEC - The time frame (in minutes) for resetting the rate limit count.
  * @property {string} ACCESS_TOKEN_SECRET - The secret key used for signing access tokens.
  * @property {string} REFRESH_TOKEN_SECRET - The secret key used for signing refresh tokens.
  * @property {string} ACCESS_TOKEN_EXPIRATION - The expiration time for access tokens.
@@ -41,7 +41,7 @@ export interface Config {
   NODE_ENV: NODE_ENV;
   PORT: Port;
   RATE_LIMIT_COUNT: number;
-  RATE_LIMIT_RESET_MINUTES: number;
+  RATE_LIMIT_RESET_SEC: number;
   ACCESS_TOKEN_SECRET: string;
   REFRESH_TOKEN_SECRET: string;
   ACCESS_TOKEN_EXPIRATION: string;

@@ -16,6 +16,7 @@
     "baseUrl": "./src",
     "paths": {
       "*": ["node_modules/*"],
+      "@app": ["app"],
       "@routes/*": ["api/routes/*"],
       "@controllers/*": ["api/controllers/*"],
       "@services/*": ["api/services/*"],

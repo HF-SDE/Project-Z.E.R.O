@@ -4,8 +4,22 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { capitalize } from '@utils/Utils';
 
-const prisma = new PrismaClient();
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+const defaultOmit = {
+  createdAt: true,
+  updatedAt: true,
+};
+
+const prisma = new PrismaClient({
+  omit: {
+    alert: defaultOmit,
+    device: { ...defaultOmit, token: true },
+    location: defaultOmit,
+    permission: defaultOmit,
+    user: defaultOmit,
+    permissionGroup: defaultOmit,
+  },
+});
+
 export default prisma;
 
 export type prismaModels = Uncapitalize<Prisma.ModelName>;
@@ -22,6 +36,7 @@ export async function errorResponse(
   model: prismaModels,
   operation: keyof typeof Status,
 ): Promise<IAPIResponse> {
+  console.log(err);
   if (err.name == 'PrismaClientValidationError') {
     return {
       status: Status.MissingDetails,

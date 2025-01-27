@@ -8,6 +8,8 @@ config/environment-variables/.env.*.prod*
 */.env.local
 .vs
 
+**/prisma/schemas
+
 *.zip
 
 # macOS

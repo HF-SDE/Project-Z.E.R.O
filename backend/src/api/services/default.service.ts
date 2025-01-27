@@ -8,21 +8,22 @@ import Joi from 'joi';
 import { APIResponse, IAPIResponse, Status } from '@api-types/general.types';
 import prisma, { errorResponse, prismaModels } from '@prisma-instance';
 import { Prisma } from '@prisma/client';
+import { UuidSchema } from '@schemas/general.schema';
 import { capitalize } from '@utils/Utils';
 
 /**
  * Service to get all records from a collection
  * @async
  * @param {prismaModels} prismaModel - The Prisma model to get the records from.
- * @param {Record<string, unknown>} config - The parameters to filter the records by.
  * @param {Joi.ObjectSchema} schema - The schema to validate the query object.
+ * @param {Record<string, unknown>} config - The parameters to filter the records by.
  * @returns {Promise<APIResponse<any>>} A promise that resolves to an object containing the data, status, and message.
  */
-export async function getAll(
+export async function getAll<T = any>(
   prismaModel: prismaModels,
-  config: Record<string, unknown> = {},
   schema: Joi.ObjectSchema,
-): Promise<APIResponse<any>> {
+  config: Record<string, unknown> = {},
+): Promise<APIResponse<T[]>> {
   const { err, prismaType, validatedData } = Validate(
     prismaModel,
     config.where,
@@ -32,7 +33,7 @@ export async function getAll(
 
   config.where = validatedData;
 
-  const results = await prismaType.findMany(config);
+  const results = await prismaType.findMany(config) as T[];
 
   return {
     data: results,
@@ -46,13 +47,13 @@ export async function getAll(
  * @async
  * @param {prismaModels} prismaModel - The Prisma model to create the record with.
  * @param {any} data - The data to create a record with.
- * @param {Joi.ObjectSchema} schema - The schema to validate the data against.
+ * @param {Joi.ObjectSchema | Joi.ArraySchema} schema - The schema to validate the data against.
  * @returns {Promise<IAPIResponse>} A promise that resolves to an object containing the record data, status, and message.
  */
 export async function create(
   prismaModel: prismaModels,
   data: unknown,
-  schema: Joi.ObjectSchema,
+  schema: Joi.ObjectSchema | Joi.ArraySchema,
 ): Promise<IAPIResponse> {
   const { err, prismaType, validatedData } = Validate(
     prismaModel,
@@ -61,8 +62,11 @@ export async function create(
   );
   if (err) return err;
 
+  const query = Array.isArray(validatedData) ? 'createMany' : 'create';
+
   try {
-    await prismaType.create({ data: validatedData });
+    // eslint-disable-next-line security/detect-object-injection
+    await prismaType[query]({ data: validatedData });
 
     return {
       status: Status.Created,
@@ -79,7 +83,7 @@ export async function create(
  * @async
  * @param {prismaModels} prismaModel - The Prisma model to update the record from.
  * @param {string} id - The id of the record to update.
- * @param {any} data - The data to update the record with.
+ * @param {unknown} data - The data to update the record with.
  * @param {Joi.ObjectSchema} schema - The schema to validate the data against.
  * @returns {Promise<APIResponse>} A promise that resolves to an object containing the record data, status, and message.
  */
@@ -87,7 +91,7 @@ export async function update(
   prismaModel: prismaModels,
   id: string,
   data: unknown,
-  schema: Joi.ObjectSchema,
+  schema: Joi.ObjectSchema | Joi.ArraySchema,
 ): Promise<APIResponse> {
   const { err, prismaType, validatedData } = Validate(
     prismaModel,
@@ -97,7 +101,18 @@ export async function update(
   if (err) return err;
 
   try {
-    await prismaType.update({ where: { id }, data: validatedData });
+    if (Array.isArray(validatedData)) {
+      const transactionCollection = [];
+      for (const item of validatedData) {
+        const { uuid, ...restItem } = item;
+        transactionCollection.push(
+          prismaType.update({ where: { uuid }, data: restItem }),
+        );
+      }
+      await prisma.$transaction(transactionCollection);
+    } else {
+      await prismaType.update({ where: { id }, data: validatedData });
+    }
 
     return {
       status: Status.Updated,
@@ -114,17 +129,23 @@ export async function update(
  * @async
  * @param {prismaModels} prismaModel - The Prisma model to delete the record from.
  * @param {string} id - The id of the record to delete.
+ * @param {"id" | "uuid"} [idType] - Default is id. Indecate if id is a id or a uuid.
  * @returns {Promise<IAPIResponse>} A promise that resolves to an object containing the record data, status, and message.
  */
 export async function deleteRecord(
   prismaModel: prismaModels,
   id: string,
+  idType: 'id' | 'uuid' = 'id',
 ): Promise<IAPIResponse> {
-  const { err, prismaType } = Validate(prismaModel);
+  const { err, prismaType } = Validate(prismaModel, id, UuidSchema);
   if (err) return err;
 
   try {
-    await prismaType.delete({ where: { id } });
+    if (idType === 'id') {
+      await prismaType.delete({ where: { id } });
+    } else {
+      await prismaType.delete({ where: { uuid: id } });
+    }
 
     return {
       status: Status.Deleted,
@@ -136,23 +157,29 @@ export async function deleteRecord(
   }
 }
 
+interface IValidateResponse {
+  err?: IAPIResponse;
+  prismaType?: any;
+  validatedData?: unknown;
+}
+
 /**
  * Function to validate the data
  * @param {prismaModels} prismaModel - The Prisma model to validate the data against.
  * @param {unknown} data - The data to validate.
- * @param {Joi.ObjectSchema} schema - The schema to validate the data against.
- * @returns {IAPIResponse} An object containing the status and message.
+ * @param {Joi.AnySchema} schema - The schema to validate the data against.
+ * @returns {IValidateResponse} An object containing
  */
-function Validate(
+export function Validate(
   prismaModel: prismaModels,
   data?: unknown,
-  schema?: Joi.ObjectSchema,
-): { err?: IAPIResponse; prismaType?: any; validatedData?: unknown } {
+  schema?: Joi.AnySchema,
+): IValidateResponse {
   if (!Object.prototype.hasOwnProperty.call(prisma, prismaModel)) {
     return {
       err: {
         status: Status.Failed,
-        message: `Something went wrong on our end`,
+        message: `Model '${prismaModel}' was not found in prisma`,
       },
     };
   }

@@ -4,11 +4,11 @@
   "private": true,
   "main": "./src/index.ts",
   "scripts": {
-    "build:tsc": "tsc --project ./tsconfig.build.json",
+    "build:tsc": "tsc --project ./tsconfig.json",
     "lint": "eslint src/**",
     "start": "TS_NODE_PROJECT='./dist' node -r tsconfig-paths/register ./dist",
     "dev": "nodemon -L",
-    "test": "vitest"
+    "test": "vitest --run"
   },
   "prisma": {
     "seed": "ts-node -r tsconfig-paths/register ./src/seed.ts"
@@ -27,6 +27,7 @@
     "dotenv": "^16.4.5",
     "express": "~4.21.2",
     "express-rate-limit": "^7.4.1",
+    "express-ws": "^5.0.2",
     "helmet": "^8.0.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
@@ -35,6 +36,7 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "prisma-joi-generator": "^0.2.0",
     "vite-tsconfig-paths": "^5.1.2"
   },
   "devDependencies": {

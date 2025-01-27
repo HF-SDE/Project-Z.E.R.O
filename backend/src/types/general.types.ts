@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { Query } from 'express-serve-static-core';
+import { WebSocket } from 'ws';
 
 export enum Status {
   Unauthorized = 'Unauthorized',
@@ -25,6 +26,7 @@ export enum Status {
   WsFailed = 'Failed WebSocket',
   WsForbidden = 'Forbidden WebSocket',
   wsInvalidDetails = 'Invalid Details WebSocket',
+  ApiKeyResetFailed = 'ApiKeyResetFailed',
 }
 export interface APIResponse<T = null | undefined> {
   status: Status;
@@ -41,6 +43,11 @@ export type ExpressFunction = (
   req: Request,
   res: Response,
   next: NextFunction,
+) => Promise<void> | void;
+
+export type WebsocketFunction = (
+  ws: WebSocket,
+  req: Request,
 ) => Promise<void> | void;
 
 export type TypedQuery<T> = Partial<T> & Query;

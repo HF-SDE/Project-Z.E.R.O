@@ -12,8 +12,8 @@ dotenv.config({ path: path.join(__dirname, '../', '.env') });
 const config: Config = {
   NODE_ENV: (process.env.NODE_ENV as NODE_ENV) || 'development',
   PORT: isPort(Number(process.env.PORT)) ? Number(process.env.PORT) : 3001,
-  RATE_LIMIT_COUNT: Number(process.env.RATE_LIMIT_COUNT) || 500,
-  RATE_LIMIT_RESET_MINUTES: Number(process.env.RATE_LIMIT_RESET_MINUTES) || 60,
+  RATE_LIMIT_COUNT: Number(process.env.RATE_LIMIT_COUNT) || 4,
+  RATE_LIMIT_RESET_SEC: Number(process.env.RATE_LIMIT_RESET_SEC) || 1,
   ACCESS_TOKEN_SECRET:
     process.env.ACCESS_TOKEN_SECRET ||
     'this_is_a_super_secret_key_for_the_access_token_please_change_it',
