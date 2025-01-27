@@ -18,9 +18,6 @@ jobs:
 
       - name: Check Docker version
         run: docker --version
-
-      - name: Run Docker Compose
-        run: docker-compose -f ./docker/docker-compose.prod.yml up --build --force-recreate
         
       # Step 1: Checkout the code
       - name: Checkout code
