@@ -87,7 +87,7 @@ To navigate between the different pages in the app, use the nav bar at the botto
 
 ### Profile Page:
 
-Coming soon!
+Coming soon
 
 #### Change Password Form
 
