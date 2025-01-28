@@ -91,7 +91,7 @@ def init_token():
             token = ""
             raise Exception("Error writing token file")
     else:
-        raise Exception("No token from \nAPI or in file")
+        raise Exception("No token from   API or in file  " + "Please create a new device. ID: " + get_device_id())
     print(f"Token has ben initialized from {token_loaded_from}")
 
 
