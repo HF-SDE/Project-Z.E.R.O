@@ -9,24 +9,6 @@ token = ""
 server_device_info = None
 
 
-def control_api_access():
-    """
-    This is for controlling that the program can contact the api
-    """
-    try:
-        response = requests.get(get_setting("api_base_url") + "/health", timeout=5)
-        if response.status_code != 200:
-            raise Exception("The response status was not 200")
-        else:
-            print("Access to API confirmed")
-
-        return response.status_code == 200
-    except Exception as e:
-        print(f"API Access Error: {e}")
-        raise Exception("API is not \nresponding")
-        #refresh_display(color=[255, 0, 0], is_error=True)
-
-
 def set_server_device_info(new_server_device_info):
     global server_device_info
     server_device_info = new_server_device_info
@@ -141,3 +123,25 @@ def get_device_info():
     if server_device_info is None:
         get_device_info_from_api()
     return server_device_info
+
+def control_api_access():
+    """
+    This is for controlling that the program can contact the api
+    """
+    try:
+        response = requests.get(get_setting("api_base_url") + "/health", timeout=5)
+        if response.status_code != 200:
+            raise Exception("API is not \nresponding")
+        else:
+            print("Access to API confirmed")
+
+        return response.status_code == 200
+    except Exception as e:
+        print(f"API Access Error: {e}")
+        raise Exception(str(e))
+        #refresh_display(color=[255, 0, 0], is_error=True)
+
+
+def control_device():
+    if get_device_info_from_api() is None:
+        raise Exception("No device found\nPlease create it" + get_device_id())

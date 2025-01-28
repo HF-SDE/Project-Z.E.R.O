@@ -7,7 +7,7 @@ install_packages()
 
 from helpers.config import initialize_config, get_setting
 from helpers.sensors import init_sensors, read_sensors
-from helpers.api import init_token, control_api_access, send_data_to_api, get_device_info
+from helpers.api import init_token, control_api_access, control_device, send_data_to_api, get_device_info
 from helpers.pages import Pages
 from helpers.display import refresh_display
 from helpers.button import button_control
@@ -53,10 +53,17 @@ def main():
             # Control that the device has access to the api
             control_api_access()
 
-            # Initialize sensors, API & websockets
+            # Initialize sensors & API
             init_sensors()
             init_token()
+
+            # Control that the device is in the DB
+            control_device()
+
+            # Initialize websocket
             init_websocket()
+
+
 
             # Init the page controller
             pages = Pages()
@@ -101,10 +108,19 @@ def main():
 
         except Exception as e:
             try:
-                refresh_display(color=[255, 0, 0], text=str(e), is_error=True)
+                # Convert the exception message to a string
+                error_message = str(e)
+
+                # Split the message into chunks of 32 characters
+                chunks = [error_message[i:i + 32] for i in range(0, len(error_message), 32)]
+                #refresh_display(color=[255, 0, 0], text=str(e), is_error=True)
+
+                for chunk in chunks:
+                    # Display each chunk
+                    refresh_display(color=[255, 0, 0], text=chunk, is_error=True)
+                    time.sleep(5)  # Wait for 5 seconds before showing the next chunk
             except Exception as e:
                 pass
-        time.sleep(5)
 
 
 if __name__ == "__main__":
