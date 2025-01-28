@@ -308,8 +308,7 @@ async function main() {
       const timeseriesData: Prisma.TimeseriesCreateManyInput[] = [];
 
       console.log('Creating timeseries data');
-      for (let index = 0; (index == 20); index++) {
-        console.log(index)
+      for (let index = 0; index < 20; index++) {
         if (Math.floor(Math.random() * 1) === 0) {
           timeseriesData.push({
             deviceId: await findDevice('Device 1'),
@@ -330,6 +329,7 @@ async function main() {
       await prisma.timeseries.createMany({
         data: timeseriesData,
       });
+      console.log(timeseriesData);
       console.log('Created timeseries data');
     }
 
