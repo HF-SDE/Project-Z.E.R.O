@@ -63,6 +63,10 @@ model Timeseries {
   createdAt  DateTime   @default(now()) @db.Timestamptz()
   updatedAt  DateTime   @updatedAt @db.Timestamptz()
 
+  @@index([identifier], name: "idx_identifier")
+  @@index([deviceId], name: "idx_deviceId")
+  @@index([locationId], name: "idx_locationId") 
+
   Device          Device            @relation(fields: [deviceId], references: [uuid])
   TimeseriesAlert TimeseriesAlert[]
 }
