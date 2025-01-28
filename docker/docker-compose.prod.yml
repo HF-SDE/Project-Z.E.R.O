@@ -46,7 +46,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - public
       - internal
 
   reverse-proxy:
