@@ -7,7 +7,7 @@
     "build:tsc": "tsc --project ./tsconfig.json",
     "lint": "eslint src/**",
     "start": "TS_NODE_PROJECT='./dist' node -r tsconfig-paths/register ./dist",
-    "dev": "npx prisma db push && (timeout 10s npx prisma db seed || echo 'Seeding timed out or failed') && nodemon -L",
+    "dev": "nodemon -L",
     "test": "vitest --run",
     "seed": "npx prisma db push && npx prisma db seed"
   },
