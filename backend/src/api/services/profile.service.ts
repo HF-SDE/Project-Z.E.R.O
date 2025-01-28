@@ -105,7 +105,7 @@ export async function getProfile(
 ): Promise<APIResponse<BasicUser>> {
   try {
     // Validate
-    const tokenValidation = jwtTokenSchema.validate({token: accessToken});
+    const tokenValidation = jwtTokenSchema.validate({ token: accessToken });
     if (tokenValidation.error) {
       return {
         status: Status.InvalidDetails,
@@ -161,8 +161,7 @@ export async function getProfile(
       };
     }
 
-    const response = {...tokenData.session.user, permissions: permission.map(perms => (perms.Permission))}
-
+    const response = { ...tokenData.session.user, permissions: permission.map(perms => (perms.Permission)) }
 
 
     return {
