@@ -32,7 +32,7 @@ services:
     env_file:
       - ../config/environment-variables/.env.db.prod
     volumes:
-      - /mnt/ssd/postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - public
       - internal
