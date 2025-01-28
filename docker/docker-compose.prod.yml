@@ -61,7 +61,12 @@ networks:
     internal: true
 
 volumes:
-  postgres_data: {}
+  postgres_data: 
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/mnt/ssd/db-data'
 
 configs:
   nginx_config:
