@@ -64,7 +64,7 @@ def init_sensors():
     """
     pinMode(get_setting("button_sensor"), "INPUT")
     read_sensors()
-    print("Sensors has ben initialized")
+    print("Sensors has been initialized")
 
 
 def read_button():
