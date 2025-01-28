@@ -65,7 +65,10 @@ model Timeseries {
 
   @@index([identifier], name: "idx_identifier")
   @@index([deviceId], name: "idx_deviceId")
-  @@index([locationId], name: "idx_locationId") 
+  @@index([locationId], name: "idx_locationId")
+  @@index([deviceId, createdAt], name: "idx_deviceId_createdAt")
+  @@index([locationId, createdAt], name: "idx_locationId_createdAt")
+  @@index([identifier, createdAt], name: "idx_identifier_createdAt")
 
   Device          Device            @relation(fields: [deviceId], references: [uuid])
   TimeseriesAlert TimeseriesAlert[]
