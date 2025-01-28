@@ -43,7 +43,8 @@ export const loginUser: ActionCreator<AppThunkAction> = (username: string, passw
 	}
 
 	try {
-		const userResponse = await backendAxios.get("/profile/settings", {
+
+		const userResponse = await backendAxios.get("/profile", {
 			headers: {
 				Authorization: accessToken,
 			},
@@ -51,42 +52,24 @@ export const loginUser: ActionCreator<AppThunkAction> = (username: string, passw
 
 		dispatch(
 			userSlice.actions.USER_DATA_RECIEVED({
-				EMAIL: userResponse.data.user.email,
-				NAME: userResponse.data.user.name,
-				ID: userResponse.data.user.id,
+				EMAIL: userResponse.data.data.email,
+				NAME: userResponse.data.data.name,
+				ID: userResponse.data.data.id,
 			})
 		);
+
+		dispatch(
+			permissionSlice.actions.PERMISSIONS_RECIEVED({
+				PERMISSIONS: userResponse.data.data.permissions
+			})
+		);
+		return;
 	} catch (error: any) {
 		console.warn("Login failed because we couldn't get user information", error.response);
 
 		dispatch(
 			userSlice.actions.AUTH_FAILED({
 				ERROR: "Couldn't get user information, Contact our support",
-			})
-		);
-		return;
-	}
-
-	try {
-
-		const permResponse = await backendAxios.get('permission/fromAuth', {
-			headers: {
-				Authorization: accessToken
-			}
-		});
-
-		dispatch(
-			permissionSlice.actions.PERMISSIONS_RECIEVED({
-				PERMISSIONS: permResponse.data.data
-			})
-		);
-
-	} catch (error: any) {
-		console.warn("Login failed because we couldn't get users permissions", error.response);
-
-		dispatch(
-			userSlice.actions.AUTH_FAILED({
-				ERROR: "Couldn't get users permissions, Contact our support",
 			})
 		);
 		return;
