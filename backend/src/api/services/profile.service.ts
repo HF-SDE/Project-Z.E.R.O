@@ -105,7 +105,7 @@ export async function getProfile(
 ): Promise<APIResponse<BasicUser>> {
   try {
     // Validate
-    const tokenValidation = jwtTokenSchema.validate(accessToken);
+    const tokenValidation = jwtTokenSchema.validate({token: accessToken});
     if (tokenValidation.error) {
       return {
         status: Status.InvalidDetails,
@@ -121,6 +121,7 @@ export async function getProfile(
           include: {
             user: {
               select: {
+                id: true,
                 initials: true,
                 name: true,
                 email: true,
@@ -135,14 +136,39 @@ export async function getProfile(
     if (!tokenData) {
       return {
         status: Status.NotFound,
-        message: 'Token not found or invalid.',
+        message: '"User have no settings',
       };
     }
+
+    const permission = await prisma.userPermissions.findMany({
+      where: {
+        userId: tokenData.session.user.id
+      },
+      include: {
+        Permission: {
+          select: {
+            code: true,
+            description: true
+          }
+        }
+      }
+    })
+
+    if (!permission) {
+      return {
+        status: Status.NotFound,
+        message: '"User have no settings',
+      };
+    }
+
+    const response = {...tokenData.session.user, permissions: permission.map(perms => (perms.Permission))}
+
+
 
     return {
       status: Status.Found,
       message: 'Profile found',
-      data: tokenData.session.user,
+      data: response,
     };
   } catch (error: unknown) {
     return {
