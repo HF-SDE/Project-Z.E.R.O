@@ -166,9 +166,9 @@ export async function getProfile(
 
 
     return {
+      data: response,
       status: Status.Found,
       message: 'Profile found',
-      data: response,
     };
   } catch (error: unknown) {
     return {
