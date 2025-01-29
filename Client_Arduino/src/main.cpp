@@ -47,19 +47,36 @@ void setup() {
 
     Serial.println("Starting...");
 
-    // clearEEPROM();
-
     connectToWifi();
 
     String ApiKey = getApiKey(getUuid());
 
     axios = new Axios(BACKEND_IP, ApiKey);
 
-    deviceSettings = axios->get("/api/device")["data"][0];
+    StaticJsonDocument<JSON_BUFFER_SIZE> deviceResponse = axios->get("/api/device");
+
+    if (deviceResponse["status"] == "Unauthorized") {
+        Serial.println("Unauthorized. Exiting...");
+
+        writeToLCD("Unauthorized", "Restart device");
+
+        clearEEPROM();
+
+        wdt_enable(WDTO_15MS);
+        while (1) {}
+        return;
+    }
+
+    deviceSettings = deviceResponse["data"][0];
+
     frequency = deviceSettings["frequency"];
+    const char* status = deviceSettings["status"];
 
     Serial.print("Frequency: ");
     Serial.println(frequency);
+
+    Serial.print("Device Status: ");
+    Serial.println(status);
 }
 
 void loop() {
@@ -77,10 +94,12 @@ void loop() {
         if (minutes % 3 == 0 && seconds == 0 && time != previosNumber) {
         deviceSettings = axios->get("/api/device")["data"][0];
 
-        frequency = deviceSettings["frequency"];
+        if (deviceSettings["frequency"].as<int>() != frequency) {
+            Serial.print("Updated Frequency: ");
+            Serial.println(frequency);
 
-        Serial.print("Updated Frequency: ");
-        Serial.println(frequency);
+            frequency = deviceSettings["frequency"];
+        }
     }
 
     if (frequency > 0 && time % (frequency / 1000) == 0 && time != previosNumber) {
