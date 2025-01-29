@@ -4,6 +4,7 @@ from helpers.sensors import get_api_format
 from helpers.display import refresh_display
 from helpers.utils import get_device_id
 import os
+import time
 
 token = ""
 server_device_info = None
@@ -143,5 +144,14 @@ def control_api_access():
 
 
 def control_device():
-    if get_device_info_from_api() is None:
-        raise Exception("No device found\nPlease create it" + get_device_id())
+    retries = 5
+    delay = 2  # Delay in seconds
+
+    for attempt in range(retries):
+        if get_device_info_from_api() is not None:
+            return  # Device found, exit function
+        
+        if attempt < retries - 1:
+            time.sleep(delay)
+        else:
+            raise Exception("No device found Please create it" + get_device_id())
