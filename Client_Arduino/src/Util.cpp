@@ -4,9 +4,7 @@
 #include <LcdHelper.h>
 #include <Arduino_Secrets.h>
 
-String getUuid(String defaultString = "") {
-    if (defaultString != "") return defaultString;
-    
+String getUuid() {    
     String uuid = readFromEEPROM(UUID_OFFSET);
     if (uuid == "") {
         uuid = generateUUID();

@@ -44,6 +44,7 @@ StaticJsonDocument<JSON_BUFFER_SIZE> Axios::post(const char* endpoint, const Str
         client.println("Content-Type: application/json");
         client.print("Content-Length: ");
         client.println(payload.length());
+        client.println("Connection: close");
         client.println();
         client.print(payload);
 

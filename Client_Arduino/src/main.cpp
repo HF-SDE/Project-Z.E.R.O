@@ -8,12 +8,6 @@
 #include <EEPROMHelper.h>
 #include <Util.h>
 #include <Arduino_Secrets.h>
-#include <avr/wdt.h>
-
-#define DHTPIN A0    
-#define DHTTYPE DHT11
-
-#define debug Serial
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -35,7 +29,6 @@ StaticJsonDocument<JSON_BUFFER_SIZE> deviceSettings;
 Axios* axios = nullptr;
 
 WiFiClient client;
-const char* websocketUrl = BACKEND_IP "/api/device";
 
 void setup() {
     debug.begin(115200);
@@ -62,7 +55,6 @@ void setup() {
 
         clearEEPROM();
 
-        wdt_enable(WDTO_15MS);
         while (1) {}
         return;
     }
@@ -142,14 +134,7 @@ void sendPostRequest() {
     String jsonPayload;
     serializeJson(dataArrayJson, jsonPayload);
 
-    unsigned long startTime = millis();
     StaticJsonDocument<JSON_BUFFER_SIZE> response = axios->post("/api/data", jsonPayload);
-    unsigned long endTime = millis();
-
-    unsigned long duration = endTime - startTime;
-    Serial.print("Function execution time: ");
-    Serial.print(duration);
-    Serial.println(" ms");
 
     const char* status = response["status"];
     const char* message = response["message"];
