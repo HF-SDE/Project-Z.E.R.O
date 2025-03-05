@@ -1,4 +1,4 @@
-name: IOT
+name: iotbigdata
 
 services:
   frontend:
@@ -6,7 +6,7 @@ services:
     build:
       context: ../frontend/
       dockerfile: Dockerfile
-      target: dev
+      target: base
     volumes:
       - ../frontend/:/usr/src/app
       - /usr/src/app/node_modules
@@ -19,8 +19,7 @@ services:
       - ../config/environment-variables/.env.frontend.dev
     networks:
       - internal
-      - public
-  
+
   backend:
     container_name: backend
     build:
@@ -82,6 +81,9 @@ networks:
 
 volumes:
   postgres_data: {}
+  mqtt-config: {}
+  mqtt-data: {}
+  mqtt-log: {}
 
 configs:
   nginx_config:
