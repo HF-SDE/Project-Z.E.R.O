@@ -1,61 +1,50 @@
 "use client";
 
 import * as React from "react";
-import {
-  AudioWaveform,
-  Bot,
-  Command,
-  GalleryVerticalEnd,
-  Settings2,
-  SquareTerminal,
-  Bell, // Alerts icon
-  BarChart, // Icon for Statistics
-} from "lucide-react";
 
-import { NavMain } from "@components/nav-main";
-import { NavUser } from "@components/nav-user";
-import { TeamSwitcher } from "@components/team-switcher";
+import { NavProjects } from "@/components/nav-projects";
+import { NavUser } from "@/components/nav-user";
+// import { TeamSwitcher } from "@/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@components/ui/sidebar";
+} from "@/components/ui/sidebar";
 
-// This is sample data.
+import {
+  ChartArea,
+  ChefHat,
+  GalleryVerticalEnd,
+  House,
+  Users,
+} from "lucide-react";
+
 const data = {
-  user: {
-    name: "Admin",
-    email: "Admin@IOT.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
+  teams: [{ name: "Acme Inc", logo: GalleryVerticalEnd, plan: "Enterprise" }],
+  pages: [
     {
-      title: "Home",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
+      name: "Home",
+      url: "/dashboard",
+      icon: House,
     },
     {
-      title: "Devices",
-      url: "/dashboard/device",
-      icon: Bot,
+      name: "Users",
+      url: "/dashboard/users",
+      icon: Users,
+      neededPermissions: ["administrator:users:view"],
     },
     {
-      title: "Statistics",
-      url: "#",
-      icon: BarChart,
+      name: "Menu",
+      url: "/dashboard/menu",
+      icon: ChefHat,
     },
     {
-      title: "Locations",
-      url: "#",
-      icon: Settings2,
-    },
-    {
-      title: "Alerts", // Alerts as a simple link
-      url: "#",
-      icon: Bell,
+      name: "Stats",
+      url: "/dashboard/stats",
+      icon: ChartArea,
+      neededPermissions: ["administrator:stats:view"],
     },
   ],
 };
@@ -63,14 +52,12 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        <TeamSwitcher />
-      </SidebarHeader>
+      <SidebarHeader>{/* <TeamSwitcher teams={data.teams} /> */}</SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavProjects pages={data.pages} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

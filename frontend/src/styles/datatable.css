@@ -1,0 +1,5 @@
+.highlighted {
+  border-width: 2px;
+
+  @apply border-info;
+}
