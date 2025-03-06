@@ -2,7 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -14,10 +14,9 @@ jobs:
           sudo usermod -aG docker $USER
           sudo systemctl restart docker
 
-
       - name: Check Docker version
         run: docker --version
-        
+
       # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
@@ -49,7 +48,13 @@ jobs:
           echo "SERVER_API_URL=${{ secrets.SERVER_API_URL }}" >> ./config/environment-variables/.env.frontend.prod
           echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> ./config/environment-variables/.env.frontend.prod
 
-      # Step 5: Run Docker Compose
+      # Step 5: Generate .env.cloudflare file
+      - name: Generate .env.cloudflare file
+        run: |
+          echo "# CLOUDFLARE" > ./config/environment-variables/.env.cloudflare.prod
+          echo "TUNNEL_TOKEN=${{ secrets.TUNNEL_TOKEN }}" >> ./config/environment-variables/.env.cloudflare.prod
+
+      # Step 6: Run Docker Compose
       - name: Run Docker Compose
         run: |
           sudo docker compose -f ./docker/docker-compose.prod.yml up --build --force-recreate -d
