@@ -12,6 +12,7 @@ import deviceRoutes from '@routes/device.routes';
 import locationRoutes from '@routes/location.routes';
 import manageRoutes from '@routes/manage.routes';
 import profileRoutes from '@routes/profile.routes';
+import stats from '@routes/stats.routes';
 import timeSeriesRoutes from '@routes/timeSeries.routes';
 import tsAlertsRoutes from '@routes/tsAlerts.routes';
 
@@ -42,6 +43,7 @@ app.use('/location', locationRoutes);
 app.use('/alert', alertRoutes);
 app.use('/data', timeSeriesRoutes);
 app.use('/tsalert', tsAlertsRoutes);
+app.use('/stats', stats);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
