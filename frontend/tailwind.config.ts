@@ -1,20 +1,68 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
-  darkMode: "class",
-  content: ["./src/**/*.tsx"],
+  darkMode: ["class"],
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
   theme: {
     extend: {
-      backgroundImage: {
-        "light-login": `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2000 1500'%3E%3Cdefs%3E%3Crect stroke='%23F3F4F6' stroke-width='.5' width='1' height='1' id='s'/%3E%3Cpattern id='a' width='3' height='3' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cuse fill='%23f1f2f4' href='%23s' y='2'/%3E%3Cuse fill='%23f1f2f4' href='%23s' x='1' y='2'/%3E%3Cuse fill='%23eeeff1' href='%23s' x='2' y='2'/%3E%3Cuse fill='%23eeeff1' href='%23s'/%3E%3Cuse fill='%23ecedef' href='%23s' x='2'/%3E%3Cuse fill='%23ecedef' href='%23s' x='1' y='1'/%3E%3C/pattern%3E%3Cpattern id='b' width='7' height='11' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%23e9eaec'%3E%3Cuse href='%23s'/%3E%3Cuse href='%23s' y='5' /%3E%3Cuse href='%23s' x='1' y='10'/%3E%3Cuse href='%23s' x='2' y='1'/%3E%3Cuse href='%23s' x='2' y='4'/%3E%3Cuse href='%23s' x='3' y='8'/%3E%3Cuse href='%23s' x='4' y='3'/%3E%3Cuse href='%23s' x='4' y='7'/%3E%3Cuse href='%23s' x='5' y='2'/%3E%3Cuse href='%23s' x='5' y='6'/%3E%3Cuse href='%23s' x='6' y='9'/%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='h' width='5' height='13' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%23e9eaec'%3E%3Cuse href='%23s' y='5'/%3E%3Cuse href='%23s' y='8'/%3E%3Cuse href='%23s' x='1' y='1'/%3E%3Cuse href='%23s' x='1' y='9'/%3E%3Cuse href='%23s' x='1' y='12'/%3E%3Cuse href='%23s' x='2'/%3E%3Cuse href='%23s' x='2' y='4'/%3E%3Cuse href='%23s' x='3' y='2'/%3E%3Cuse href='%23s' x='3' y='6'/%3E%3Cuse href='%23s' x='3' y='11'/%3E%3Cuse href='%23s' x='4' y='3'/%3E%3Cuse href='%23s' x='4' y='7'/%3E%3Cuse href='%23s' x='4' y='10'/%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='c' width='17' height='13' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%23e7e7e9'%3E%3Cuse href='%23s' y='11'/%3E%3Cuse href='%23s' x='2' y='9'/%3E%3Cuse href='%23s' x='5' y='12'/%3E%3Cuse href='%23s' x='9' y='4'/%3E%3Cuse href='%23s' x='12' y='1'/%3E%3Cuse href='%23s' x='16' y='6'/%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='d' width='19' height='17' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%23F3F4F6'%3E%3Cuse href='%23s' y='9'/%3E%3Cuse href='%23s' x='16' y='5'/%3E%3Cuse href='%23s' x='14' y='2'/%3E%3Cuse href='%23s' x='11' y='11'/%3E%3Cuse href='%23s' x='6' y='14'/%3E%3C/g%3E%3Cg fill='%23e4e5e7'%3E%3Cuse href='%23s' x='3' y='13'/%3E%3Cuse href='%23s' x='9' y='7'/%3E%3Cuse href='%23s' x='13' y='10'/%3E%3Cuse href='%23s' x='15' y='4'/%3E%3Cuse href='%23s' x='18' y='1'/%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='e' width='47' height='53' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%23DE222A'%3E%3Cuse href='%23s' x='2' y='5'/%3E%3Cuse href='%23s' x='16' y='38'/%3E%3Cuse href='%23s' x='46' y='42'/%3E%3Cuse href='%23s' x='29' y='20'/%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='f' width='59' height='71' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%23DE222A'%3E%3Cuse href='%23s' x='33' y='13'/%3E%3Cuse href='%23s' x='27' y='54'/%3E%3Cuse href='%23s' x='55' y='55'/%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='g' width='139' height='97' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%23DE222A'%3E%3Cuse href='%23s' x='11' y='8'/%3E%3Cuse href='%23s' x='51' y='13'/%3E%3Cuse href='%23s' x='17' y='73'/%3E%3Cuse href='%23s' x='99' y='57'/%3E%3C/g%3E%3C/pattern%3E%3C/defs%3E%3Crect fill='url(%23a)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23b)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23h)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23c)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23d)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23e)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23f)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23g)' width='100%25' height='100%25'/%3E%3C/svg%3E")`,
-        "dark-login": `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2000 1500'%3E%3Cdefs%3E%3Crect stroke='%230c0b09' stroke-width='.5' width='1' height='1' id='s' /%3E%3Cpattern id='a' width='3' height='3' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cuse fill='%230e0d0b' href='%23s' y='2' /%3E%3Cuse fill='%230e0d0b' href='%23s' x='1' y='2' /%3E%3Cuse fill='%2311100e' href='%23s' x='2' y='2' /%3E%3Cuse fill='%2311100e' href='%23s' /%3E%3Cuse fill='%23131210' href='%23s' x='2' /%3E%3Cuse fill='%23131210' href='%23s' x='1' y='1' /%3E%3C/pattern%3E%3Cpattern id='b' width='7' height='11' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%23161513'%3E%3Cuse href='%23s' /%3E%3Cuse href='%23s' y='5' /%3E%3Cuse href='%23s' x='1' y='10' /%3E%3Cuse href='%23s' x='2' y='1' /%3E%3Cuse href='%23s' x='2' y='4' /%3E%3Cuse href='%23s' x='3' y='8' /%3E%3Cuse href='%23s' x='4' y='3' /%3E%3Cuse href='%23s' x='4' y='7' /%3E%3Cuse href='%23s' x='5' y='2' /%3E%3Cuse href='%23s' x='5' y='6' /%3E%3Cuse href='%23s' x='6' y='9' /%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='h' width='5' height='13' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%23161513'%3E%3Cuse href='%23s' y='5' /%3E%3Cuse href='%23s' y='8' /%3E%3Cuse href='%23s' x='1' y='1' /%3E%3Cuse href='%23s' x='1' y='9' /%3E%3Cuse href='%23s' x='1' y='12' /%3E%3Cuse href='%23s' x='2' /%3E%3Cuse href='%23s' x='2' y='4' /%3E%3Cuse href='%23s' x='3' y='2' /%3E%3Cuse href='%23s' x='3' y='6' /%3E%3Cuse href='%23s' x='3' y='11' /%3E%3Cuse href='%23s' x='4' y='3' /%3E%3Cuse href='%23s' x='4' y='7' /%3E%3Cuse href='%23s' x='4' y='10' /%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='c' width='17' height='13' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%23181816'%3E%3Cuse href='%23s' y='11' /%3E%3Cuse href='%23s' x='2' y='9' /%3E%3Cuse href='%23s' x='5' y='12' /%3E%3Cuse href='%23s' x='9' y='4' /%3E%3Cuse href='%23s' x='12' y='1' /%3E%3Cuse href='%23s' x='16' y='6' /%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='d' width='19' height='17' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%230c0b09'%3E%3Cuse href='%23s' y='9' /%3E%3Cuse href='%23s' x='16' y='5' /%3E%3Cuse href='%23s' x='14' y='2' /%3E%3Cuse href='%23s' x='11' y='11' /%3E%3Cuse href='%23s' x='6' y='14' /%3E%3C/g%3E%3Cg fill='%231b1a18'%3E%3Cuse href='%23s' x='3' y='13' /%3E%3Cuse href='%23s' x='9' y='7' /%3E%3Cuse href='%23s' x='13' y='10' /%3E%3Cuse href='%23s' x='15' y='4' /%3E%3Cuse href='%23s' x='18' y='1' /%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='e' width='47' height='53' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%23FF4E45'%3E%3Cuse href='%23s' x='2' y='5' /%3E%3Cuse href='%23s' x='16' y='38' /%3E%3Cuse href='%23s' x='46' y='42' /%3E%3Cuse href='%23s' x='29' y='20' /%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='f' width='59' height='71' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%23FF4E45'%3E%3Cuse href='%23s' x='33' y='13' /%3E%3Cuse href='%23s' x='27' y='54' /%3E%3Cuse href='%23s' x='55' y='55' /%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='g' width='139' height='97' patternUnits='userSpaceOnUse' patternTransform='scale(21) translate(-952.38 -714.29)'%3E%3Cg fill='%23FF4E45'%3E%3Cuse href='%23s' x='11' y='8' /%3E%3Cuse href='%23s' x='51' y='13' /%3E%3Cuse href='%23s' x='17' y='73' /%3E%3Cuse href='%23s' x='99' y='57' /%3E%3C/g%3E%3C/pattern%3E%3C/defs%3E%3Crect fill='url(%23a)' width='100%25' height='100%25' /%3E%3Crect fill='url(%23b)' width='100%25' height='100%25' /%3E%3Crect fill='url(%23h)' width='100%25' height='100%25' /%3E%3Crect fill='url(%23c)' width='100%25' height='100%25' /%3E%3Crect fill='url(%23d)' width='100%25' height='100%25' /%3E%3Crect fill='url(%23e)' width='100%25' height='100%25' /%3E%3Crect fill='url(%23f)' width='100%25' height='100%25' /%3E%3Crect fill='url(%23g)' width='100%25' height='100%25' /%3E%3C/svg%3E")`,
-      },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        hoverBg: "var(--hover-bg)",
-        hoverFg: "var(--hover-fg)",
-        mutedForeground: "var(--muted-foreground)",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
+        },
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        chart: {
+          "1": "hsl(var(--chart-1))",
+          "2": "hsl(var(--chart-2))",
+          "3": "hsl(var(--chart-3))",
+          "4": "hsl(var(--chart-4))",
+          "5": "hsl(var(--chart-5))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -33,5 +81,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;

@@ -1,14 +1,17 @@
-"use client"; // Add this directive at the top of the file
+export const metadata = {
+  title: "Dashboard",
+  description: "Admin dashboard",
+};
 
-export default function Home() {
+export default async function Dashboard() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-8 sm:px-20 md:px-40 font-[family-name:var(--font-geist-sans)]">
-      {/* Main content section */}
-      <main className="flex flex-col items-center justify-center flex-grow text-center w-full max-w-screen-lg">
-        <h1 className="text-3xl sm:text-4xl font-semibold">
-          Welcome to Your Dashboard
-        </h1>
-      </main>
+    <div className="flex h-screen flex-col items-center mt-24">
+      <h1 className="mb-4 text-center text-4xl font-bold">
+        Welcome to the Admin Dashboard
+      </h1>
+      <p className="text-xl text-gray-600">
+        Manage your data and settings with ease
+      </p>
     </div>
   );
 }

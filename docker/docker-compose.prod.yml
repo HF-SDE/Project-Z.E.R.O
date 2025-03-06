@@ -1,12 +1,37 @@
-name: iot
+name: iotbigdata
 
 services:
+  frontend:
+    container_name: frontend
+    build:
+      context: ../frontend/
+      dockerfile: Dockerfile.production
+      target: base
+    volumes:
+      - ../frontend/:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - "backend"
+    command: npm run dev
+    env_file:
+      - ../config/environment-variables/.env.frontend.prod
+    networks:
+      - internal
+
   backend:
     container_name: backend
     build:
       context: ../backend/
       dockerfile: Dockerfile
       target: base
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     expose:
       - "3001"
     command: ["npm", "run", "dev"]
@@ -25,8 +50,12 @@ services:
   db:
     container_name: db
     image: timescale/timescaledb:latest-pg17
-    expose:
-      - "5432"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     ports:
       - 5432:5432
     env_file:
@@ -34,7 +63,26 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - public
+      - internal
+
+  mqtt5:
+    container_name: mqtt5
+    build:
+      context: ..
+      dockerfile: docker/mosquitto.Dockerfile
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    ports:
+      - "9001:9001"
+    volumes:
+      - ../config/mosquitto.conf:/mosquitto/config/mosquitto.conf:rw
+      - mqtt-data:/mosquitto/data:rw
+      - mqtt-log:/mosquitto/log:rw
+    networks:
       - internal
 
   reverse-proxy:
@@ -42,29 +90,56 @@ services:
     build:
       context: ..
       dockerfile: docker/nginx.Dockerfile
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     ports:
       - 80:80
+      - 1883:1883
     depends_on:
       - backend
+      - mqtt5
     configs:
       - source: nginx_config
         target: /etc/nginx/nginx.conf
     networks:
-      - public
       - internal
+      - tunnel
+      - public
+
+  tunnel:
+    image: cloudflare/cloudflared
+    container_name: cloudflared-tunnel
+    command: tunnel run
+    env_file:
+      - ../config/environment-variables/.env.cloudflare.prod
+    volumes:
+      - cloudflare-tunnel:/etc/cloudflared
+    networks:
+      - public
+      - tunnel
 
 networks:
   public:
     driver: bridge
+  tunnel:
+    driver: bridge
+    internal: true
   internal:
-    name: internal
+    driver: bridge
     internal: true
 
 volumes:
   postgres_data: {}
+  mqtt-data: {}
+  mqtt-log: {}
+  cloudflare-tunnel: {}
 
 configs:
   nginx_config:
-    file: ../config/nginx.conf.prod
+    file: ../config/nginx.conf
   backend_nodemon:
     file: ../backend/nodemon.json

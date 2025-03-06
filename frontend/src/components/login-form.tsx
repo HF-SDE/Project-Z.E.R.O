@@ -1,99 +1,54 @@
-"use client";
-import { Button } from "@components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@components/ui/card";
-import { Input } from "@components/ui/input";
-import { Label } from "@components/ui/label";
-import { useUser } from "@hooks/useUser";
-import { cn } from "@lib/utils";
-import { loginUser } from "core/redux/actions/user.actions";
-import { usePathname, useRouter } from "next/navigation";
-import {
-  ComponentPropsWithoutRef,
-  FormEvent,
-  useEffect,
-  useState,
-} from "react";
-import { useDispatch } from "react-redux";
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+import { cn } from "@/lib/utils";
+
+interface LoginFormProps extends React.ComponentPropsWithoutRef<"div"> {
+  handleSubmit: React.FormEventHandler<HTMLFormElement>;
+}
 
 export function LoginForm({
+  handleSubmit,
   className,
   ...props
-}: ComponentPropsWithoutRef<"div">) {
-  const [state, setState] = useState({
-    username: "",
-    password: "",
-  });
-
-  const user = useUser();
-  const dispatch = useDispatch();
-  const router = useRouter();
-  const pathname = usePathname()
-
-  // Check if the user is authenticated and redirect them to the dashboard
-  useEffect(() => {
-    if (user.AUTHENTICATED) {
-      if (pathname.at(0) === "/") {
-        router.push(pathname.toString());
-      }
-      router.push("/dashboard");
-    } else {
-      console.warn("User is not authenticated");
-    }
-  }, [user.AUTHENTICATED]);
-
-  /**
-   * Handle the login form submission
-   * @param {FormEvent<HTMLFormElement>} event
-   */
-  async function onLogin(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    dispatch(loginUser(state.username, state.password));
-  }
-
+}: LoginFormProps) {
   return (
-    <Card className={cn("flex flex-col gap-6", className)} {...props}>
-      <CardHeader>
-        <CardTitle className="text-2xl">Login</CardTitle>
-        <CardDescription>
-          Enter your email below to login to your account
-        </CardDescription>
-        {user.ERROR !== "" ? <h3 className="text-red-500 text-center">{user.ERROR}</h3> : <h3 className="h-6"></h3>}
-      </CardHeader>
-      <form className="flex flex-col gap-6 p-6 pt-0" onSubmit={onLogin}>
-        <fieldset className="grid gap-2">
-          <Label htmlFor="username">username</Label>
-          <Input
-            id="username"
-            type="text"
-            required
-            onChange={(e) => setState({ ...state, username: e.target.value })}
-          />
-        </fieldset>
-        <fieldset className="grid gap-2">
-          <div className="flex items-center">
-            <Label htmlFor="password">Password</Label>
-            <p className="ml-auto inline-block text-sm underline-offset-4 cursor-pointer hover:underline">
-              Forgot your password?
-            </p>
-          </div>
-          <Input
-            id="password"
-            type="password"
-            min={8}
-            required
-            onChange={(e) => setState({ ...state, password: e.target.value })}
-          />
-        </fieldset>
-        <Button type="submit" className="w-full">
-          Login
-        </Button>
-      </form>
-    </Card>
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardDescription>
+            Enter username and password to login
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="username" name="username" type="text" required />
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Password</Label>
+                </div>
+                <Input id="password" name="password" type="password" required />
+              </div>
+              <Button type="submit" className="w-full">
+                Login
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

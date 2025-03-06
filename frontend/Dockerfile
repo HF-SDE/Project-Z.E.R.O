@@ -1,10 +1,12 @@
-FROM node:22.9-alpine AS builder
-RUN apk add --no-cache libc6-compat
+# syntax=docker/dockerfile:1.4
+FROM node:22.9-alpine AS base
+
+# Set working directory
 WORKDIR /usr/src/app
-COPY package.json package-lock.json /usr/src/app/
+
+# Copy package.json and install dependencies
+COPY package.json ./
 RUN npm install
 
-COPY . /usr/src/app/
-
-FROM builder AS dev
-WORKDIR /usr/src/app
+# Copy other application files
+COPY . .
