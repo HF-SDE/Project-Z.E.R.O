@@ -17,6 +17,10 @@ jobs:
       - name: Check Docker version
         run: docker --version
 
+      - name: Fix permissions
+        run: sudo chmod -R 777 /home/magn9814/_work/HF4-BigData/HF4-BigData
+
+
       # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
