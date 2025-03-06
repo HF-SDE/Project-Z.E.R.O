@@ -6,6 +6,10 @@ from helpers.utils import get_device_id
 import os
 import time
 
+import paho.mqtt.client as mqtt
+import json
+
+
 token = ""
 server_device_info = None
 
@@ -100,19 +104,58 @@ def send_data_to_api():
     """
     Sends the data from the sensor to the API.
     """
-    try:
-        # Make the headers for the request
-        headers = {
-            "device-id": get_device_id(),
-            "x-api-key": token
-        }
 
-        # Calling the API with the sensor data
-        requests.post(get_setting("api_base_url") + "/data", json=get_api_format(), headers=headers, timeout=5)
+    try:
+        mqtt_username = get_setting("mqtt_username")
+        mqtt_password = get_setting("mqtt_password")
+        mqtt_broker = get_setting("mqtt_base_url")
+        mqtt_port = int(get_setting("mqtt_port"))
+
+        sensor_data = get_api_format()
+
+        print("Sending data to API")
+        print(mqtt_username)
+        print(mqtt_password)
+        print(mqtt_broker)
+        print(mqtt_port)
+
+
+
+        if mqtt_username and mqtt_password and mqtt_broker and mqtt_port:
+            # Use MQTT to send data
+            print("MQTT 1")
+            client = mqtt.Client()
+            print("MQTT 2")            
+            client.username_pw_set(mqtt_username, mqtt_password)
+            # Ensure mqtt_port is an integer
+            print("MQTT 3")
+            print(client)
+            client.connect(mqtt_broker, port=mqtt_port)
+            print("MQTT 3.5")
+
+            topic = get_setting("mqtt_topic")  # Change this topic as needed
+            payload = json.dumps(sensor_data)
+            # Publish the data to the topic
+            print("MQTT 4")
+
+            client.publish(topic, payload)
+            # Optionally, you can call loop or loop_start if you need to handle callbacks
+            print("MQTT 5")
+
+            client.disconnect()
+       
+        else:
+            # Fallback: use the HTTP API
+            headers = {
+                "device-id": get_device_id(),
+                "x-api-key": token
+            }
+            api_url = get_setting("api_base_url") + "/data"
+            requests.post(api_url, json=sensor_data, headers=headers, timeout=5)        
 
     except Exception as e:
         print(e)
-        raise Exception("Error sending sensor data to API")
+        raise Exception("Error sending sensor data")
         # refresh_display(color=[255, 150, 0], is_error=True)
 
 
