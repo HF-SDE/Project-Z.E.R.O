@@ -7,7 +7,7 @@ install_packages()
 
 from helpers.config import initialize_config, get_setting
 from helpers.sensors import init_sensors, read_sensors
-from helpers.api import init_token, control_api_access, control_device, send_data_to_api, get_device_info
+from helpers.api import init_token, control_api_access, control_device, send_data_to_api, get_device_info, init_mqtt
 from helpers.pages import Pages
 from helpers.display import refresh_display
 from helpers.button import button_control
@@ -55,6 +55,7 @@ def main():
 
             # Initialize sensors & API
             init_sensors()
+            init_mqtt()
             init_token()
 
             # Control that the device is in the DB
