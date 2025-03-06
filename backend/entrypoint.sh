@@ -5,7 +5,7 @@ set +x
 npm run build:tsc
 
 # Automatic deploy to prod database
-npx prisma db push
+npx prisma migrate deploy
 
 # Go forward
 exec "$@"
