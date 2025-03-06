@@ -27,6 +27,12 @@ def initialize_config():
     settings["wifi_ssid"] = os.getenv("WIFI_SSID", None)
     settings["wifi_password"] = os.getenv("WIFI_PASSWORD", None)
 
+    settings["mqtt_base_url"] = os.getenv("MQTT_BASE_URL")
+    settings["mqtt_port"] = os.getenv("MQTT_PORT", 1883)
+    settings["mqtt_username"] = os.getenv("MQTT_USERNAME")
+    settings["mqtt_password"] = os.getenv("MQTT_PASSWORD")
+    settings["mqtt_topic"] = os.getenv("MQTT_TOPIC", "sensor/data")
+
 
 
     # Sensors

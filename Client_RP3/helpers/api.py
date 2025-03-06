@@ -6,8 +6,14 @@ from helpers.utils import get_device_id
 import os
 import time
 
+import paho.mqtt.client as mqtt
+import json
+
+
 token = ""
 server_device_info = None
+mqtt_client = None
+mqtt_connected = False
 
 
 def set_server_device_info(new_server_device_info):
@@ -96,23 +102,75 @@ def init_token():
     print(f"Token has ben initialized from {token_loaded_from}")
 
 
+
+def on_connect(client, userdata, flags, rc):
+    global mqtt_connected
+    if rc == 0:
+        print("Connected to MQTT broker.")
+        mqtt_connected = True
+    else:
+        print(f"Failed to connect, return code {rc}")
+
+
+def on_disconnect(client, userdata, rc):
+    global mqtt_connecteds
+    print("Disconnected from MQTT broker. Attempting to reconnect...")
+    mqtt_connected = False
+    while not mqtt_connected:
+        try:
+            client.reconnect()
+            time.sleep(2)
+        except Exception as e:
+            print(f"Reconnection failed: {e}")
+            time.sleep(5)  # Wait before retrying
+
+
+def init_mqtt():
+    global mqtt_client
+    mqtt_username = get_setting("mqtt_username")
+    mqtt_password = get_setting("mqtt_password")
+    mqtt_broker = get_setting("mqtt_base_url")
+    mqtt_port = int(get_setting("mqtt_port"))
+
+    mqtt_client = mqtt.Client()
+    mqtt_client.username_pw_set(mqtt_username, mqtt_password)
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_disconnect = on_disconnect
+
+    try:
+        mqtt_client.connect(mqtt_broker, port=mqtt_port)
+        mqtt_client.loop_start()  # Keep the connection alive in a separate thread
+        print("MQTT connection initialized.")
+    except Exception as e:
+        print(f"Failed to connect to MQTT broker: {e}")
+
 def send_data_to_api():
     """
     Sends the data from the sensor to the API.
     """
-    try:
-        # Make the headers for the request
-        headers = {
-            "device-id": get_device_id(),
-            "x-api-key": token
-        }
 
-        # Calling the API with the sensor data
-        requests.post(get_setting("api_base_url") + "/data", json=get_api_format(), headers=headers, timeout=5)
+    try:
+        sensor_data = get_api_format()
+        topic = get_setting("mqtt_topic")
+        payload = json.dumps(sensor_data)
+
+
+
+        if  mqtt_client and mqtt_connected:
+            mqtt_client.publish(topic, payload)
+       
+        else:
+            # Fallback: use the HTTP API
+            headers = {
+                "device-id": get_device_id(),
+                "x-api-key": token
+            }
+            api_url = get_setting("api_base_url") + "/data"
+            requests.post(api_url, json=sensor_data, headers=headers, timeout=5)        
 
     except Exception as e:
         print(e)
-        raise Exception("Error sending sensor data to API")
+        raise Exception("Error sending sensor data")
         # refresh_display(color=[255, 150, 0], is_error=True)
 
 
