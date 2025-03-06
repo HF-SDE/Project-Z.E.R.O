@@ -12,6 +12,8 @@ import json
 
 token = ""
 server_device_info = None
+mqtt_client = None
+mqtt_connected = False
 
 
 def set_server_device_info(new_server_device_info):
@@ -100,49 +102,62 @@ def init_token():
     print(f"Token has ben initialized from {token_loaded_from}")
 
 
+
+def on_connect(client, userdata, flags, rc):
+    global mqtt_connected
+    if rc == 0:
+        print("Connected to MQTT broker.")
+        mqtt_connected = True
+    else:
+        print(f"Failed to connect, return code {rc}")
+
+
+def on_disconnect(client, userdata, rc):
+    global mqtt_connecteds
+    print("Disconnected from MQTT broker. Attempting to reconnect...")
+    mqtt_connected = False
+    while not mqtt_connected:
+        try:
+            client.reconnect()
+            time.sleep(2)
+        except Exception as e:
+            print(f"Reconnection failed: {e}")
+            time.sleep(5)  # Wait before retrying
+
+
+def init_mqtt():
+    global mqtt_client
+    mqtt_username = get_setting("mqtt_username")
+    mqtt_password = get_setting("mqtt_password")
+    mqtt_broker = get_setting("mqtt_base_url")
+    mqtt_port = int(get_setting("mqtt_port"))
+
+    mqtt_client = mqtt.Client()
+    mqtt_client.username_pw_set(mqtt_username, mqtt_password)
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_disconnect = on_disconnect
+
+    try:
+        mqtt_client.connect(mqtt_broker, port=mqtt_port)
+        mqtt_client.loop_start()  # Keep the connection alive in a separate thread
+        print("MQTT connection initialized.")
+    except Exception as e:
+        print(f"Failed to connect to MQTT broker: {e}")
+
 def send_data_to_api():
     """
     Sends the data from the sensor to the API.
     """
 
     try:
-        mqtt_username = get_setting("mqtt_username")
-        mqtt_password = get_setting("mqtt_password")
-        mqtt_broker = get_setting("mqtt_base_url")
-        mqtt_port = int(get_setting("mqtt_port"))
-
         sensor_data = get_api_format()
-
-        print("Sending data to API")
-        print(mqtt_username)
-        print(mqtt_password)
-        print(mqtt_broker)
-        print(mqtt_port)
+        topic = get_setting("mqtt_topic")
+        payload = json.dumps(sensor_data)
 
 
 
-        if mqtt_username and mqtt_password and mqtt_broker and mqtt_port:
-            # Use MQTT to send data
-            print("MQTT 1")
-            client = mqtt.Client()
-            print("MQTT 2")            
-            client.username_pw_set(mqtt_username, mqtt_password)
-            # Ensure mqtt_port is an integer
-            print("MQTT 3")
-            print(client)
-            client.connect(mqtt_broker, port=mqtt_port)
-            print("MQTT 3.5")
-
-            topic = get_setting("mqtt_topic")  # Change this topic as needed
-            payload = json.dumps(sensor_data)
-            # Publish the data to the topic
-            print("MQTT 4")
-
-            client.publish(topic, payload)
-            # Optionally, you can call loop or loop_start if you need to handle callbacks
-            print("MQTT 5")
-
-            client.disconnect()
+        if  mqtt_client and mqtt_connected:
+            mqtt_client.publish(topic, payload)
        
         else:
             # Fallback: use the HTTP API
