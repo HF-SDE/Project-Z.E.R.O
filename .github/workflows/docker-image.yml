@@ -18,8 +18,8 @@ jobs:
         run: docker --version
 
       # Step 1: Checkout the code
-      - name: Checkout code
-        uses: actions/checkout@v3
+      #- name: Checkout code
+      #  uses: actions/checkout@v3
 
       # Step 2: Generate .env.backend file
       - name: Generate .env.backend file
