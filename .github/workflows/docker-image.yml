@@ -54,7 +54,23 @@ jobs:
           echo "# CLOUDFLARE" > ./config/environment-variables/.env.cloudflare.prod
           echo "TUNNEL_TOKEN=${{ secrets.TUNNEL_TOKEN }}" >> ./config/environment-variables/.env.cloudflare.prod
 
-      # Step 6: Run Docker Compose
+      # Step 6: Generate .env.grafana file
+      - name: Generate .env.grafana file
+        run: |
+          echo "# GRAFANA" > ./config/environment-variables/.env.grafana.prod
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> ./config/environment-variables/.env.grafana.prod
+          echo "GF_SECURITY_ADMIN_USER=${{ secrets.GF_SECURITY_ADMIN_USER }}" >> ./config/environment-variables/.env.grafana.prod
+          echo "GF_SECURITY_ADMIN_PASSWORD=${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}" >> ./config/environment-variables/.env.grafana.prod
+          echo "GF_SECURITY_SECRET_KEY=${{ secrets.GF_SECURITY_SECRET_KEY }}" >> ./config/environment-variables/.env.grafana.prod
+          echo "GF_SECURITY_COOKIE_SECURE=${{ secrets.GF_SECURITY_COOKIE_SECURE }}" >> ./config/environment-variables/.env.grafana.prod
+          echo "GF_ENCRYPTION_KEY_CACHING.ENCRYPTION=${{ secrets.GF_ENCRYPTION_KEY_CACHING_ENCRYPTION }}" >> ./config/environment-variables/.env.grafana.prod
+          echo "GF_SERVER_ROOT_URL=${{ secrets.GF_SERVER_ROOT_URL }}" >> ./config/environment-variables/.env.grafana.prod
+          echo "GF_SERVER_SERVE_FROM_SUB_PATH=${{ secrets.GF_SERVER_SERVE_FROM_SUB_PATH }}" >> ./config/environment-variables/.env.grafana.prod
+          echo "DATASOURCES_POSTGRES_DB=${{ secrets.DATASOURCES_POSTGRES_DB }}" >> ./config/environment-variables/.env.grafana.prod
+          echo "DATASOURCES_POSTGRES_USER=${{ secrets.DATASOURCES_POSTGRES_USER }}" >> ./config/environment-variables/.env.grafana.prod
+          echo "DATASOURCES_POSTGRES_PASSWORD=${{ secrets.DATASOURCES_POSTGRES_PASSWORD }}" >> ./config/environment-variables/.env.grafana.prod
+
+      # Step 7: Run Docker Compose
       - name: Run Docker Compose
         run: |
           sudo docker compose -f ./docker/docker-compose.prod.yml up --build --force-recreate -d
