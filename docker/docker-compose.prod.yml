@@ -156,6 +156,7 @@ volumes:
   mqtt-data: {}
   mqtt-log: {}
   cloudflare-tunnel: {}
+  grafana-data: {}
 
 configs:
   nginx_config:
