@@ -98,7 +98,7 @@ services:
     ports:
       - "9001:9001"
     env_file:
-      - ../config/environment-variables/.env.mqtt.dev
+      - ../config/environment-variables/.env.mqtt.prod
     volumes:
       - ../config/mosquitto.conf:/mosquitto/config/mosquitto.conf:rw
       - mqtt-data:/mosquitto/data:rw
