@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import mqtt, { MqttClient } from 'mqtt';
 import passport from 'passport';
 
+import { MQTTData } from '@api-types/mqttclient.types';
 import app from '@app';
 import config from '@config';
 import prisma from '@prisma-instance';
@@ -19,7 +20,6 @@ import timeSeriesRoutes from '@routes/timeSeries.routes';
 import tsAlertsRoutes from '@routes/tsAlerts.routes';
 
 import './passport';
-import { MQTTData } from '@api-types/mqttclient.types';
 
 const limiter = rateLimit({
   windowMs: config.RATE_LIMIT_RESET_SEC * 1000, // 60 minutes
@@ -54,45 +54,47 @@ app.get('/health', (req, res) => {
 
 app.listen(config.PORT, () => {
   console.info(`Server is running on ${config.PORT}`);
-});
 
-// MQTT Connection
-const client: MqttClient = mqtt.connect(config.MQTT_BROKER, {
-  username: config.MQTT_USERNAME,
-  password: config.MQTT_PASSWORD,
-});
+  console.info('MQTT Broker: ', config.MQTT_BROKER);
 
-client.on('connect', () => {
-  console.info('✅ Connected to MQTT Broker');
-  client.subscribe(config.MQTT_TOPIC, (err) => {
-    if (err) console.error('❌ MQTT Subscription Error:', err);
+  // MQTT Connection
+  const client: MqttClient = mqtt.connect(config.MQTT_BROKER, {
+    username: config.MQTT_USERNAME,
+    password: config.MQTT_PASSWORD,
   });
-});
 
-// Listen for incoming MQTT messages and save them to PostgreSQL
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
-client.on('message', async (_topic: string, message: Buffer) => {
-  try {
-    const data: MQTTData = JSON.parse(message.toString()) as MQTTData;
-
-    const device = await prisma.device.findUnique({
-      where: { uuid: data.deviceId },
+  client.on('connect', () => {
+    console.info('✅ Connected to MQTT Broker');
+    client.subscribe(config.MQTT_TOPIC, (err) => {
+      if (err) console.error('❌ MQTT Subscription Error:', err);
     });
+  });
 
-    await prisma.timeseries.createMany({
-      data: data.data.map((element) => ({
-        value: element.value,
-        identifier: element.identifier,
-        name: element.name,
-        deviceId: data.deviceId,
-        locationId: device?.locationUuid ?? '',
-      })),
-    });
+  // Listen for incoming MQTT messages and save them to PostgreSQL
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  client.on('message', async (_topic: string, message: Buffer) => {
+    try {
+      const data: MQTTData = JSON.parse(message.toString()) as MQTTData;
 
-    console.log(`✅ Data saved: ${JSON.stringify(data)}`);
+      const device = await prisma.device.findUnique({
+        where: { uuid: data.deviceId },
+      });
 
-    return;
-  } catch (err) {
-    console.error('❌ Database Error:', err);
-  }
+      await prisma.timeseries.createMany({
+        data: data.data.map((element) => ({
+          value: element.value,
+          identifier: element.identifier,
+          name: element.name,
+          deviceId: data.deviceId,
+          locationId: device?.locationUuid ?? '',
+        })),
+      });
+
+      console.log(`✅ Data saved: ${JSON.stringify(data)}`);
+
+      return;
+    } catch (err) {
+      console.error('❌ Database Error:', err);
+    }
+  });
 });
