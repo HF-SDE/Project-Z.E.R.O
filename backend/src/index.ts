@@ -2,10 +2,13 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
+import mqtt, { MqttClient } from 'mqtt';
 import passport from 'passport';
 
+import { MQTTData } from '@api-types/mqttclient.types';
 import app from '@app';
 import config from '@config';
+import prisma from '@prisma-instance';
 import alertRoutes from '@routes/alert.routes';
 import authRoutes from '@routes/auth.routes';
 import deviceRoutes from '@routes/device.routes';
@@ -51,4 +54,47 @@ app.get('/health', (req, res) => {
 
 app.listen(config.PORT, () => {
   console.info(`Server is running on ${config.PORT}`);
+
+  console.info('MQTT Broker: ', config.MQTT_BROKER);
+
+  // MQTT Connection
+  const client: MqttClient = mqtt.connect(config.MQTT_BROKER, {
+    username: config.MQTT_USERNAME,
+    password: config.MQTT_PASSWORD,
+  });
+
+  client.on('connect', () => {
+    console.info('✅ Connected to MQTT Broker');
+    client.subscribe(config.MQTT_TOPIC, (err) => {
+      if (err) console.error('❌ MQTT Subscription Error:', err);
+    });
+  });
+
+  // Listen for incoming MQTT messages and save them to PostgreSQL
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  client.on('message', async (_topic: string, message: Buffer) => {
+    try {
+      const data: MQTTData = JSON.parse(message.toString()) as MQTTData;
+
+      const device = await prisma.device.findUnique({
+        where: { uuid: data.deviceId },
+      });
+
+      await prisma.timeseries.createMany({
+        data: data.data.map((element) => ({
+          value: element.value,
+          identifier: element.identifier,
+          name: element.name,
+          deviceId: data.deviceId,
+          locationId: device?.locationUuid ?? '',
+        })),
+      });
+
+      console.log(`✅ Data saved: ${JSON.stringify(data)}`);
+
+      return;
+    } catch (err) {
+      console.error('❌ Database Error:', err);
+    }
+  });
 });

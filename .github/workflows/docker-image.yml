@@ -30,7 +30,10 @@ jobs:
           echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> ./config/environment-variables/.env.backend.prod
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> ./config/environment-variables/.env.backend.prod
           echo "ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}" >> ./config/environment-variables/.env.backend.prod
-          echo "REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}" >> ./config/environment-variables/.env.backend.prod
+          echo "MQTT_BROKER=${{ secrets.MQTT_BROKER }}" >> ./config/environment-variables/.env.backend.prod
+          echo "MQTT_USERNAME=${{ secrets.MQTT_ADMIN_USERNAME }}" >> ./config/environment-variables/.env.backend.prod
+          echo "MQTT_PASSWORD=${{ secrets.MQTT_ADMIN_PASSWORD }}" >> ./config/environment-variables/.env.backend.prod
+          echo "MQTT_TOPIC=${{ secrets.MQTT_TOPIC }}" >> ./config/environment-variables/.env.backend.prod
 
       # Step 3: Generate .env.db file
       - name: Generate .env.db file
@@ -70,7 +73,13 @@ jobs:
           echo "DATASOURCES_POSTGRES_USER=${{ secrets.DATASOURCES_POSTGRES_USER }}" >> ./config/environment-variables/.env.grafana.prod
           echo "DATASOURCES_POSTGRES_PASSWORD=${{ secrets.DATASOURCES_POSTGRES_PASSWORD }}" >> ./config/environment-variables/.env.grafana.prod
 
-      # Step 7: Run Docker Compose
+      # Step 7: Generate .env.mqtt file
+      - name: Generate .env.mqtt file
+        run: |
+          echo "MQTT_ADMIN_USERNAME=${{ secrets.MQTT_ADMIN_USERNAME }}" >> ./config/environment-variables/.env.mqtt.prod
+          echo "MQTT_ADMIN_PASSWORD=${{ secrets.MQTT_ADMIN_PASSWORD }}" >> ./config/environment-variables/.env.mqtt.prod
+
+      # Step 8: Run Docker Compose
       - name: Run Docker Compose
         run: |
           sudo docker compose -f ./docker/docker-compose.prod.yml up --build --force-recreate -d
