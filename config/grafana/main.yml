@@ -1,7 +1,7 @@
 apiversion: 1
 
 providers:
-  - name: 'Dashboard provider'
+  - name: 'Data'
     org_id: 1
     type: file
     disableDeletion: false
