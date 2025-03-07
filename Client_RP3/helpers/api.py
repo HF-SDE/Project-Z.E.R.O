@@ -152,11 +152,14 @@ def send_data_to_api():
     try:
         sensor_data = get_api_format()
         topic = get_setting("mqtt_topic")
-        payload = json.dumps(sensor_data)
 
 
 
         if  mqtt_client and mqtt_connected:
+            payload = json.dumps({
+                "deviceId": get_device_id(),
+                "data": sensor_data
+            })
             mqtt_client.publish(topic, payload)
        
         else:
