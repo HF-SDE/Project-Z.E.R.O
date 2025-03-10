@@ -3,22 +3,17 @@ name: Docker Image CI
 on:
   push:
     branches: ["main"]
-
-defaults:
-  run:
-    shell: bash -leo pipefail {0} 
     
 jobs:
   build:
     runs-on: self-hosted
 
     steps:
+      - name: Set default env
+        run: export PATH=/usr/bin:$PATH && export DOCKER_HOST=unix:///run/user/1004/docker.sock
+
       - name: Check Docker version
         run: docker --version
-      
-      - name: Check docker
-        run: cat ./../../../../../../../../../home/docker-runner/.bashrc
-
 
       # Step 1: Checkout the code
       - name: Checkout code
