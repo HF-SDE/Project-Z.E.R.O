@@ -24,6 +24,9 @@ cat -A /etc/nginx/certs/ca.pem
 echo "Client Cert2\n"
 openssl x509 -in /etc/nginx/certs/ca.pem -noout -text
 
+echo "Client Cert3\n"
+file /etc/nginx/certs/ca.pem
+
 # Overwrite and unset cert env variables
 CLIENT_CERT="***"
 CLIENT_KEY="***"
