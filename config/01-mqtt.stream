@@ -1,0 +1,26 @@
+stream {
+        upstream mqtt_backend {
+                hash $remote_addr consistent;
+                server mqtt5:1883;
+        }
+
+        server {
+
+                set $my_server_name $SERVER_NAME;
+                listen       8883 ssl;
+                listen       [::]:8883 ssl;
+                server_name  $my_server_name;
+
+                ssl_certificate /etc/nginx/certs/origin.pem;
+                ssl_certificate_key /etc/nginx/certs/origin.key;
+                ssl_client_certificate /etc/nginx/certs/ca.pem;
+                ssl_session_cache shared:SSL:5m;
+                ssl_verify_client on;
+                ssl_session_timeout  10m;
+                ssl_prefer_server_ciphers on;
+
+                proxy_connect_timeout 5s;
+                proxy_timeout 10m; # is default
+                proxy_pass mqtt_backend;
+        }
+}

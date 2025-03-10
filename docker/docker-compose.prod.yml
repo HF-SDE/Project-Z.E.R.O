@@ -123,9 +123,13 @@ services:
     depends_on:
       - backend
       - mqtt5
+    env_file:
+      - ../config/environment-variables/.env.nginx.dev
     configs:
       - source: nginx_config
         target: /etc/nginx/nginx.conf
+      - source: nginx_stream_config
+        target: /etc/nginx/conf.d/01-mqtt.stream
     networks:
       - internal
       - tunnel
@@ -165,3 +169,5 @@ configs:
     file: ../config/nginx.conf
   backend_nodemon:
     file: ../backend/nodemon.json
+  nginx_stream_config:
+    file: ../config/01-mqtt.stream
