@@ -82,6 +82,15 @@ jobs:
         run: |
           echo "MQTT_ADMIN_USERNAME=${{ secrets.MQTT_ADMIN_USERNAME }}" >> ./config/environment-variables/.env.mqtt.prod
           echo "MQTT_ADMIN_PASSWORD=${{ secrets.MQTT_ADMIN_PASSWORD }}" >> ./config/environment-variables/.env.mqtt.prod
+      
+      # Step 7: Generate .env.nginx file
+      - name: Generate .env.nginx file
+        run: |
+          echo "CLIENT_CERT=${{ secrets.CLIENT_CERT }}" >> ./config/environment-variables/.env.nginx.prod
+          echo "CLIENT_KEY=${{ secrets.CLIENT_KEY }}" >> ./config/environment-variables/.env.nginx.prod
+          echo "ORIGIN_CERT=${{ secrets.ORIGIN_CERT }}" >> ./config/environment-variables/.env.nginx.prod
+          echo "ORIGIN_KEY=${{ secrets.ORIGIN_KEY }}" >> ./config/environment-variables/.env.nginx.prod
+          echo "SERVER_NAME=${{ secrets.SERVER_NAME }}" >> ./config/environment-variables/.env.nginx.prod
 
       # Step 8: Run Docker Compose
       - name: Run Docker Compose
