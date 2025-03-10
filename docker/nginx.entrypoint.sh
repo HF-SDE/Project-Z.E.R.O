@@ -8,9 +8,13 @@ echo "$ORIGIN_KEY" | base64 -d > /etc/nginx/certs/origin.key
 
 # Formatting certs to linux
 sed -i 's/\r$//' /etc/nginx/certs/ca.pem
+sed -i 's/ *$//' /etc/nginx/certs/ca.pem
 sed -i 's/\r$//' /etc/nginx/certs/ca.key
+sed -i 's/ *$//' /etc/nginx/certs/ca.key
 sed -i 's/\r$//' /etc/nginx/certs/origin.pem
+sed -i 's/ *$//' /etc/nginx/certs/origin.pem
 sed -i 's/\r$//' /etc/nginx/certs/origin.key
+sed -i 's/ *$//' /etc/nginx/certs/origin.key
 
 echo "Client Cert1\n"
 cat -A /etc/nginx/certs/ca.pem
