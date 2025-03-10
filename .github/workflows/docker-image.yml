@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Set default env
-        run: export PATH=/usr/bin:$PATH && export DOCKER_HOST=unix:///run/user/1004/docker.sock
+        run: export DOCKER_HOST=unix:///run/user/1004/docker.sock
 
       - name: Check Docker version
         run: docker --version
