@@ -17,4 +17,6 @@ unset CLIENT_KEY
 unset ORIGIN_CERT
 unset ORIGIN_KEY
 
+cat /etc/nginx/certs/ca.pem
+
 exec "$@"
