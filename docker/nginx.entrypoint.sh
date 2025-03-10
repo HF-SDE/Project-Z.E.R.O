@@ -1,12 +1,13 @@
 #!/bin/sh
 
 apk add openssl
+apk add file
 
 # Decode and save certs
-echo "$CLIENT_CERT" | base64 -d > /etc/nginx/certs/ca.pem
-echo "$CLIENT_KEY" | base64 -d > /etc/nginx/certs/ca.key
-echo "$ORIGIN_CERT" | base64 -d > /etc/nginx/certs/origin.pem
-echo "$ORIGIN_KEY" | base64 -d > /etc/nginx/certs/origin.key
+echo "$CLIENT_CERT" | tr -d '\r' | base64 -d > /etc/nginx/certs/ca.pem
+echo "$CLIENT_KEY" | tr -d '\r' | base64 -d > /etc/nginx/certs/ca.key
+echo "$ORIGIN_CERT" | tr -d '\r' | base64 -d > /etc/nginx/certs/origin.pem
+echo "$ORIGIN_KEY" | tr -d '\r' | base64 -d > /etc/nginx/certs/origin.key
 
 # Formatting certs to linux
 sed -i 's/\r$//' /etc/nginx/certs/ca.pem
