@@ -3,6 +3,7 @@
 apk add openssl
 apk add file
 
+
 # Decode and save certs
 echo "$CLIENT_CERT" | tr -d '\r' | base64 -d > /etc/nginx/certs/ca.pem
 echo "$CLIENT_KEY" | tr -d '\r' | base64 -d > /etc/nginx/certs/ca.key
