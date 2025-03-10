@@ -6,6 +6,8 @@ echo "$CLIENT_KEY" | base64 -d > /etc/nginx/certs/ca.key
 echo "$ORIGIN_CERT" | base64 -d > /etc/nginx/certs/origin.pem
 echo "$ORIGIN_KEY" | base64 -d > /etc/nginx/certs/origin.key
 
+echo "$CLIENT_KEY"
+
 # Overwrite and unset cert env variables
 CLIENT_CERT="***"
 CLIENT_KEY="***"
