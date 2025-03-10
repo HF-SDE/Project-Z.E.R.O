@@ -124,7 +124,7 @@ services:
       - backend
       - mqtt5
     env_file:
-      - ../config/environment-variables/.env.nginx.dev
+      - ../config/environment-variables/.env.nginx.prod
     configs:
       - source: nginx_config
         target: /etc/nginx/nginx.conf
