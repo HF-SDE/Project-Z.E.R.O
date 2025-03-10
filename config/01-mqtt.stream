@@ -1,26 +1,31 @@
 stream {
-        upstream mqtt_backend {
-                hash $remote_addr consistent;
-                server mqtt5:1883;
-        }
+    upstream mqtt_backend {
+        hash $remote_addr consistent;
+        server mqtt5:1883;
+    }
 
-        server {
+    server {
+        listen 8883 ssl;
+        listen [::]:8883 ssl;
+        server_name _;
 
-                set $my_server_name $SERVER_NAME;
-                listen       8883 ssl;
-                listen       [::]:8883 ssl;
-                server_name _;
+        ssl_certificate /etc/nginx/certs/origin.pem;
+        ssl_certificate_key /etc/nginx/certs/origin.key;
+        ssl_client_certificate /etc/nginx/certs/ca.pem;
+        ssl_session_cache shared:SSL:5m;
+        ssl_session_timeout 10m;
+        ssl_prefer_server_ciphers on;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256';
 
-                ssl_certificate /etc/nginx/certs/origin.pem;
-                ssl_certificate_key /etc/nginx/certs/origin.key;
-                ssl_client_certificate /etc/nginx/certs/ca.pem;
-                ssl_session_cache shared:SSL:5m;
-                ssl_verify_client on;
-                ssl_session_timeout  10m;
-                ssl_prefer_server_ciphers on;
+        # Optional: enable logging for debugging
+        log_format main '$proxy_protocol_addr - $remote_user [$time_local] "$request" '
+                         '$status $bytes_sent "$http_referer" '
+                         '"$http_user_agent" "$http_x_forwarded_for"';
+        access_log /var/log/nginx/mqtt_access.log main;
 
-                proxy_connect_timeout 5s;
-                proxy_timeout 10m; # is default
-                proxy_pass mqtt_backend;
-        }
+        proxy_connect_timeout 5s;
+        proxy_timeout 10m;
+        proxy_pass mqtt_backend;
+    }
 }
