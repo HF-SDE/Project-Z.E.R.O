@@ -1,5 +1,7 @@
 #!/bin/sh
 
+apk add openssl
+
 # Decode and save certs
 echo "$CLIENT_CERT" | base64 -d > /etc/nginx/certs/ca.pem
 echo "$CLIENT_KEY" | base64 -d > /etc/nginx/certs/ca.key
@@ -18,6 +20,9 @@ sed -i 's/ *$//' /etc/nginx/certs/origin.key
 
 echo "Client Cert1\n"
 cat -A /etc/nginx/certs/ca.pem
+
+echo "Client Cert2\n"
+openssl x509 -in /etc/nginx/certs/ca.pem -noout -text
 
 # Overwrite and unset cert env variables
 CLIENT_CERT="***"
