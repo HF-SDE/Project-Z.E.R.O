@@ -4,6 +4,10 @@ on:
   push:
     branches: ["main"]
 
+defaults:
+  run:
+    shell: bash -leo pipefail {0} 
+    
 jobs:
   build:
     runs-on: self-hosted
