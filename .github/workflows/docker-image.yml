@@ -11,6 +11,9 @@ jobs:
     steps:
       - name: Check Docker version
         run: docker --version
+      
+      - name: Check docker
+        run: cat .bachrc
 
 
       # Step 1: Checkout the code
