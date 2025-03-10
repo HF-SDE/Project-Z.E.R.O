@@ -6,14 +6,11 @@ echo "$CLIENT_KEY" | base64 -d > /etc/nginx/certs/ca.key
 echo "$ORIGIN_CERT" | base64 -d > /etc/nginx/certs/origin.pem
 echo "$ORIGIN_KEY" | base64 -d > /etc/nginx/certs/origin.key
 
-echo "Client Cert1\n"
-cat -A /etc/nginx/certs/ca.pem
-
-echo "Client Cert2\n"
-openssl x509 -in /etc/nginx/certs/ca.pem -noout -text
-
-echo "Client Cert3\n"
-sed -i 's/ *$//' /etc/nginx/certs/ca.pem
+# Formatting certs to linux
+sed -i 's/\r$//' /etc/nginx/certs/ca.pem
+sed -i 's/\r$//' /etc/nginx/certs/ca.key
+sed -i 's/\r$//' /etc/nginx/certs/origin.pem
+sed -i 's/\r$//' /etc/nginx/certs/origin.key
 
 # Overwrite and unset cert env variables
 CLIENT_CERT="***"
