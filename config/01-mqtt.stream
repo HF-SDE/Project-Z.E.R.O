@@ -9,7 +9,7 @@ stream {
                 set $my_server_name $SERVER_NAME;
                 listen       8883 ssl;
                 listen       [::]:8883 ssl;
-                server_name  $my_server_name;
+                server_name _;
 
                 ssl_certificate /etc/nginx/certs/origin.pem;
                 ssl_certificate_key /etc/nginx/certs/origin.key;
