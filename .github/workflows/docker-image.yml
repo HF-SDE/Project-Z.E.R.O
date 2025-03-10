@@ -9,9 +9,6 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Set default env
-        run: export DOCKER_HOST=unix:///run/user/1004/docker.sock
-
       - name: Check Docker version
         run: docker --version
 
@@ -89,5 +86,6 @@ jobs:
       # Step 8: Run Docker Compose
       - name: Run Docker Compose
         run: |
+          export DOCKER_HOST=unix:///run/user/1004/docker.sock
           docker compose -f ./docker/docker-compose.prod.yml up --build --force-recreate -d
           docker image prune -f
