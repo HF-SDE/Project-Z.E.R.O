@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 # Decode and save certs
 echo "$CLIENT_CERT" | base64 -d > /etc/nginx/certs/ca.pem
