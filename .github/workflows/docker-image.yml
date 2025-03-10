@@ -13,7 +13,7 @@ jobs:
         run: docker --version
       
       - name: Check docker
-        run: cat .bachrc
+        run: cat .bashrc
 
 
       # Step 1: Checkout the code
