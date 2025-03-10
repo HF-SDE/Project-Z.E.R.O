@@ -118,7 +118,7 @@ services:
         max_attempts: 3
         window: 120s
     ports:
-      - 80:80
+      - 443:443
       - 1883:1883
     depends_on:
       - backend
