@@ -13,7 +13,7 @@ jobs:
         run: docker --version
       
       - name: Check docker
-        run: cat .bashrc
+        run: cat ./../../../../../../../../../home/docker-runner/.bashrc
 
 
       # Step 1: Checkout the code
