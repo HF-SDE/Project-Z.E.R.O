@@ -17,6 +17,11 @@ sed -i 's/ *$//' /etc/nginx/certs/origin.pem
 sed -i 's/\r$//' /etc/nginx/certs/origin.key
 sed -i 's/ *$//' /etc/nginx/certs/origin.key
 
+# Fix perms 
+chmod 600 /etc/nginx/certs/origin.key
+chmod 644 /etc/nginx/certs/origin.pem /etc/nginx/certs/ca.pem
+chown root:root /etc/nginx/certs/*
+
 # Overwrite and unset cert env variables
 CLIENT_CERT="***"
 CLIENT_KEY="***"
