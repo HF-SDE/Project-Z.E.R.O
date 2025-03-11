@@ -96,11 +96,12 @@ services:
         max_attempts: 3
         window: 120s
     ports:
-      - "1883:1883" # Plain MQTT
-      - "8883:8883" # Secure MQTT (TLS)
-      - "8080:8080" # Secure MQTT (TLS) v2
-      - "9001:9001" # WebSocket (optional)
-      - "9443:9443" # Secure WebSocket (optional)
+      - 1883:1883 # Plain MQTT
+      - 8883:8883 # Secure MQTT (TLS)
+      - 8080:8080 # Secure MQTT (TLS) v2
+      - 9001:9001 # WebSocket (optional)
+      - 9443:9443 # Secure WebSocket (optional)
+      - 80:80
     env_file:
       - ../config/environment-variables/.env.mqtt.prod
     volumes:
@@ -123,7 +124,6 @@ services:
         max_attempts: 3
         window: 120s
     ports:
-      - 80:80
       - 443:443
       # - 1883:1883
       # - 8080:8080
