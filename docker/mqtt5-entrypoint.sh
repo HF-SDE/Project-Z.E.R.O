@@ -19,6 +19,7 @@ if [ ! -f "$CERT_PATH/fullchain.pem" ]; then
   certbot certonly --standalone --non-interactive --agree-tos --email phgu03@gmail.com -d $DOMAIN
 
   echo "[INFO] Copying certs to /mosquitto/certs/"
+  mkdir -p /mosquitto/certs
   cp "$CERT_PATH/"* /mosquitto/certs/
 fi
 
