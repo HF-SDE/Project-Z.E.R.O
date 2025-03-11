@@ -16,7 +16,7 @@ chgrp root /mosquitto/config/pwfile
 # Get cert if not already present
 if [ ! -f "$CERT_PATH/fullchain.pem" ]; then
   echo "[INFO] Requesting Let's Encrypt cert for $DOMAIN..."
-  certbot certonly --standalone --non-interactive --agree-tos --email phgu03@gmail.com -d $DOMAIN
+  certbot certonly --standalone --non-interactive --agree-tos --dry-run --email phgu03@gmail.com -d $DOMAIN
 
   echo "[INFO] Copying certs to /mosquitto/certs/"
   mkdir -p /mosquitto/certs
