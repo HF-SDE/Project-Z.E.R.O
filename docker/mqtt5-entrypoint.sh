@@ -1,6 +1,7 @@
 #!/bin/ash
 set -e
 
+CERT_PATH="/etc/letsencrypt/live/$DOMAIN"
 
 mosquitto_passwd -c -b /mosquitto/config/pwfile iot1 12345678
 mosquitto_passwd -b /mosquitto/config/pwfile iot2 12345678

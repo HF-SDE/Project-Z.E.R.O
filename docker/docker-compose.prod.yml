@@ -96,7 +96,12 @@ services:
         max_attempts: 3
         window: 120s
     ports:
-      - "9001:9001"
+      - 1883:1883 # Plain MQTT
+      - 8883:8883 # Secure MQTT (TLS)
+      - 8080:8080 # Secure MQTT (TLS) v2
+      - 9001:9001 # WebSocket (optional)
+      - 9443:9443 # Secure WebSocket (optional)
+      - 80:80
     env_file:
       - ../config/environment-variables/.env.mqtt.prod
     volumes:
@@ -105,6 +110,7 @@ services:
       - mqtt-log:/mosquitto/log:rw
     networks:
       - internal
+      - public
 
   reverse-proxy:
     container_name: reverse-proxy
@@ -118,14 +124,19 @@ services:
         max_attempts: 3
         window: 120s
     ports:
-      - 80:80
-      - 1883:1883
+      - 443:443
+      # - 1883:1883
+      # - 8080:8080
     depends_on:
       - backend
       - mqtt5
+    env_file:
+      - ../config/environment-variables/.env.nginx.prod
     configs:
       - source: nginx_config
         target: /etc/nginx/nginx.conf
+      - source: nginx_stream_config
+        target: /etc/nginx/conf.d/01-mqtt.stream
     networks:
       - internal
       - tunnel
@@ -165,3 +176,5 @@ configs:
     file: ../config/nginx.conf
   backend_nodemon:
     file: ../backend/nodemon.json
+  nginx_stream_config:
+    file: ../config/01-mqtt.stream
