@@ -110,7 +110,7 @@ services:
       - ../config/mosquitto.conf:/mosquitto/config/mosquitto.conf:rw
       - mqtt-data:/mosquitto/data:rw
       - mqtt-log:/mosquitto/log:rw
-      - cert:/etc/letsencrypt/live/mqtt.exploit4all.com/
+      - cert:/etc/letsencrypt/live/mqtts.exploit4all.com/
     networks:
       - internal
       - public
