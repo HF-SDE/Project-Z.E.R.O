@@ -110,7 +110,6 @@ services:
       - mqtt-log:/mosquitto/log:rw
     networks:
       - internal
-      - public
 
   reverse-proxy:
     container_name: reverse-proxy
