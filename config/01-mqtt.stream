@@ -5,20 +5,10 @@ stream {
     }
 
     server {
-        listen 8080 ssl;
-        listen [::]:8080 ssl;
-        server_name _;
-
-        ssl_certificate /etc/nginx/certs/origin.pem;
-        ssl_certificate_key /etc/nginx/certs/origin.key;
-        ssl_client_certificate /etc/nginx/certs/ca.pem;
-        ssl_session_cache shared:SSL:5m;
-        ssl_session_timeout 10m;
-        ssl_prefer_server_ciphers on;
-        ssl_protocols TLSv1.2 TLSv1.3;
-
-        proxy_connect_timeout 5s;
-        proxy_timeout 10m;
+        listen 8080;
+        listen [::]:8080;
+        server_name mqtt.exploit4all.com;
+        
         proxy_pass mqtt_ssl;
     }
     
