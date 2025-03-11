@@ -3,23 +3,14 @@ name: Docker Image CI
 on:
   push:
     branches: ["main"]
-
+    
 jobs:
   build:
     runs-on: self-hosted
 
     steps:
-      - name: Set up Docker permissions
-        run: |
-          sudo usermod -aG docker $USER
-          sudo systemctl restart docker
-
       - name: Check Docker version
         run: docker --version
-
-      - name: Fix permissions
-        run: sudo chmod -R 777 /home/magn9814/_work/HF4-BigData/HF4-BigData
-
 
       # Step 1: Checkout the code
       - name: Checkout code
@@ -95,5 +86,6 @@ jobs:
       # Step 8: Run Docker Compose
       - name: Run Docker Compose
         run: |
-          sudo docker compose -f ./docker/docker-compose.prod.yml up --build --force-recreate -d
-          sudo docker image prune -f
+          export DOCKER_HOST=unix:///run/user/1004/docker.sock
+          docker compose -f ./docker/docker-compose.prod.yml up --build --force-recreate -d
+          docker image prune -f

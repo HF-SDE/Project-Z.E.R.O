@@ -119,12 +119,13 @@ services:
         window: 120s
     ports:
       - 80:80
+      - 443:443
       - 1883:1883
     depends_on:
       - backend
       - mqtt5
     env_file:
-      - ../config/environment-variables/.env.nginx.dev
+      - ../config/environment-variables/.env.nginx.prod
     configs:
       - source: nginx_config
         target: /etc/nginx/nginx.conf
