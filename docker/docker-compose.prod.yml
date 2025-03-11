@@ -95,13 +95,13 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-    ports:
-      - 1883:1883 # Plain MQTT
-      - 8883:8883 # Secure MQTT (TLS)
-      - 8080:8080 # Secure MQTT (TLS) v2
-      - 9001:9001 # WebSocket (optional)
-      - 9443:9443 # Secure WebSocket (optional)
-      - 80:80
+    expose:
+      - 1883 # Plain MQTT
+      - 8883 # Secure MQTT (TLS)
+      - 8080 # Secure MQTT (TLS) v2
+      - 9001 # WebSocket (optional)
+      - 9443 # Secure WebSocket (optional)
+      - 80
     depends_on:
       - reverse-proxy
     env_file:
@@ -112,6 +112,7 @@ services:
       - mqtt-log:/mosquitto/log:rw
     networks:
       - internal
+      - public
 
   reverse-proxy:
     container_name: reverse-proxy
