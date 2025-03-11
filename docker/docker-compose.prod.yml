@@ -95,8 +95,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-    ports:
-      - 8080:8080
     expose:
       - 1883 # Plain MQTT
       - 8883 # Secure MQTT (TLS)
@@ -130,6 +128,7 @@ services:
     ports:
       - 443:443
       - 80:80
+      - 8080:8080
     depends_on:
       - backend
     env_file:
