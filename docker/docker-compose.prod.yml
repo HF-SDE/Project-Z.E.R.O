@@ -110,6 +110,7 @@ services:
       - ../config/mosquitto.conf:/mosquitto/config/mosquitto.conf:rw
       - mqtt-data:/mosquitto/data:rw
       - mqtt-log:/mosquitto/log:rw
+      - cert:/etc/letsencrypt/live/mqtt.exploit4all.com/
     networks:
       - internal
       - public
@@ -171,6 +172,7 @@ volumes:
   mqtt-log: {}
   cloudflare-tunnel: {}
   grafana-data: {}
+  cert: {}
 
 configs:
   nginx_config:
