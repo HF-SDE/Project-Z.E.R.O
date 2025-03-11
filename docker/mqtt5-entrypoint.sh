@@ -23,7 +23,7 @@ if [ ! -f "$CERT_PATH/fullchain.pem" ]; then
 fi
 
 # Fix perms 
-usermod -aG ssl-cert mosquitto
+addgroup mosquitto ssl-cert
 chown -R root:ssl-cert /etc/letsencrypt/live/
 chmod -R 750 /etc/letsencrypt/live/
 
