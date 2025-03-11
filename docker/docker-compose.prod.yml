@@ -46,6 +46,7 @@ services:
         target: /usr/src/app/nodemon.json
     networks:
       - internal
+      - public
 
   db:
     container_name: db
