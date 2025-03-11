@@ -20,11 +20,11 @@ if [ ! -f "$CERT_PATH/fullchain.pem" ]; then
 
   echo "[INFO] Copying certs to /mosquitto/certs/"
   mkdir -p /mosquitto/certs
-  cp "$CERT_PATH/"* /mosquitto/certs/
+  # cp "$CERT_PATH/"* /mosquitto/certs/
 elif [ ! -f "/mosquitto/certs/fullchain.pem" ]; then
   echo "[INFO] Copying certs to /mosquitto/certs/"
   mkdir -p /mosquitto/certs
-  cp "$CERT_PATH/"* /mosquitto/certs/
+  # cp "$CERT_PATH/"* /mosquitto/certs/
 fi
 
 # Fix perms
