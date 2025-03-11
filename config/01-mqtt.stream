@@ -7,8 +7,8 @@ stream {
     server {
         listen 8080;
         listen [::]:8080;
-        server_name mqtt.exploit4all.com;
-        
+        server_name mqtts.exploit4all.com;
+
         proxy_pass mqtt_ssl;
     }
     
