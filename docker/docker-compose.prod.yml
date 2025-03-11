@@ -102,6 +102,8 @@ services:
       - 9001:9001 # WebSocket (optional)
       - 9443:9443 # Secure WebSocket (optional)
       - 80:80
+    depends_on:
+      - reverse-proxy
     env_file:
       - ../config/environment-variables/.env.mqtt.prod
     volumes:
@@ -127,7 +129,6 @@ services:
       - 80:80
     depends_on:
       - backend
-      - mqtt5
     env_file:
       - ../config/environment-variables/.env.nginx.prod
     configs:
