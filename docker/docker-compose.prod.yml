@@ -125,7 +125,8 @@ services:
     ports:
       - 80:80
       - 443:443
-      - 1883:1883
+      # - 1883:1883
+      # - 8080:8080
     depends_on:
       - backend
       - mqtt5
