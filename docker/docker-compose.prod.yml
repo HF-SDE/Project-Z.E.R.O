@@ -37,7 +37,6 @@ services:
     command: ["npm", "run", "dev"]
     depends_on:
       - db
-      - mqtt5
     env_file:
       - ../config/environment-variables/.env.backend.prod
     volumes:
@@ -109,12 +108,14 @@ services:
     env_file:
       - ../config/environment-variables/.env.mqtt.prod
     volumes:
-      - ../config/mosquitto.conf:/mosquitto/config/mosquitto.conf:rw
       - mqtt-data:/mosquitto/data:rw
       - mqtt-log:/mosquitto/log:rw
       - cert-link:/etc/letsencrypt/live
       - cert-config:/etc/letsencrypt/renewal
       - cert:/etc/letsencrypt/archive
+    configs:
+      - source: mosquitto_config
+        target: /mosquitto/config/mosquitto.conf
     networks:
       - internal
       - public
@@ -141,6 +142,7 @@ services:
       - 1883
     depends_on:
       - backend
+      - grafana
     env_file:
       - ../config/environment-variables/.env.nginx.prod
     configs:
@@ -190,5 +192,7 @@ configs:
     file: ../config/nginx.conf
   backend_nodemon:
     file: ../backend/nodemon.json
+  mosquitto_config:
+    file: ../config/mosquitto.conf
   nginx_stream_config:
     file: ../config/01-mqtt.stream
