@@ -18,8 +18,9 @@ certbot certificates
 # Get cert if not already present
 if [ -z "$(ls $CERT_PATH*/fullchain.pem 2>/dev/null)" ]; then
   echo "[INFO] Requesting Let's Encrypt cert for $DOMAIN..."
-  certbot certonly --standalone --non-interactive --agree-tos --test-cert --email phgu03@gmail.com -d $DOMAIN
-  cat  /etc/letsencrypt/renewal/mqttsss.exploit4all.com.conf
+  certbot certonly -v --standalone --non-interactive --agree-tos --test-cert --email phgu03@gmail.com -d $DOMAIN
+  cat /etc/letsencrypt/renewal/mqttsss.exploit4all.com.conf
+  cat /var/log/letsencrypt/letsencrypt.log
 
   echo "[INFO] Copying certs to /mosquitto/certs/"
   mkdir -p /mosquitto/certs
