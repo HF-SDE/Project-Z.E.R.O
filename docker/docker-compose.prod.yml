@@ -111,7 +111,7 @@ services:
       - ../config/mosquitto.conf:/mosquitto/config/mosquitto.conf:rw
       - mqtt-data:/mosquitto/data:rw
       - mqtt-log:/mosquitto/log:rw
-      - cert:/etc/letsencrypt/live/
+      - cert:/etc/letsencrypt/live:rw
     networks:
       - internal
       - public
@@ -131,6 +131,11 @@ services:
       - 443:443
       - 80:80
       - 8080:8080
+    expose:
+      - 443
+      - 80
+      - 8080
+      - 1883
     depends_on:
       - backend
     env_file:
