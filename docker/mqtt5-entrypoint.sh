@@ -13,8 +13,6 @@ mosquitto_passwd -b /mosquitto/config/pwfile $MQTT_ADMIN_USERNAME $MQTT_ADMIN_PA
 chown root /mosquitto/config/pwfile
 chgrp root /mosquitto/config/pwfile
 
-certbot certificates
-
 # Get cert if not already present
 if [ -z "$(ls $CERT_PATH/fullchain.pem 2>/dev/null)" ]; then
   echo "[INFO] Requesting Let's Encrypt cert for $DOMAIN..."
@@ -23,10 +21,10 @@ if [ -z "$(ls $CERT_PATH/fullchain.pem 2>/dev/null)" ]; then
   echo "[INFO] Copying certs to /mosquitto/certs/"
   mkdir -p /mosquitto/certs
   cp "$CERT_PATH"/* /mosquitto/certs/
-elif [ ! -f "/mosquitto/certs/fullchain.pem" ]; then
-  echo "[INFO] Copying certs to /mosquitto/certs/"
-  mkdir -p /mosquitto/certs
-  cp "$CERT_PATH"/* /mosquitto/certs/
+# elif [ ! -f "/mosquitto/certs/fullchain.pem" ]; then
+#   echo "[INFO] Copying certs to /mosquitto/certs/"
+#   mkdir -p /mosquitto/certs
+#   cp "$CERT_PATH"/* /mosquitto/certs/
 fi
 
 # Fix perms
