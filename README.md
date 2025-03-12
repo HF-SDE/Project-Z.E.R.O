@@ -1,8 +1,8 @@
-# IOT Project
+# BIG Data Project
 
-Welcome to the IOT project! This repository contains everything you need to get the backend and website server running for the project. Follow the steps below to get started.
+Welcome to the BIG Data project! This repository contains everything you need to get the backend and website server running for the project. Follow the steps below to get started.
 
-| Welcome to the IOT project! This repository contains everything you need to get the backend and website server running for the project. Follow the steps below to get started. | |
+| Welcome to the BIG Data project! This repository contains everything you need to get the backend and website server running for the project. Follow the steps below to get started. | |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
 ## Prerequisites
