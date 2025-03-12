@@ -3,7 +3,7 @@ name: Docker Image CI
 on:
   push:
     branches: ["main"]
-    
+
 jobs:
   build:
     runs-on: self-hosted
@@ -74,7 +74,7 @@ jobs:
           echo "MQTT_ADMIN_USERNAME=${{ secrets.MQTT_ADMIN_USERNAME }}" >> ./config/environment-variables/.env.mqtt.prod
           echo "MQTT_ADMIN_PASSWORD=${{ secrets.MQTT_ADMIN_PASSWORD }}" >> ./config/environment-variables/.env.mqtt.prod
           echo "DOMAIN=${{ secrets.DOMAIN }}" >> ./config/environment-variables/.env.mqtt.prod
-      
+
       # Step 7: Generate .env.nginx file
       - name: Generate .env.nginx file
         run: |
