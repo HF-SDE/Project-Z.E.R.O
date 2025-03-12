@@ -1,6 +1,22 @@
 name: iotbigdata
 
 services:
+  clickhouse:
+    container_name: clickhouse
+    image: yandex/clickhouse-server:latest
+    expose:
+      - "9000"
+      - "8123"
+    ports:
+      - 9000:9000
+      - 8123:8123
+    env_file:
+      - ../config/environment-variables/.env.clickhouse.dev
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse/data
+    networks:
+      - public
+      - internal
   frontend:
     container_name: frontend
     build:
@@ -83,7 +99,7 @@ services:
     networks:
       - public
       - internal
-  
+
   grafana:
     container_name: grafana
     image: grafana/grafana:main
@@ -138,6 +154,7 @@ volumes:
   mqtt-data: {}
   mqtt-log: {}
   grafana-data: {}
+  clickhouse_data: {}
   # cert-link: {}
   # cert: {}
   # cert-config: {}
