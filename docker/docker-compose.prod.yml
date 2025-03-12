@@ -27,7 +27,7 @@ services:
       - 9200:9200
     depends_on:
       - db
-      - clickhouse
+      # - clickhouse
     env_file:
       - ../config/environment-variables/.env.grafana.prod
     volumes:
@@ -162,7 +162,7 @@ services:
     depends_on:
       - backend
       - grafana
-      - clickhouse
+      # - clickhouse
     env_file:
       - ../config/environment-variables/.env.nginx.prod
     configs:
