@@ -1,7 +1,7 @@
 #!/bin/ash
 set -e
 
-CERT_PATH="/etc/letsencrypt/archive/$DOMAIN"
+CERT_PATH="/etc/letsencrypt/live/$DOMAIN"
 
 mosquitto_passwd -c -b /mosquitto/config/pwfile iot1 12345678
 mosquitto_passwd -b /mosquitto/config/pwfile iot2 12345678
@@ -28,8 +28,6 @@ elif [ ! -f "/mosquitto/certs/fullchain.pem" ]; then
   fi
   cp "$CERT_PATH"/* /mosquitto/certs/
 fi
-
-ls -la /mosquitto/certs
 
 # Fix perms
 echo "[INFO] Fixing permissions..."
