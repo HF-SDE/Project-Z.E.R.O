@@ -86,23 +86,23 @@ services:
     networks:
       - internal
 
-  clickhouse:
-    container_name: clickhouse
-    build:
-      context: ..
-      dockerfile: docker/clickhouse.Dockerfile
-    expose:
-      - 9000:9000
-      - 8123:8123
-    depends_on:
-      - db
-    env_file:
-      - ../config/environment-variables/.env.clickhouse.prod
-      - ../config/environment-variables/.env.db.prod
-    volumes:
-      - clickhouse_data:/var/lib/clickhouse
-    networks:
-      - internal
+  # clickhouse:
+  #   container_name: clickhouse
+  #   build:
+  #     context: ..
+  #     dockerfile: docker/clickhouse.Dockerfile
+  #   expose:
+  #     - 9000:9000
+  #     - 8123:8123
+  #   depends_on:
+  #     - db
+  #   env_file:
+  #     - ../config/environment-variables/.env.clickhouse.prod
+  #     - ../config/environment-variables/.env.db.prod
+  #   volumes:
+  #     - clickhouse_data:/var/lib/clickhouse
+  #   networks:
+  #     - internal
 
   mqtt5:
     container_name: mqtt5
