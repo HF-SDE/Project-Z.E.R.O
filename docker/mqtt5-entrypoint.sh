@@ -29,6 +29,8 @@ elif [ ! -f "/mosquitto/certs/fullchain.pem" ]; then
   cp "$CERT_PATH"/* /mosquitto/certs/
 fi
 
+cat /mosquitto/certs/chain.pem
+
 # Fix perms
 echo "[INFO] Fixing permissions..."
 chown -R mosquitto:mosquitto /mosquitto/data
