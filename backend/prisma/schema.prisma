@@ -41,6 +41,7 @@ model Device {
 
   Location   Location     @relation(fields: [locationUuid], references: [uuid])
   Timeseries Timeseries[]
+  TimeseriesAbnormal TimeseriesAbnormal[]
   Alert      Alert[]
 }
 
@@ -72,6 +73,20 @@ model Timeseries {
 
   Device          Device            @relation(fields: [deviceId], references: [uuid])
   TimeseriesAlert TimeseriesAlert[]
+}
+
+model TimeseriesAbnormal {
+  id          Int      @id @default(autoincrement())
+  deviceId    String   @db.Uuid
+  name        String
+  identifier  Identifier
+  min         Float
+  max         Float
+  
+  createdAt  DateTime   @default(now()) @db.Timestamptz()
+  updatedAt  DateTime   @updatedAt @db.Timestamptz()
+
+  Device          Device            @relation(fields: [deviceId], references: [uuid])  
 }
 
 model Alert {

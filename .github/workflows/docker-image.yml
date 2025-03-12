@@ -71,6 +71,7 @@ jobs:
       # Step 7: Generate .env.mqtt file
       - name: Generate .env.mqtt file
         run: |
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> ./config/environment-variables/.env.mqtt.prod
           echo "MQTT_ADMIN_USERNAME=${{ secrets.MQTT_ADMIN_USERNAME }}" >> ./config/environment-variables/.env.mqtt.prod
           echo "MQTT_ADMIN_PASSWORD=${{ secrets.MQTT_ADMIN_PASSWORD }}" >> ./config/environment-variables/.env.mqtt.prod
           echo "DOMAIN=${{ secrets.DOMAIN }}" >> ./config/environment-variables/.env.mqtt.prod

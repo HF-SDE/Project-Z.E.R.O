@@ -37,6 +37,7 @@ services:
     command: ["npm", "run", "dev"]
     depends_on:
       - db
+      - mqtt5
     env_file:
       - ../config/environment-variables/.env.backend.prod
     volumes:
