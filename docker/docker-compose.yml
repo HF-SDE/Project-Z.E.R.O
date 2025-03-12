@@ -12,6 +12,11 @@ services:
       - 8123:8123
     env_file:
       - ../config/environment-variables/.env.clickhouse.dev
+    environment:
+      - CLICKHOUSE_USER=admin
+      - CLICKHOUSE_PASSWORD=Admin1234
+      - CLICKHOUSE_DB=iot_data
+
     volumes:
       - clickhouse_data:/var/lib/clickhouse/data
     networks:
