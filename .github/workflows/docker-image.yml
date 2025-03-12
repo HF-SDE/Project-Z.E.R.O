@@ -84,6 +84,13 @@ jobs:
           echo "ORIGIN_CERT=${{ secrets.ORIGIN_CERT }}" >> ./config/environment-variables/.env.nginx.prod
           echo "ORIGIN_KEY=${{ secrets.ORIGIN_KEY }}" >> ./config/environment-variables/.env.nginx.prod
           echo "SERVER_NAME=${{ secrets.SERVER_NAME }}" >> ./config/environment-variables/.env.nginx.prod
+      
+      # Step 8: Generate .env.clickhouse file
+      - name: Generate .env.clickhouse file
+        run: |
+          echo "CLICKHOUSE_DB=${{ secrets.CLICKHOUSE_DB }}" >> ./config/environment-variables/.env.clickhouse.prod
+          echo "CLICKHOUSE_USER=${{ secrets.CLICKHOUSE_USER }}" >> ./config/environment-variables/.env.clickhouse.prod
+          echo "CLICKHOUSE_PASSWORD=${{ secrets.CLICKHOUSE_PASSWORD }}" >> ./config/environment-variables/.env.clickhouse.prod
 
       # Step 8: Run Docker Compose
       - name: Run Docker Compose
