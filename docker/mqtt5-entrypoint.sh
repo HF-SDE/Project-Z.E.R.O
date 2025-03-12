@@ -12,9 +12,10 @@ mosquitto_passwd -b /mosquitto/config/pwfile $MQTT_ADMIN_USERNAME $MQTT_ADMIN_PA
 # Fix permissions
 chown root /mosquitto/config/pwfile
 chgrp root /mosquitto/config/pwfile
+ls "$CERT_PATH"/*fullchain.pem
 
 # Get cert if not already present
-if [ ! -f "$CERT_PATH/fullchain.pem" ]; then
+if [ -z "$(ls "$CERT_PATH"/*fullchain.pem 2>/dev/null)" ]; then
   echo "[INFO] Requesting Let's Encrypt cert for $DOMAIN..."
   certbot certonly --standalone --non-interactive --agree-tos --test-cert --email phgu03@gmail.com -d $DOMAIN
 
