@@ -17,7 +17,7 @@ chgrp root /mosquitto/config/pwfile
 if [ -z "$(ls $CERT_PATH/fullchain.pem 2>/dev/null)" ]; then
   echo "[INFO] Requesting Let's Encrypt cert for $DOMAIN..."
   if [[ "$NODE_ENV" == "development" ]]; then
-    certbot certonly -v --standalone --non-interactive --agree-tos --test-cert --email phgu03@gmail.com -d $DOMAIN
+    certbot certonly -v --standalone --non-interactive --agree-tos --test-cert --email example@gmail.com -d $DOMAIN
   else
     certbot certonly -v --standalone --non-interactive --agree-tos --email phgu03@gmail.com -d $DOMAIN
   fi
