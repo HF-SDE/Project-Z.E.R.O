@@ -12,7 +12,7 @@ mosquitto_passwd -b /mosquitto/config/pwfile $MQTT_ADMIN_USERNAME $MQTT_ADMIN_PA
 # Fix permissions
 chown root /mosquitto/config/pwfile
 chgrp root /mosquitto/config/pwfile
-ls "$CERT_PATH"/*fullchain.pem
+ls $CERT_PATH*/fullchain.pem
 
 # Get cert if not already present
 if [ -z "$(ls $CERT_PATH*/fullchain.pem 2>/dev/null)" ]; then
