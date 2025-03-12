@@ -1,7 +1,7 @@
 #!/bin/ash
 set -e
 
-CERT_PATH="/etc/letsencrypt/live/$DOMAIN"
+CERT_PATH="/etc/letsencrypt/archive/$DOMAIN"
 
 mosquitto_passwd -c -b /mosquitto/config/pwfile iot1 12345678
 mosquitto_passwd -b /mosquitto/config/pwfile iot2 12345678
@@ -16,19 +16,17 @@ chgrp root /mosquitto/config/pwfile
 certbot certificates
 
 # Get cert if not already present
-if [ -z "$(ls $CERT_PATH*/fullchain.pem 2>/dev/null)" ]; then
+if [ -z "$(ls $CERT_PATH/fullchain.pem 2>/dev/null)" ]; then
   echo "[INFO] Requesting Let's Encrypt cert for $DOMAIN..."
   certbot certonly -v --standalone --non-interactive --agree-tos --test-cert --email phgu03@gmail.com -d $DOMAIN
-  cat /etc/letsencrypt/renewal/mqttsss.exploit4all.com.conf
-  cat /var/log/letsencrypt/letsencrypt.log
 
   echo "[INFO] Copying certs to /mosquitto/certs/"
   mkdir -p /mosquitto/certs
-  cp "$CERT_PATH"*/* /mosquitto/certs/
+  cp "$CERT_PATH"/* /mosquitto/certs/
 elif [ ! -f "/mosquitto/certs/fullchain.pem" ]; then
   echo "[INFO] Copying certs to /mosquitto/certs/"
   mkdir -p /mosquitto/certs
-  cp "$CERT_PATH"*/* /mosquitto/certs/
+  cp "$CERT_PATH"/* /mosquitto/certs/
 fi
 
 # Fix perms
