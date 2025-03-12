@@ -31,6 +31,7 @@ services:
     command: ["npm", "run", "dev"]
     depends_on:
       - db
+      - mqtt5
     env_file:
       - ../config/environment-variables/.env.backend.dev
     volumes:
@@ -46,16 +47,27 @@ services:
     build:
       context: ..
       dockerfile: docker/mosquitto.Dockerfile
-    ports:
-      - "9001:9001"
+    expose:
+      - 1883 # Plain MQTT
+      - 8883 # Secure MQTT (TLS)
+      - 8080 # Secure MQTT (TLS) v2
+      - 9001 # WebSocket (optional)
+      - 9443 # Secure WebSocket (optional)
+      - 80 # Certbot
+    depends_on:
+      - reverse-proxy
     env_file:
       - ../config/environment-variables/.env.mqtt.dev
     volumes:
       - ../config/mosquitto.conf:/mosquitto/config/mosquitto.conf:rw
       - mqtt-data:/mosquitto/data:rw
       - mqtt-log:/mosquitto/log:rw
+      # - cert-link:/etc/letsencrypt/live
+      # - cert-config:/etc/letsencrypt/renewal
+      # - cert:/etc/letsencrypt/archive
     networks:
       - internal
+      - public
 
   db:
     container_name: db
@@ -75,7 +87,7 @@ services:
   grafana:
     container_name: grafana
     image: grafana/grafana:main
-    ports:
+    expose:
       - 9200:9200
     depends_on:
       - db
@@ -85,7 +97,7 @@ services:
       - ../config/grafana/defaults.ini:/usr/share/grafana/conf/defaults.ini
       - ../config/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
       - ../config/grafana/main.yml:/etc/grafana/provisioning/dashboards/main.yml
-      - ../config/grafana/dashboards:/var/lib/grafana/dashboards
+      - ../config/grafana/dashboards/:/var/lib/grafana/dashboards/
       - grafana-data:/var/lib/grafana
     networks:
       - internal
@@ -97,7 +109,9 @@ services:
       context: ..
       dockerfile: docker/nginx.Dockerfile
     ports:
+      - 443:443
       - 80:80
+      - 8080:8080
       - 1883:1883
     depends_on:
       - backend
@@ -109,8 +123,8 @@ services:
       - source: nginx_stream_config
         target: /etc/nginx/conf.d/01-mqtt.stream
     networks:
-      - public
       - internal
+      - public
 
 networks:
   public:
@@ -121,10 +135,12 @@ networks:
 
 volumes:
   postgres_data: {}
-  mqtt-config: {}
   mqtt-data: {}
   mqtt-log: {}
   grafana-data: {}
+  # cert-link: {}
+  # cert: {}
+  # cert-config: {}
 
 configs:
   nginx_config:
