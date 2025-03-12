@@ -111,7 +111,9 @@ services:
       - ../config/mosquitto.conf:/mosquitto/config/mosquitto.conf:rw
       - mqtt-data:/mosquitto/data:rw
       - mqtt-log:/mosquitto/log:rw
-      - cert:/etc/letsencrypt/live:rw
+      - cert-link:/etc/letsencrypt/live
+      - cert-config:/etc/letsencrypt/renewal
+      - cert:/etc/letsencrypt/archive
     networks:
       - internal
       - public
@@ -178,7 +180,9 @@ volumes:
   mqtt-log: {}
   cloudflare-tunnel: {}
   grafana-data: {}
+  cert-link: {}
   cert: {}
+  cert-config: {}
 
 configs:
   nginx_config:
