@@ -20,6 +20,26 @@ services:
     networks:
       - internal
 
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:main
+    expose:
+      - 9200:9200
+    depends_on:
+      - db
+      - clickhouse
+    env_file:
+      - ../config/environment-variables/.env.grafana.prod
+    volumes:
+      - ../config/grafana/defaults.ini:/usr/share/grafana/conf/defaults.ini
+      - ../config/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ../config/grafana/main.yml:/etc/grafana/provisioning/dashboards/main.yml
+      - ../config/grafana/dashboards/:/var/lib/grafana/dashboards/
+      - grafana-data:/var/lib/grafana
+    networks:
+      - internal
+      - public
+
   backend:
     container_name: backend
     build:
@@ -66,24 +86,23 @@ services:
     networks:
       - internal
 
-  grafana:
-    container_name: grafana
-    image: grafana/grafana:main
+  clickhouse:
+    container_name: clickhouse
+    build:
+      context: ..
+      dockerfile: docker/clickhouse.Dockerfile
     expose:
-      - 9200:9200
+      - 9000:9000
+      - 8123:8123
     depends_on:
       - db
     env_file:
-      - ../config/environment-variables/.env.grafana.prod
+      - ../config/environment-variables/.env.clickhouse.prod
+      - ../config/environment-variables/.env.db.prod
     volumes:
-      - ../config/grafana/defaults.ini:/usr/share/grafana/conf/defaults.ini
-      - ../config/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
-      - ../config/grafana/main.yml:/etc/grafana/provisioning/dashboards/main.yml
-      - ../config/grafana/dashboards/:/var/lib/grafana/dashboards/
-      - grafana-data:/var/lib/grafana
+      - clickhouse_data:/var/lib/clickhouse
     networks:
       - internal
-      - public
 
   mqtt5:
     container_name: mqtt5
@@ -143,6 +162,7 @@ services:
     depends_on:
       - backend
       - grafana
+      - clickhouse
     env_file:
       - ../config/environment-variables/.env.nginx.prod
     configs:
@@ -179,6 +199,7 @@ networks:
 
 volumes:
   postgres_data: {}
+  clickhouse_data: {}
   mqtt-data: {}
   mqtt-log: {}
   cloudflare-tunnel: {}

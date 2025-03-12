@@ -20,6 +20,26 @@ services:
     networks:
       - internal
 
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:main
+    expose:
+      - 9200:9200
+    depends_on:
+      - db
+      - clickhouse
+    env_file:
+      - ../config/environment-variables/.env.grafana.dev
+    volumes:
+      - ../config/grafana/defaults.ini:/usr/share/grafana/conf/defaults.ini
+      - ../config/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ../config/grafana/main.yml:/etc/grafana/provisioning/dashboards/main.yml
+      - ../config/grafana/dashboards/:/var/lib/grafana/dashboards/
+      - grafana-data:/var/lib/grafana
+    networks:
+      - internal
+      - public
+
   backend:
     container_name: backend
     build:
@@ -84,25 +104,25 @@ services:
     networks:
       - public
       - internal
-  
-  grafana:
-    container_name: grafana
-    image: grafana/grafana:main
-    expose:
-      - 9200:9200
+
+  clickhouse:
+    container_name: clickhouse
+    build:
+      context: ..
+      dockerfile: docker/clickhouse.Dockerfile
+    ports:
+      - 9000:9000
+      - 8123:8123
     depends_on:
       - db
     env_file:
-      - ../config/environment-variables/.env.grafana.dev
+      - ../config/environment-variables/.env.clickhouse.dev
+      - ../config/environment-variables/.env.db.dev
     volumes:
-      - ../config/grafana/defaults.ini:/usr/share/grafana/conf/defaults.ini
-      - ../config/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
-      - ../config/grafana/main.yml:/etc/grafana/provisioning/dashboards/main.yml
-      - ../config/grafana/dashboards/:/var/lib/grafana/dashboards/
-      - grafana-data:/var/lib/grafana
+      - clickhouse_data:/var/lib/clickhouse
     networks:
-      - internal
       - public
+      - internal
 
   reverse-proxy:
     container_name: reverse-proxy
@@ -117,6 +137,7 @@ services:
     depends_on:
       - backend
       - grafana
+      - clickhouse
     env_file:
       - ../config/environment-variables/.env.nginx.dev
     configs:
@@ -140,6 +161,7 @@ volumes:
   mqtt-data: {}
   mqtt-log: {}
   grafana-data: {}
+  clickhouse_data: {}
   # cert-link: {}
   # cert: {}
   # cert-config: {}

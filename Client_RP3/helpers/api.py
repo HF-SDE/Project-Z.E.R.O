@@ -134,6 +134,8 @@ def init_mqtt():
 
     mqtt_client = mqtt.Client()
     mqtt_client.username_pw_set(mqtt_username, mqtt_password)
+    client.tls_set()
+    client.tls_insecure_set(False)
     mqtt_client.on_connect = on_connect
     mqtt_client.on_disconnect = on_disconnect
 
