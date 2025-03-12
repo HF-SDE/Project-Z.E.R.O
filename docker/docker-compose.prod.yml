@@ -10,7 +10,7 @@ services:
     volumes:
       - ../frontend/:/usr/src/app
       - /usr/src/app/node_modules
-    ports:
+    expose:
       - "3000:3000"
     depends_on:
       - "backend"
@@ -37,6 +37,7 @@ services:
     command: ["npm", "run", "dev"]
     depends_on:
       - db
+      - mqtt5
     env_file:
       - ../config/environment-variables/.env.backend.prod
     volumes:
@@ -46,6 +47,7 @@ services:
         target: /usr/src/app/nodemon.json
     networks:
       - internal
+      - public
 
   db:
     container_name: db
@@ -56,7 +58,7 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-    ports:
+    expose:
       - 5432:5432
     env_file:
       - ../config/environment-variables/.env.db.prod
@@ -68,7 +70,7 @@ services:
   grafana:
     container_name: grafana
     image: grafana/grafana:main
-    ports:
+    expose:
       - 9200:9200
     depends_on:
       - db
@@ -95,16 +97,27 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-    ports:
-      - "9001:9001"
+    expose:
+      - 1883 # Plain MQTT
+      - 8883 # Secure MQTT (TLS)
+      - 8080 # Secure MQTT (TLS) v2
+      - 9001 # WebSocket (optional)
+      - 9443 # Secure WebSocket (optional)
+      - 80 # Certbot
+    depends_on:
+      - reverse-proxy
     env_file:
       - ../config/environment-variables/.env.mqtt.prod
     volumes:
       - ../config/mosquitto.conf:/mosquitto/config/mosquitto.conf:rw
       - mqtt-data:/mosquitto/data:rw
       - mqtt-log:/mosquitto/log:rw
+      - cert-link:/etc/letsencrypt/live
+      - cert-config:/etc/letsencrypt/renewal
+      - cert:/etc/letsencrypt/archive
     networks:
       - internal
+      - public
 
   reverse-proxy:
     container_name: reverse-proxy
@@ -118,17 +131,26 @@ services:
         max_attempts: 3
         window: 120s
     ports:
+      - 443:443
       - 80:80
-      - 1883:1883
+      - 8080:8080
+    expose:
+      - 443
+      - 80
+      - 8080
+      - 1883
     depends_on:
       - backend
-      - mqtt5
+    env_file:
+      - ../config/environment-variables/.env.nginx.prod
     configs:
       - source: nginx_config
         target: /etc/nginx/nginx.conf
+      - source: nginx_stream_config
+        target: /etc/nginx/conf.d/01-mqtt.stream
     networks:
       - internal
-      - tunnel
+      # - tunnel
       - public
 
   tunnel:
@@ -159,9 +181,14 @@ volumes:
   mqtt-log: {}
   cloudflare-tunnel: {}
   grafana-data: {}
+  cert-link: {}
+  cert: {}
+  cert-config: {}
 
 configs:
   nginx_config:
     file: ../config/nginx.conf
   backend_nodemon:
     file: ../backend/nodemon.json
+  nginx_stream_config:
+    file: ../config/01-mqtt.stream
