@@ -1,0 +1,7833 @@
+{
+	"info": {
+		"_postman_id": "27af1d98-e4ed-416a-b757-85a74661e6c5",
+		"name": "Big Data",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39148655",
+		"_collection_link": "https://bold-shuttle-827895.postman.co/workspace/Team-Workspace~5289c5d3-f9e1-4805-80f2-3a92f74cfcb6/collection/39277023-27af1d98-e4ed-416a-b757-85a74661e6c5?action=share&source=collection_link&creator=39148655"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const body = pm.response.json()",
+									"if (!body.data) return;",
+									"pm.environment.set(\"AuthToken\", body.data.accessToken.token);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"\r",
+									"const btoa = require('btoa');\r",
+									"const passwordRaw = JSON.parse(pm.request.body.raw).password;\r",
+									"var password = btoa(passwordRaw);\r",
+									"console.log(password)\r",
+									"const body = {\r",
+									"    mode: 'raw',\r",
+									"    raw: JSON.stringify({\r",
+									"        username: JSON.parse(pm.request.body.raw).username,\r",
+									"        password: password\r",
+									"    }),\r",
+									"    options: {\r",
+									"        raw: {\r",
+									"            language: 'json'\r",
+									"        }\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"pm.request.body.update(body);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"admin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"login"
+							]
+						},
+						"description": "### Login\n\nThis endpoint is used to authenticate a user and obtain access and refresh tokens.\n\n#### Request Body\n\n- `user` (string, required) - The username of the user.\n    \n- `password` (string, required) - The password of the user, encoded in Base64 format.\n    \n\n#### Response\n\n- `accessToken` (object)\n    \n    - `authType` (string) - The type of authentication.\n        \n    - `token` (string) - The access token.\n        \n- `refreshToken` (object)\n    \n    - `token` (string) - The refresh token.\n        \n- `status` (string): The status of the logout operation.\n    \n- `message` (string): Additional information or message related to the logout operation."
+					},
+					"response": [
+						{
+							"name": "200 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"Admin\",\r\n    \"password\": \"UGFzc3dvcmQ=\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/login",
+									"path": [
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"accessToken\": {\n            \"authType\": \"bearer\",\n            \"token\": \"string\"\n        }\n    },\n    \"status\": \"Success\",\n    \"message\": \"Login successful\"\n}"
+						},
+						{
+							"name": "400 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"\",\r\n    \"password\": \"UGFzc3dvcmQ=\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/login",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"login"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"MissingCredentials\",\r\n    \"message\": \"Some credentials missing\"\r\n}"
+						},
+						{
+							"name": "401 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"Admin1\",\r\n    \"password\": \"UGFzc3dvcmQ=\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/login",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"login"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"InvalidCredentials\",\n    \"message\": \"Wrong username or password\"\n}"
+						},
+						{
+							"name": "500 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"Admin\",\r\n    \"password\": \"UGFzc3dvcmQ=\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/login",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"login"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"ServerError\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refreshToken\": \"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/logout",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"logout"
+							]
+						},
+						"description": "### Logout\n\nThe `Logout` endpoint is used to log out a user by invalidating the refresh token.\n\n#### Request Body\n\n- `refreshToken` (string, required): The refresh token of the user.\n    \n\n#### Response\n\nThe response for this request is a JSON object with the following properties:\n\n- `refreshToken` (string) - The refresh token.\n    \n- `status` (string): The status of the logout operation.\n    \n- `message` (string): Additional information or message related to the logout operation."
+					},
+					"response": [
+						{
+							"name": "200 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"refreshToken\": \"string\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/logout",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"logout"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Success\",\n    \"message\": \"Logout\"\n}"
+						},
+						{
+							"name": "400 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/logout",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"logout"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"MissingDetails\",\n    \"message\": \"Some error message (TBD)\"\n}"
+						},
+						{
+							"name": "500 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"refreshToken\": \"string\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/logout",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"logout"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"ServerError\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Acces Token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\": \"djiru390uffkf98r3f.diu389\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/accessToken",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"accessToken"
+							]
+						},
+						"description": "### Access Token Endpoint\n\nThis endpoint is used to retrieve an access token.\n\n#### Request Body\n\n- `refreshToken` (string, required): The refresh token of the user.\n    \n\n#### Response\n\nThe response for this request is a JSON object with the following properties:\n\n- `status` (string): The status of the logout operation.\n    \n- `message` (string): Additional information or message related to the logout operation.\n    \n\n#### Response JSON Schema\n\n``` json\n{\n    \"accessToken\": {\n        \"authType\": \"Type\",\n        \"token\": \"Token\"\n    }\n}\n\n ```"
+					},
+					"response": [
+						{
+							"name": "200 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"refreshToken\": \"djiru390uffkf98r3f.diu389\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/accessToken",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"accessToken"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "refreshToken=didj9w3ej3uu3rfh893y8w3",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"accessToken\": {\n        \"authType\": \"bearer\",\n        \"token\": \"fjkhfheie\"\n    }\n}"
+						},
+						{
+							"name": "400 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"refreshToken\": \"djiru390uffkf98r3f.diu389\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/accessToken",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"accessToken"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"MissingData\",\n    \"message\": \"Missing authentication\"\n}"
+						},
+						{
+							"name": "403 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"refreshToken\": \"djiru390uffkf98r3f.diu389\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/accessToken",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"accessToken"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Unauthorized\",\n    \"message\": \"Not authorized\"\n}"
+						},
+						{
+							"name": "500 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"refreshToken\": \"djiru390uffkf98r3f.diu389\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/accessToken",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"accessToken"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"ServerError\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/refreshToken",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"refreshToken"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/refreshToken",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"refreshToken"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "refreshToken=didj9w3ej3uu3rfh893y8w3",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"refreshToken\": {\n        \"token\": \"fjkhfheie\"\n    }\n}"
+						},
+						{
+							"name": "400 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/refreshToken",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"refreshToken"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"MissingData\",\n    \"message\": \"Missing authentication\"\n}"
+						},
+						{
+							"name": "403 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/refreshToken",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"refreshToken"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Unauthorized\",\n    \"message\": \"Not authorized\"\n}"
+						},
+						{
+							"name": "500 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/refreshToken",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"refreshToken"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"ServerError\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Get user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/manage/user?id=string&username=string&email=string",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"manage",
+								"user"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "string",
+									"description": "Id on a single table"
+								},
+								{
+									"key": "username",
+									"value": "string",
+									"description": "Username"
+								},
+								{
+									"key": "email",
+									"value": "string",
+									"description": "User mail"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/manage/user?id=string&username=string&email=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "username",
+											"value": "string",
+											"description": "Username"
+										},
+										{
+											"key": "email",
+											"value": "string",
+											"description": "User mail"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"data\": [\r\n        {\r\n            \"id\": \"string\",\r\n            \"name\": \"string\",\r\n            \"username\": \"string\",\r\n            \"email\": \"string\",\r\n            \"initials\": \"string\",\r\n            \"active\": \"boolean\",\r\n            \"permissions\": [\r\n                {\r\n                    \"code\": \"string\",\r\n                    \"description\": \"string\"\r\n                }\r\n            ]\r\n        }\r\n    ],\r\n    \"status\": \"Found\",\r\n    \"message\": \"User(s) found\"\r\n}"
+						},
+						{
+							"name": "400 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/manage/user?id=string&username=string&email=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "username",
+											"value": "string",
+											"description": "Username"
+										},
+										{
+											"key": "email",
+											"value": "string",
+											"description": "User mail"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"InvaildDetails\",\n    \"message\": \"Invalid Params\"\n}"
+						},
+						{
+							"name": "401 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/manage/user?id=string&username=string&email=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "username",
+											"value": "string",
+											"description": "Username"
+										},
+										{
+											"key": "email",
+											"value": "string",
+											"description": "User mail"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"Not authorized\"\r\n}"
+						},
+						{
+							"name": "403 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/manage/user?id=string&username=string&email=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "username",
+											"value": "string",
+											"description": "Username"
+										},
+										{
+											"key": "email",
+											"value": "string",
+											"description": "User mail"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/manage/user?id=string&username=string&email=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "username",
+											"value": "string",
+											"description": "Username"
+										},
+										{
+											"key": "email",
+											"value": "string",
+											"description": "User mail"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"NotFound\",\n    \"message\": \"User(s) not found\"\n}"
+						},
+						{
+							"name": "500 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/manage/user?id=string&username=string&email=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "username",
+											"value": "string",
+											"description": "Username"
+										},
+										{
+											"key": "email",
+											"value": "string",
+											"description": "User mail"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get settings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/profile",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"profile"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/profile/settings",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"profile",
+										"settings"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"data\": [\r\n        {\r\n            \"id\": \"string\",\r\n            \"initials\": \"string\",\r\n            \"name\": \"string\",\r\n            \"username\": \"string\",\r\n            \"email\": \"string\",\r\n            \"permissions\": [\r\n                {\r\n                    \"code\": \"string\",\r\n                    \"description\": \"string\"\r\n                }\r\n            ]\r\n        }\r\n    ],\r\n    \"status\": \"Found\",\r\n    \"message\": \"Found Setting\"\r\n}"
+						},
+						{
+							"name": "400 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/profile/settings",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"profile",
+										"settings"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"InvaildDetails\",\n    \"message\": \"Invalid Params\"\n}"
+						},
+						{
+							"name": "401 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/profile/settings",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"profile",
+										"settings"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"Not authorized\"\r\n}"
+						},
+						{
+							"name": "403 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/profile/settings",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"profile",
+										"settings"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/profile/settings",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"profile",
+										"settings"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"NotFound\",\n    \"message\": \"User have no settings\"\n}"
+						},
+						{
+							"name": "500 Copy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/profile/settings",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"profile",
+										"settings"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create user",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"email\": \"string\",\r\n    \"password\": \"base64\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/manage/user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"manage",
+								"user"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"mail\": \"string\",\r\n    \"password\": \"base64\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Created\",\r\n    \"message\": \"Created user\"\r\n}"
+						},
+						{
+							"name": "400 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"mail\": \"string\",\r\n    \"password\": \"base64\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "Text",
+							"header": [
+								{}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date"
+								}
+							],
+							"body": "{\r\n    \"status\": \"InvaildDetails\",\r\n    \"message\": \"Invalid Params\"\r\n}"
+						},
+						{
+							"name": "401 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"mail\": \"string\",\r\n    \"password\": \"base64\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"Not authorized\"\r\n}"
+						},
+						{
+							"name": "403 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"mail\": \"string\",\r\n    \"password\": \"base64\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "500 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"mail\": \"string\",\r\n    \"password\": \"base64\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update user",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"mail\": \"string\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/manage/user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"manage",
+								"user"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"mail\": \"string\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"user"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Updated\",\r\n    \"message\": \"Updated user\"\r\n}"
+						},
+						{
+							"name": "400 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"mail\": \"string\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"MissingDetails\",\r\n    \"message\": \"Some error message (TBD)\"\r\n}"
+						},
+						{
+							"name": "401 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"mail\": \"string\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Unauthorized\",\n    \"message\": \"Not authorized\"\n}"
+						},
+						{
+							"name": "403 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"mail\": \"string\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"mail\": \"string\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"UpdateFaild\",\r\n    \"message\": \"Faild to update resevation\"\r\n}"
+						},
+						{
+							"name": "500 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"mail\": \"string\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/user",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"user"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update user password",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"password\": \"base64\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/manage/password",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"manage",
+								"password"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": \"string\",\r\n    \"password\": \"base64\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/password",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"password"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Updated\",\r\n    \"message\": \"Updated Password\"\r\n}"
+						},
+						{
+							"name": "400 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": \"string\",\r\n    \"password\": \"base64\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/password",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"password"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"MissingDetails\",\r\n    \"message\": \"Some error message (TBD)\"\r\n}"
+						},
+						{
+							"name": "401 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": \"string\",\r\n    \"password\": \"base64\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/password",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"password"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Unauthorized\",\n    \"message\": \"Not authorized\"\n}"
+						},
+						{
+							"name": "403 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": \"string\",\r\n    \"password\": \"base64\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/password",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"password"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"string\",\r\n    \"username\": \"string\",\r\n    \"mail\": \"string\",\r\n    \"permissions\": [\r\n        \"table.see\",\r\n        \"table.create\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/password",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"password"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"UpdateFaild\",\r\n    \"message\": \"Faild to update user\"\r\n}"
+						},
+						{
+							"name": "500 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": \"string\",\r\n    \"password\": \"base64\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/manage/password",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"manage",
+										"password"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update own password",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"\r",
+									"const btoa = require('btoa');\r",
+									"const oldPasswordRaw = JSON.parse(pm.request.body.raw).oldPassword;\r",
+									"const oldPassword = btoa(oldPasswordRaw);\r",
+									"\r",
+									"const newPasswordRaw = JSON.parse(pm.request.body.raw).newPassword;\r",
+									"const newPassword = btoa(newPasswordRaw);\r",
+									"\r",
+									"const body = {\r",
+									"    mode: 'raw',\r",
+									"    raw: JSON.stringify({\r",
+									"        oldPassword: oldPassword,\r",
+									"        newPassword: newPassword\r",
+									"    }),\r",
+									"    options: {\r",
+									"        raw: {\r",
+									"            language: 'json'\r",
+									"        }\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"pm.request.body.update(body);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"oldPassword\": \"admin1=A\",\r\n    \"newPassword\": \"admin1=A\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/profile/reset",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"profile",
+								"reset"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"oldPassword\": \"base64\",\r\n    \"newPassword\": \"base64\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/profile/reset",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"profile",
+										"reset"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Updated\",\r\n    \"message\": \"Updated Password\"\r\n}"
+						},
+						{
+							"name": "400 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"oldPassword\": \"base64\",\r\n    \"newPassword\": \"base64\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/profile/reset",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"profile",
+										"reset"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"MissingDetails\",\r\n    \"message\": \"Some error message (TBD)\"\r\n}"
+						},
+						{
+							"name": "401 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"oldPassword\": \"base64\",\r\n    \"newPassword\": \"base64\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/profile/reset",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"profile",
+										"reset"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Unauthorized\",\n    \"message\": \"Not authorized\"\n}"
+						},
+						{
+							"name": "404 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"oldPassword\": \"base64\",\r\n    \"newPassword\": \"base64\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/profile/reset",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"profile",
+										"reset"
+									]
+								}
+							},
+							"status": "Bad Request'",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"UpdateFaild\",\r\n    \"message\": \"Faild to update password\"\r\n}"
+						},
+						{
+							"name": "500 Copy",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"oldPassword\": \"base64\",\r\n    \"newPassword\": \"base64\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/profile/reset",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"profile",
+										"reset"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/user/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "UUID",
+									"description": "UUID on the user that should be disabled"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/user/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"user",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "UUID on the user item that should be disabled"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Deleted\",\r\n    \"message\": \"User Disabled\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/user/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"user",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "UUID on the user item that should be disabled"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"MissingDetails\",\r\n    \"message\": \"Some error message (TBD)\"\r\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/user/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"user",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "UUID on the user item that should be disabled"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Unauthorized\",\n    \"message\": \"Not authorized\"\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/user/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"user",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "UUID on the user item that should be disabled"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/user/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"user",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "UUID on the user item that should be disabled"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"DeletionFaild\",\r\n    \"message\": \"User not found\"\r\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/user/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"user",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "UUID on the user item that should be disabled"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Manage",
+			"item": [
+				{
+					"name": "Get Permission",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/manage/permission?id=string&code=string&permissionGroupId=string",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"manage",
+								"permission"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "string"
+								},
+								{
+									"key": "code",
+									"value": "string"
+								},
+								{
+									"key": "permissionGroupId",
+									"value": "string"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Device",
+			"item": [
+				{
+					"name": "Get Device",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/device?id=string&name=string&location=string&status=string",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"device"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "string",
+									"description": "Uuid on the device"
+								},
+								{
+									"key": "name",
+									"value": "string",
+									"description": "Name ont the device"
+								},
+								{
+									"key": "location",
+									"value": "string",
+									"description": "The location name or uuid of the device"
+								},
+								{
+									"key": "status",
+									"value": "string",
+									"description": "The status on the device. ACTIVE | INACTIVE | MAINTENANCE"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"data\": [\r\n        {\r\n            \"uuid\": \"string\",\r\n            \"name\": \"string\",\r\n            \"status\": \"enum\",\r\n            \"frequency\": \"number\",\r\n            \"Location\": {\r\n                \"uuid\": \"string\",\r\n                \"name\": \"string\"\r\n            }\r\n        }\r\n    ],\r\n    \"status\": \"Found\",\r\n    \"message\": \"Device(s) found\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"InvaildDetails\",\n    \"message\": \"Invalid Params\"\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"Not authorized\"\r\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/device?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"NotFound\",\n    \"message\": \"User(s) not found\"\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Device (Api key)",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "string",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-api-key",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Device-Id",
+								"value": "string",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/device?name=string&location=string&status=enum",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"device"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "string",
+									"description": "Name ont the device"
+								},
+								{
+									"key": "location",
+									"value": "string",
+									"description": "The location on the device"
+								},
+								{
+									"key": "status",
+									"value": "enum",
+									"description": "The status on the device. ACTIVE | INACTIVE | MAINTENANCE"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"data\": [\r\n        {\r\n            \"uuid\": \"string\",\r\n            \"name\": \"string\",\r\n            \"status\": \"enum\",\r\n            \"frequency\": \"number\",\r\n            \"location\": {\r\n                \"uuid\": \"string\",\r\n                \"name\": \"string\"\r\n            }\r\n        }\r\n    ],\r\n    \"status\": \"Found\",\r\n    \"message\": \"Device(s) found\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"InvaildDetails\",\n    \"message\": \"Invalid Params\"\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"x-api-key header is required when deviceId is provided\"\r\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/device?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"NotFound\",\n    \"message\": \"User(s) not found\"\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Device",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uuid\": \"string\",\n    \"name\": \"string\",\n    \"frequency\": \"number\",\n    \"locationUuid\": \"string\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/device",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"device"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Created\",\r\n    \"message\": \"Created Location\"\r\n}"
+						},
+						{
+							"name": "400 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "Text",
+							"header": [
+								{}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date"
+								}
+							],
+							"body": "{\r\n    \"status\": \"InvaildDetails\",\r\n    \"message\": \"Invalid Params\"\r\n}"
+						},
+						{
+							"name": "401 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"Not authorized\"\r\n}"
+						},
+						{
+							"name": "403 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "500 Copy",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Device",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"uuid\": \"string\",\r\n        \"name\": \"string\",\r\n        \"frequency\": \"number (max 2147483647)\",\r\n        \"status\": \"enum\",\r\n        \"locationUuid\": \"string\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/device",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"device"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/device",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Updated\",\r\n    \"message\": \"Updated Device\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/device",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"MissingDetails\",\r\n    \"message\": \"Some error message (TBD)\"\r\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/device",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Unauthorized\",\n    \"message\": \"Not authorized\"\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/device",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/device",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"UpdateFailed\",\r\n    \"message\": \"Device not found\"\r\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/device",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Device",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/device/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"device",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Uuid on the device"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the device"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Deleted\",\r\n    \"message\": \"Device deleted\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the device"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"InvalidDetails\",\r\n    \"message\": \"[id] must be a valid GUID\"\r\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the device"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Unauthorized\",\n    \"message\": \"Not authorized\"\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the device"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the device"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"DeletionFaild\",\r\n    \"message\": \"Device not found\"\r\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/device/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the device"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Reset Device api key",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/device/reset/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"device",
+								"reset",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Device uuid"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/device/reset/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device",
+										"reset",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": ""
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"data\": {\r\n        \"api-key\": \"string\"\r\n    },\r\n    \"status\": \"Updated\",\r\n    \"message\": \"Updated Device api key\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/device/reset/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device",
+										"reset",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": ""
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"MissingDetails\",\r\n    \"message\": \"Some error message (TBD)\"\r\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/device/reset/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device",
+										"reset",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": ""
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Unauthorized\",\n    \"message\": \"Not authorized\"\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/device/reset/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device",
+										"reset",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": ""
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/device/reset/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device",
+										"reset",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": ""
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"data\": null,\r\n    \"status\": \"NotFound\",\r\n    \"message\": \"Device not found\"\r\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/device/reset/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"device",
+										"reset",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": ""
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Location",
+			"item": [
+				{
+					"name": "Get Location",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/location?id=string&name=string",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"location"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "string",
+									"description": "Uuid on the Location"
+								},
+								{
+									"key": "name",
+									"value": "string",
+									"description": "Name ont the Location"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/location?id=string&name=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"data\": [\r\n        {\r\n            \"uuid\": \"string\",\r\n            \"name\": \"string\",\r\n            \"devices\": [\r\n                {\r\n                    \"uuid\": \"string\",\r\n                    \"name\": \"string\",\r\n                    \"status\": \"enum\",\r\n                    \"frequency\": \"number\"\r\n                }\r\n\r\n            ]\r\n        }\r\n    ],\r\n    \"status\": \"Found\",\r\n    \"message\": \"Location(s) found\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/location?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"InvaildDetails\",\n    \"message\": \"Invalid Params\"\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/location?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"Not authorized\"\r\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/location?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/location?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"NotFound\",\n    \"message\": \"User(s) not found\"\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/location?id=string&name=string&location=string&status=enum",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Id on a single table"
+										},
+										{
+											"key": "name",
+											"value": "string"
+										},
+										{
+											"key": "location",
+											"value": "string"
+										},
+										{
+											"key": "status",
+											"value": "enum"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Location",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/location",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"location"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Created\",\r\n    \"message\": \"Created new location\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "Text",
+							"header": [
+								{}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date"
+								}
+							],
+							"body": "{\r\n    \"status\": \"InvaildDetails\",\r\n    \"message\": \"Invalid Params\"\r\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"Not authorized\"\r\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Location",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"uuid\": \"string\",\r\n        \"name\": \"string\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/location",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"location"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Updated\",\r\n    \"message\": \"Updated location\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"InvalidDetails\",\r\n    \"message\": \"[id] must be a valid GUID\"\r\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Unauthorized\",\n    \"message\": \"Not authorized\"\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"UpdateFaild\",\r\n    \"message\": \"Faild to update location\"\r\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/location",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete location",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/location/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"location",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Uuid on the location"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/location/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the location"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Deleted\",\r\n    \"message\": \"Location deleted\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/location/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the location"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"InvalidDetails\",\r\n    \"message\": \"[id] must be a valid GUID\"\r\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/location/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the location"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Unauthorized\",\n    \"message\": \"Not authorized\"\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/location/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the location"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/location/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the location"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"DeletionFaild\",\r\n    \"message\": \"location not found\"\r\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/location/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"location",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the location"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Alert",
+			"item": [
+				{
+					"name": "Get Alert",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/alert?id=string&name=string&type=enum&identifier=string&deviceId=string",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"alert"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "string",
+									"description": "Uuid on the Alert"
+								},
+								{
+									"key": "name",
+									"value": "string",
+									"description": "Name on the Alert"
+								},
+								{
+									"key": "type",
+									"value": "enum",
+									"description": "Type of the Alert"
+								},
+								{
+									"key": "identifier",
+									"value": "string",
+									"description": "Identifier of the alert"
+								},
+								{
+									"key": "deviceId",
+									"value": "string",
+									"description": "Uuid on the device the alert came from"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert",
+											"disabled": true
+										},
+										{
+											"key": "name",
+											"value": "string",
+											"description": "Name on the Alert",
+											"disabled": true
+										},
+										{
+											"key": "type",
+											"value": "enum",
+											"description": "Type of the Alert",
+											"disabled": true
+										},
+										{
+											"key": "identifier",
+											"value": "string",
+											"description": "Identifier of the alert",
+											"disabled": true
+										},
+										{
+											"key": "deviceId",
+											"value": "string",
+											"description": "Uuid on the device the alert came from",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"data\": [\r\n        {\r\n            \"uuid\": \"string\",\r\n            \"name\": \"string\",\r\n            \"description\": \"string\",\r\n            \"type\": \"enum\",\r\n            \"threshold\": \"number\",\r\n            \"device\": \r\n                {\r\n                    \"uuid\": \"string\",\r\n                    \"name\": \"string\"\r\n                }\r\n        }\r\n    ],\r\n    \"status\": \"Found\",\r\n    \"message\": \"Alert(s) found\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert?id=string&name=string&type=enum&identifier=string&deviceId=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										},
+										{
+											"key": "name",
+											"value": "string",
+											"description": "Name on the Alert"
+										},
+										{
+											"key": "type",
+											"value": "enum",
+											"description": "Type of the Alert"
+										},
+										{
+											"key": "identifier",
+											"value": "string",
+											"description": "Identifier of the alert"
+										},
+										{
+											"key": "deviceId",
+											"value": "string",
+											"description": "Uuid on the device the alert came from"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"InvaildDetails\",\n    \"message\": \"Invalid Params\"\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert?id=string&name=string&type=enum&identifier=string&deviceId=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										},
+										{
+											"key": "name",
+											"value": "string",
+											"description": "Name on the Alert"
+										},
+										{
+											"key": "type",
+											"value": "enum",
+											"description": "Type of the Alert"
+										},
+										{
+											"key": "identifier",
+											"value": "string",
+											"description": "Identifier of the alert"
+										},
+										{
+											"key": "deviceId",
+											"value": "string",
+											"description": "Uuid on the device the alert came from"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"Not authorized\"\r\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/alert?id=string&name=string&type=enum&identifier=string&deviceId=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										},
+										{
+											"key": "name",
+											"value": "string",
+											"description": "Name on the Alert"
+										},
+										{
+											"key": "type",
+											"value": "enum",
+											"description": "Type of the Alert"
+										},
+										{
+											"key": "identifier",
+											"value": "string",
+											"description": "Identifier of the alert"
+										},
+										{
+											"key": "deviceId",
+											"value": "string",
+											"description": "Uuid on the device the alert came from"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert?id=string&name=string&type=enum&identifier=string&deviceId=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										},
+										{
+											"key": "name",
+											"value": "string",
+											"description": "Name on the Alert"
+										},
+										{
+											"key": "type",
+											"value": "enum",
+											"description": "Type of the Alert"
+										},
+										{
+											"key": "identifier",
+											"value": "string",
+											"description": "Identifier of the alert"
+										},
+										{
+											"key": "deviceId",
+											"value": "string",
+											"description": "Uuid on the device the alert came from"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"NotFound\",\n    \"message\": \"Alert(s) not found\"\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert?id=string&name=string&type=enum&identifier=string&deviceId=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										},
+										{
+											"key": "name",
+											"value": "string",
+											"description": "Name on the Alert"
+										},
+										{
+											"key": "type",
+											"value": "enum",
+											"description": "Type of the Alert"
+										},
+										{
+											"key": "identifier",
+											"value": "string",
+											"description": "Identifier of the alert"
+										},
+										{
+											"key": "deviceId",
+											"value": "string",
+											"description": "Uuid on the device the alert came from"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Alert",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"string\",\r\n    \"description\": \"string\",\r\n    \"type\": \"enum\",\r\n    \"threshold\": \"number\",\r\n    \"identifier\": \"enum\",\r\n    \"deviceId\": \"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/Alert",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"Alert"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Created\",\r\n    \"message\": \"Created Alert\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "Text",
+							"header": [
+								{}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date"
+								}
+							],
+							"body": "{\r\n    \"status\": \"InvaildDetails\",\r\n    \"message\": \"Invalid Params\"\r\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"Not authorized\"\r\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Alert",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"uuid\": \"string\",\r\n        \"name\": \"string\",\r\n        \"description\": \"string\",\r\n        \"type\": \"enum\",\r\n        \"threshold\": \"number\",\r\n        \"identifier\": \"enum\",\r\n        \"deviceId\": \"string\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/Alert",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"Alert"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Updated\",\r\n    \"message\": \"Updated Alert\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"InvalidDetails\",\r\n    \"message\": \"[id] must be a valid GUID\"\r\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Unauthorized\",\n    \"message\": \"Not authorized\"\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"UpdateFaild\",\r\n    \"message\": \"Faild to update Alert\"\r\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Alert",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/alert/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"alert",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Uuid on the Alert"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Deleted\",\r\n    \"message\": \"Alert deleted\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"MissingDetails\",\r\n    \"message\": \"Some error message (TBD)\"\r\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Unauthorized\",\n    \"message\": \"Not authorized\"\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"DeletionFaild\",\r\n    \"message\": \"Alert not found\"\r\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "UUID",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Data (Time series)",
+			"item": [
+				{
+					"name": "Get Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/data?id=number&identifier=string&name=string&deviceId=string&locationId=string",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"data"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "number",
+									"description": "Id on the data"
+								},
+								{
+									"key": "identifier",
+									"value": "string",
+									"description": "Identifier for the data"
+								},
+								{
+									"key": "name",
+									"value": "string",
+									"description": "Name of the data"
+								},
+								{
+									"key": "deviceId",
+									"value": "string",
+									"description": "Device uuid for the data"
+								},
+								{
+									"key": "locationId",
+									"value": "string",
+									"description": "Location uuid for the data"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/data?id=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"data"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"data\": [\r\n        {\r\n            \"id\": \"number\",\r\n            \"value\": \"number\",\r\n            \"identifier\": \"enum\",\r\n            \"name\": \"string\",\r\n            \"deviceId\": \"string\",\r\n            \"locationId\": \"string\"\r\n        }\r\n    ],\r\n    \"status\": \"Found\",\r\n    \"message\": \"Data found\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/data?id=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"data"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"InvaildDetails\",\n    \"message\": \"Invalid Params\"\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/data?id=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"data"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"Not authorized\"\r\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/data?id=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"data"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/data?id=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"data"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"NotFound\",\n    \"message\": \"Data not found\"\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/data?id=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"data"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Add Data",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-api-key",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "device-id",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"value\": \"number\",\r\n        \"identifier\": \"enum\",\r\n        \"name\": \"string\"\r\n    },\r\n    {\r\n        \"value\": \"number\",\r\n        \"identifier\": \"enum\",\r\n        \"name\": \"string\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/data",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"data"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Created\",\r\n    \"message\": \"Created Alert\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "Text",
+							"header": [
+								{}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date"
+								}
+							],
+							"body": "{\r\n    \"status\": \"InvaildDetails\",\r\n    \"message\": \"Invalid Params\"\r\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"Not authorized\"\r\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/alert",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "TS Alert",
+			"item": [
+				{
+					"name": "Get TS Alert",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/tsalert?id=string",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tsalert"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "string",
+									"description": "Uuid"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/tsalert?id=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"tsalert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"data\": [\r\n        {\r\n            \"id\": \"number\",\r\n            \"alert\": {\r\n                \"uuid\": \"string\",\r\n                \"name\": \"string\",\r\n                \"description\": \"string\",\r\n                \"type\": \"enum\",\r\n                \"threshold\": \"number\",\r\n                \"identifier\": \"enum\"\r\n            },\r\n            \"data\": {\r\n                \"id\": \"number\",\r\n                \"value\": \"number\",\r\n                \"identifier\": \"enum\",\r\n                \"name\": \"string\",\r\n                \"device\": {\r\n                    \"uuid\": \"string\",\r\n                    \"name\": \"string\"\r\n                },\r\n                \"location\": {\r\n                    \"uuid\": \"string\",\r\n                    \"name\": \"string\"\r\n                }\r\n            }\r\n        }\r\n    ],\r\n    \"status\": \"Found\",\r\n    \"message\": \"Alert notification(s) found\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/tsalert?id=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"tsalert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"InvaildDetails\",\n    \"message\": \"Invalid Params\"\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/tsalert?id=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"tsalert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"Not authorized\"\r\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/tsalert?id=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"tsalert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/tsalert?id=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"tsalert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"NotFound\",\n    \"message\": \"Alert(s) not found\"\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/tsalert?id=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"tsalert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Stats",
+			"item": [
+				{
+					"name": "Get Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/alert?id=string&name=string&type=enum&identifier=string&deviceId=string",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"alert"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "string",
+									"description": "Uuid on the Alert"
+								},
+								{
+									"key": "name",
+									"value": "string",
+									"description": "Name on the Alert"
+								},
+								{
+									"key": "type",
+									"value": "enum",
+									"description": "Type of the Alert"
+								},
+								{
+									"key": "identifier",
+									"value": "string",
+									"description": "Identifier of the alert"
+								},
+								{
+									"key": "deviceId",
+									"value": "string",
+									"description": "Uuid on the device the alert came from"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/stats?device&sensor&start-datetime&end-datetime",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"stats"
+									],
+									"query": [
+										{
+											"key": "device",
+											"value": null
+										},
+										{
+											"key": "sensor",
+											"value": null
+										},
+										{
+											"key": "start-datetime",
+											"value": null
+										},
+										{
+											"key": "end-datetime",
+											"value": null
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"data\": [\r\n        {\r\n            \"uuid\": \"string\",\r\n            \"name\": \"string\",\r\n            \"status\": \"enum\",\r\n            \"frequency\": \"number\",\r\n            \"Location\": {\r\n                \"uuid\": \"string\",\r\n                \"name\": \"string\"\r\n            },\r\n            \"sensors\": [\r\n                {\r\n                    \"name\": \"string\",\r\n                    \"data\": [\r\n                        {\r\n                            \"value\": \"number\",\r\n                            \"identifier\": \"enum\",\r\n                            \"date\": \"date\"\r\n                        }\r\n\r\n                    ]\r\n                }\r\n\r\n            ]\r\n        }\r\n    ],\r\n    \"status\": \"Found\",\r\n    \"message\": \"Stats(s) found\"\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert?id=string&name=string&type=enum&identifier=string&deviceId=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										},
+										{
+											"key": "name",
+											"value": "string",
+											"description": "Name on the Alert"
+										},
+										{
+											"key": "type",
+											"value": "enum",
+											"description": "Type of the Alert"
+										},
+										{
+											"key": "identifier",
+											"value": "string",
+											"description": "Identifier of the alert"
+										},
+										{
+											"key": "deviceId",
+											"value": "string",
+											"description": "Uuid on the device the alert came from"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"InvaildDetails\",\n    \"message\": \"Invalid Params\"\n}"
+						},
+						{
+							"name": "401",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert?id=string&name=string&type=enum&identifier=string&deviceId=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										},
+										{
+											"key": "name",
+											"value": "string",
+											"description": "Name on the Alert"
+										},
+										{
+											"key": "type",
+											"value": "enum",
+											"description": "Type of the Alert"
+										},
+										{
+											"key": "identifier",
+											"value": "string",
+											"description": "Identifier of the alert"
+										},
+										{
+											"key": "deviceId",
+											"value": "string",
+											"description": "Uuid on the device the alert came from"
+										}
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"status\": \"Unauthorized\",\r\n    \"message\": \"Not authorized\"\r\n}"
+						},
+						{
+							"name": "403",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/alert?id=string&name=string&type=enum&identifier=string&deviceId=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										},
+										{
+											"key": "name",
+											"value": "string",
+											"description": "Name on the Alert"
+										},
+										{
+											"key": "type",
+											"value": "enum",
+											"description": "Type of the Alert"
+										},
+										{
+											"key": "identifier",
+											"value": "string",
+											"description": "Identifier of the alert"
+										},
+										{
+											"key": "deviceId",
+											"value": "string",
+											"description": "Uuid on the device the alert came from"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Forbidden\",\n    \"message\": \"Access denied\"\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert?id=string&name=string&type=enum&identifier=string&deviceId=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										},
+										{
+											"key": "name",
+											"value": "string",
+											"description": "Name on the Alert"
+										},
+										{
+											"key": "type",
+											"value": "enum",
+											"description": "Type of the Alert"
+										},
+										{
+											"key": "identifier",
+											"value": "string",
+											"description": "Identifier of the alert"
+										},
+										{
+											"key": "deviceId",
+											"value": "string",
+											"description": "Uuid on the device the alert came from"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"NotFound\",\n    \"message\": \"Alert(s) not found\"\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/alert?id=string&name=string&type=enum&identifier=string&deviceId=string",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"alert"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "string",
+											"description": "Uuid on the Alert"
+										},
+										{
+											"key": "name",
+											"value": "string",
+											"description": "Name on the Alert"
+										},
+										{
+											"key": "type",
+											"value": "enum",
+											"description": "Type of the Alert"
+										},
+										{
+											"key": "identifier",
+											"value": "string",
+											"description": "Identifier of the alert"
+										},
+										{
+											"key": "deviceId",
+											"value": "string",
+											"description": "Uuid on the device the alert came from"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"Failed\",\n    \"message\": \"Something went wrong on our end\"\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{AuthToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"const postRequest = {\r",
+					"    url: pm.environment.get(\"url\") + \"/login\",\r",
+					"    method: 'post',\r",
+					"    header: {\r",
+					"        'Content-Type': 'application/json',\r",
+					"    },\r",
+					"    body: {\r",
+					"        mode: 'raw',\r",
+					"        raw: JSON.stringify({\r",
+					"            username: pm.variables.get(\"User\"),\r",
+					"            password: pm.variables.get(\"Password\")\r",
+					"        })\r",
+					"    }\r",
+					"}\r",
+					"\r",
+					"// call login"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "PasswordBase64",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "RefreshToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "AuthToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
