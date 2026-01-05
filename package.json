@@ -1,5 +1,5 @@
 {
-  "name": "bigdata",
+  "name": "zero",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -12,6 +12,6 @@
     "seed": "cd backend && npx prisma db push && npx prisma db seed",
     "prisma:generate": "cd backend && npx prisma generate"
   },
-  "author": "bigdata",
-  "description": "World best BIG Data management system"
+  "author": "zero",
+  "description": "World best IOT management system"
 }

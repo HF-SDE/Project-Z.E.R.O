@@ -61,35 +61,6 @@ services:
     networks:
       - internal
 
-  mqtt5:
-    container_name: mqtt5
-    build:
-      context: ..
-      dockerfile: docker/mosquitto.Dockerfile
-    expose:
-      - 1883 # Plain MQTT
-      - 8883 # Secure MQTT (TLS)
-      - 8080 # Secure MQTT (TLS) v2
-      - 9001 # WebSocket (optional)
-      - 9443 # Secure WebSocket (optional)
-      - 80 # Certbot
-    depends_on:
-      - reverse-proxy
-    env_file:
-      - ../config/environment-variables/.env.mqtt.dev
-    volumes:
-      - mqtt-data:/mosquitto/data:rw
-      - mqtt-log:/mosquitto/log:rw
-      # - cert-link:/etc/letsencrypt/live
-      # - cert-config:/etc/letsencrypt/renewal
-      # - cert:/etc/letsencrypt/archive
-    configs:
-      - source: mosquitto_config
-        target: /mosquitto/config/mosquitto.conf
-    networks:
-      - internal
-      - public
-
   db:
     container_name: db
     image: timescale/timescaledb:latest-pg17

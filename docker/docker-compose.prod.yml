@@ -86,59 +86,6 @@ services:
     networks:
       - internal
 
-  # clickhouse:
-  #   container_name: clickhouse
-  #   build:
-  #     context: ..
-  #     dockerfile: docker/clickhouse.Dockerfile
-  #   expose:
-  #     - 9000:9000
-  #     - 8123:8123
-  #   depends_on:
-  #     - db
-  #   env_file:
-  #     - ../config/environment-variables/.env.clickhouse.prod
-  #     - ../config/environment-variables/.env.db.prod
-  #   volumes:
-  #     - clickhouse_data:/var/lib/clickhouse
-  #   networks:
-  #     - internal
-
-  mqtt5:
-    container_name: mqtt5
-    build:
-      context: ..
-      dockerfile: docker/mosquitto.Dockerfile
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-    expose:
-      - 1883 # Plain MQTT
-      - 8883 # Secure MQTT (TLS)
-      - 8080 # Secure MQTT (TLS) v2
-      - 9001 # WebSocket (optional)
-      - 9443 # Secure WebSocket (optional)
-      - 80 # Certbot
-    depends_on:
-      - reverse-proxy
-    env_file:
-      - ../config/environment-variables/.env.mqtt.prod
-    volumes:
-      - mqtt-data:/mosquitto/data:rw
-      - mqtt-log:/mosquitto/log:rw
-      - cert-link:/etc/letsencrypt/live
-      - cert-config:/etc/letsencrypt/renewal
-      - cert:/etc/letsencrypt/archive
-    configs:
-      - source: mosquitto_config
-        target: /mosquitto/config/mosquitto.conf
-    networks:
-      - internal
-      - public
-
   reverse-proxy:
     container_name: reverse-proxy
     build:
@@ -172,7 +119,7 @@ services:
         target: /etc/nginx/conf.d/01-mqtt.stream
     networks:
       - internal
-      # - tunnel
+      - tunnel
       - public
 
   tunnel:

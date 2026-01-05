@@ -51,5 +51,4 @@ export interface Config {
   MQTT_BROKER: string;
   MQTT_USERNAME: string;
   MQTT_PASSWORD: string;
-  MQTT_TOPIC: string;
 }
