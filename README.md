@@ -1,8 +1,8 @@
-# BIG Data Project
+# Project Z.E.R.O
 
-Welcome to the BIG Data project! This repository contains everything you need to get the backend and website server running for the project. Follow the steps below to get started.
+Welcome to the Project Z.E.R.O! This repository contains everything you need to get the backend and website server running for the project. Follow the steps below to get started.
 
-| Welcome to the BIG Data project! This repository contains everything you need to get the backend and website server running for the project. Follow the steps below to get started. | |
+| Welcome to the Project Z.E.R.O! This repository contains everything you need to get the backend and website server running for the project. Follow the steps below to get started. | |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
 ## Prerequisites
