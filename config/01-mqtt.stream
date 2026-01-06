@@ -1,7 +1,7 @@
 stream {
     upstream mqtt_ssl {
         hash $remote_addr consistent;
-        server mqtt5:8080;
+        server mosquitto:8883;
     }
 
     server {
