@@ -88,7 +88,9 @@ services:
     volumes:
       - mqtt-data:/mosquitto/data
       - mqtt-log:/mosquitto/log
-      - ./config/mosquitto.dev.conf:/mosquitto/config/mosquitto.conf
+    configs:
+      - source: mosquitto_config
+        target: /mosquitto/config/mosquitto.conf
 
   # clickhouse:
   #   container_name: clickhouse
