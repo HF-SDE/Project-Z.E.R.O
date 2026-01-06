@@ -91,6 +91,8 @@ services:
     configs:
       - source: mosquitto_config
         target: /mosquitto/config/mosquitto.conf
+    networks:
+      - internal
 
   # clickhouse:
   #   container_name: clickhouse
