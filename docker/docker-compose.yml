@@ -1,4 +1,4 @@
-name: iotbigdata
+name: zero
 
 services:
   frontend:
@@ -20,25 +20,25 @@ services:
     networks:
       - internal
 
-  grafana:
-    container_name: grafana
-    image: grafana/grafana:main
-    expose:
-      - 9200:9200
-    depends_on:
-      - db
-      - clickhouse
-    env_file:
-      - ../config/environment-variables/.env.grafana.dev
-    volumes:
-      - ../config/grafana/defaults.ini:/usr/share/grafana/conf/defaults.ini
-      - ../config/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
-      - ../config/grafana/main.yml:/etc/grafana/provisioning/dashboards/main.yml
-      - ../config/grafana/dashboards/:/var/lib/grafana/dashboards/
-      - grafana-data:/var/lib/grafana
-    networks:
-      - internal
-      - public
+  # grafana:
+  #   container_name: grafana
+  #   image: grafana/grafana:main
+  #   expose:
+  #     - 9200:9200
+  #   depends_on:
+  #     - db
+  #     # - clickhouse
+  #   env_file:
+  #     - ../config/environment-variables/.env.grafana.dev
+  #   volumes:
+  #     - ../config/grafana/defaults.ini:/usr/share/grafana/conf/defaults.ini
+  #     - ../config/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+  #     - ../config/grafana/main.yml:/etc/grafana/provisioning/dashboards/main.yml
+  #     - ../config/grafana/dashboards/:/var/lib/grafana/dashboards/
+  #     - grafana-data:/var/lib/grafana
+  #   networks:
+  #     - internal
+  #     - public
 
   backend:
     container_name: backend
@@ -76,24 +76,38 @@ services:
       - public
       - internal
 
-  clickhouse:
-    container_name: clickhouse
-    build:
-      context: ..
-      dockerfile: docker/clickhouse.Dockerfile
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    hostname: mosquitto
+    container_name: mosquitto
+    restart: unless-stopped
     ports:
-      - 9000:9000
-      - 8123:8123
-    depends_on:
-      - db
-    env_file:
-      - ../config/environment-variables/.env.clickhouse.dev
-      - ../config/environment-variables/.env.db.dev
+      - "1883:1883" # MQTT
+      - "8883:8883" # MQTTS (secure)
+      - "9001:9001" # WebSockets
     volumes:
-      - clickhouse_data:/var/lib/clickhouse
-    networks:
-      - public
-      - internal
+      - mqtt-data:/mosquitto/data
+      - mqtt-log:/mosquitto/log
+      - ./config/mosquitto.dev.conf:/mosquitto/config/mosquitto.conf
+
+  # clickhouse:
+  #   container_name: clickhouse
+  #   build:
+  #     context: ..
+  #     dockerfile: docker/clickhouse.Dockerfile
+  #   ports:
+  #     - 9000:9000
+  #     - 8123:8123
+  #   depends_on:
+  #     - db
+  #   env_file:
+  #     - ../config/environment-variables/.env.clickhouse.dev
+  #     - ../config/environment-variables/.env.db.dev
+  #   volumes:
+  #     - clickhouse_data:/var/lib/clickhouse
+  #   networks:
+  #     - public
+  #     - internal
 
   reverse-proxy:
     container_name: reverse-proxy
@@ -107,8 +121,8 @@ services:
       - 1883:1883
     depends_on:
       - backend
-      - grafana
-      - clickhouse
+      # - grafana
+      # - clickhouse
     env_file:
       - ../config/environment-variables/.env.nginx.dev
     configs:
@@ -131,8 +145,8 @@ volumes:
   postgres_data: {}
   mqtt-data: {}
   mqtt-log: {}
-  grafana-data: {}
-  clickhouse_data: {}
+  # grafana-data: {}
+  # clickhouse_data: {}
   # cert-link: {}
   # cert: {}
   # cert-config: {}
