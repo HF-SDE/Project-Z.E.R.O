@@ -83,7 +83,7 @@ services:
     restart: unless-stopped
     ports:
       - "1883:1883" # MQTT
-      - "8883:8883" # MQTTS (secure)
+      - "8080:8080" # MQTTS (secure)
       - "9001:9001" # WebSockets
     volumes:
       - mqtt-data:/mosquitto/data
