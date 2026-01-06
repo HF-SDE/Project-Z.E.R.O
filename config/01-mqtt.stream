@@ -14,7 +14,7 @@ stream {
 
     upstream mqtt {
         hash $remote_addr consistent;
-        server mqtt5:1883;
+        server mosquitto:1883;
     }
 
     server {
