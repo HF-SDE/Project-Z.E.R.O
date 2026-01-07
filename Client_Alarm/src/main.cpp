@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include <../lib/wifiSetup.h>
 #include <../lib/SerialManager.h>
+#include <../lib/wifi_setup.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <PubSubClient.h>
@@ -8,8 +8,8 @@
 #include <../lib/MqttManager.h>
 
 //---------------------- Wifi config ----------------------
-const char *ssid = "Case-ZERO_2,4GHz";
-const char *password = "Nogetjegkanhuske";
+const char *WIFI_SSID = "Case-ZERO_2,4GHz";
+const char *WIFI_PASSWORD = "Nogetjegkanhuske";
 const int serialFrequency = 115200;
 
 //---------------------- MQTT config ----------------------
@@ -44,38 +44,36 @@ void setup()
   pinMode(redLedPin, OUTPUT);
   pinMode(blueLedPin, OUTPUT);
   pinMode(greenLedPin, OUTPUT);
-  updateWiFiStatusLED(redLedPin, greenLedPin, blueLedPin, firstWifiStartUp);
 
   Serial.println("Connecting to WiFi...");
-  try
+
+  wifiInitStatusLed(redLedPin, greenLedPin, blueLedPin);
+  updateWifiStatusLed(firstWifiStartUp);
+  firstWifiStartUp = false;
+
+  if (!wifiConnect(WIFI_SSID, WIFI_PASSWORD, 10000))
   {
-    setupWiFi(ssid, password);
-    firstWifiStartUp = false;
-  }
-  catch (const std::runtime_error &e)
-  {
-    Serial.println(e.what());
-    // Handle the error, e.g., retry or halt
+    Serial.println("WiFi failed");
+    updateWifiStatusLed(false);
+    return;
   }
 
-  mqttInit(
-      MQTT_HOST,
-      MQTT_PORT,
-      nullptr, // user
-      nullptr, // pass
-      MQTT_TOPIC);
+  Serial.print("IP: ");
+  Serial.println(wifiGetIp());
+
+  updateWifiStatusLed(false);
+
+  // mqttInit(
+  //     MQTT_HOST,
+  //     MQTT_PORT,
+  //     nullptr, // user
+  //     nullptr, // pass
+  //     MQTT_TOPIC);
 }
 
 void loop()
 {
-  updateWiFiStatusLED(redLedPin, greenLedPin, blueLedPin, firstWifiStartUp);
-
-  mqttLoop();
-
-  if (mqttIsConnected())
-  {
-    Serial.println(mqttGetLastMessage());
-  }
-
-  delay(1000);
+  updateWifiStatusLed(false);
+  // mqttLoop();
+  delay(500);
 }
