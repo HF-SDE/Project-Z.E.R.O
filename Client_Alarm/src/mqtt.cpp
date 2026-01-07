@@ -5,22 +5,25 @@ static WiFiClient wifiClient;
 static PubSubClient mqtt(wifiClient);
 
 static const char *subTopic;
+static MqttMessageHandler userHandler = nullptr;
 
-static char lastMessage[MQTT_MAX_MSG_LEN + 1];
 // ------------------------------------------------------
 
 // MQTT callback
 static void mqttCallback(char *topic, byte *payload, unsigned int length)
 {
-    unsigned int n = (length < MQTT_MAX_MSG_LEN)
-                         ? length
-                         : MQTT_MAX_MSG_LEN;
+    Serial.println("Event received - callback");
 
-    for (unsigned int i = 0; i < n; i++)
+    static char msg[128];
+
+    unsigned int n = (length < sizeof(msg) - 1) ? length : sizeof(msg) - 1;
+    memcpy(msg, payload, n);
+    msg[n] = '\0';
+
+    if (userHandler)
     {
-        lastMessage[i] = (char)payload[i];
+        userHandler(topic, msg);
     }
-    lastMessage[n] = '\0';
 }
 
 // Internal reconnect
@@ -40,6 +43,11 @@ static void mqttReconnect()
             delay(1000);
         }
     }
+}
+
+void mqttSetMessageHandler(MqttMessageHandler handler)
+{
+    userHandler = handler;
 }
 
 // -------- PUBLIC FUNCTIONS --------
@@ -71,9 +79,4 @@ void mqttLoop()
 bool mqttIsConnected()
 {
     return mqtt.connected();
-}
-
-const char *mqttGetLastMessage()
-{
-    return lastMessage;
 }

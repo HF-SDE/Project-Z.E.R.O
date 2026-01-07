@@ -23,4 +23,10 @@ void mqttLoop();
 bool mqttIsConnected();
 const char *mqttGetLastMessage();
 
+typedef void (*MqttMessageHandler)(
+    const char *topic,
+    const char *payload);
+
+void mqttSetMessageHandler(MqttMessageHandler handler);
+
 #endif
