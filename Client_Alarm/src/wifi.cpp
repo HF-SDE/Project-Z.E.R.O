@@ -50,8 +50,6 @@ void wifiInitStatusLed(int redPin, int greenPin, int bluePin)
 
 void updateWifiStatusLed(bool firstStartup)
 {
-    if (ledRed < 0)
-        return; // not initialized
 
     if (firstStartup)
     {

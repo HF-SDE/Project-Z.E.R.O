@@ -8,6 +8,7 @@
 #include <../lib/alarm_message.h>
 #include <../lib/ConfigWriter.h>
 #include <../lib/StorageManager.h>
+#include <../lib/config_message.h>
 
 // ---------------------- Global Config ----------------------
 DeviceConfig config;
@@ -68,12 +69,37 @@ static void onMqttClearAlarmMessage(const char *topic, const char *payload)
 
   digitalWrite(buzzerPin, LOW);
 }
+static void onMqttConfigMessage(const char *topic, const char *payload)
+{
+  // check if the topic matches this event
+  if (strstr(topic, "/config") == nullptr)
+  {
+    return;
+  }
+  Serial.println("Event received 1");
+
+  ConfigMessage configMsg;
+  Serial.println(payload);
+
+  if (!parseConfigMessage(payload, configMsg))
+  {
+    Serial.println("Invalid alarm JSON");
+    return;
+  }
+
+  // write new config
+  config.heartbeatInterval = configMsg.heartbeatInterval;
+  storageSaveConfig(config);
+
+  Serial.println("Alarm started");
+}
 
 static void onMqttMessage(const char *topic, const char *payload)
 {
   // Dispatcher: route to the appropriate handler based on topic
   onMqttAlarmMessage(topic, payload);
   onMqttClearAlarmMessage(topic, payload);
+  onMqttConfigMessage(topic, payload);
 }
 
 void setup()
