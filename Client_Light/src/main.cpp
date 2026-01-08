@@ -35,6 +35,7 @@ std::vector<ButtonConfig::keys> component_config = {
 const String MQTT_HOST = "192.168.1.147";
 
 // Hysteresis thresholds
+constexpr int THRESH_ON = 3100;
 constexpr int THRESH_OFF = 3300;
 
 // Debounce
@@ -125,11 +126,11 @@ static bool computeLedState(int lightValue)
     return ledState;
   }
 
-  if (!ledState && lightValue < THRESH_OFF)
+  if (!ledState && lightValue < THRESH_ON)
   {
     ledState = true;
   }
-  else
+  else if (ledState && lightValue > THRESH_OFF)
   {
     ledState = false;
   }
