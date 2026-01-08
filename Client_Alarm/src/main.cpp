@@ -9,6 +9,7 @@
 #include <../lib/ConfigWriter.h>
 #include <../lib/StorageManager.h>
 #include <../lib/config_message.h>
+#include <../lib/StatusLedManager.h>
 
 // ---------------------- Global Config ----------------------
 DeviceConfig config;
@@ -118,7 +119,7 @@ void setup()
   pinMode(buzzerPin, OUTPUT);
   pinMode(alarmLedPin, OUTPUT);
 
-  wifiInitStatusLed(redWifiLedPin, greenWifiLedPin, blueWifiLedPin);
+  statusLedInit(redWifiLedPin, greenWifiLedPin, blueWifiLedPin);
 
   // Initialize storage and load configuration
   Serial.println("Initializing storage...");
@@ -173,20 +174,20 @@ void setup()
     delay(100);
   }
 
-  updateWifiStatusLed(firstWifiStartUp);
+  statusLedUpdate(false, false, firstWifiStartUp);
   firstWifiStartUp = false;
 
   if (!wifiConnect(config.wifiSsid.c_str(), config.wifiPassword.c_str(), 10000))
   {
     Serial.println("WiFi failed");
-    updateWifiStatusLed(false);
+    statusLedUpdate(false, false, false);
     return;
   }
 
   Serial.print("IP: ");
   Serial.println(wifiGetIp());
 
-  updateWifiStatusLed(false);
+  statusLedUpdate(true, false, false);
 
   mqttInit(
       config.mqttHost.c_str(),
@@ -203,7 +204,7 @@ void loop()
 {
   static unsigned long lastHeartbeat = 0;
 
-  updateWifiStatusLed(false);
+  statusLedUpdate(wifiIsConnected(), mqttIsConnected(), false);
   mqttLoop();
 
   unsigned long currentMillis = millis();
