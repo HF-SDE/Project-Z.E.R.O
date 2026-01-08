@@ -6,27 +6,18 @@
 #include <../lib/DisplayManager.h>
 #include <../lib/MqttManager.h>
 #include <../lib/alarm_message.h>
+#include <../lib/ConfigWriter.h>
+#include <../lib/StorageManager.h>
 
-//---------------------- Wifi config ----------------------
-const char *WIFI_SSID = "Case-ZERO_2,4GHz";
-const char *WIFI_PASSWORD = "Nogetjegkanhuske";
-const int serialFrequency = 115200;
-
-//---------------------- MQTT config ----------------------
-const char *MQTT_HOST = "192.168.1.143"; // broker IP or DNS
-const int MQTT_PORT = 1883;
-const char *MQTT_TOPIC = "devices/1/triggers/#";
-const char *MQTT_USER = ""; // optional
-const char *MQTT_PASS = ""; // optional
-
-WiFiClient espClient;
-PubSubClient mqtt(espClient);
+// ---------------------- Global Config ----------------------
+DeviceConfig config;
 
 //---------------------- Pin config ----------------------
-const int blueLedPin = 0;
-const int greenLedPin = 4;
-const int redLedPin = 2;
+const int blueWifiLedPin = 0;
+const int greenWifiLedPin = 4;
+const int redWifiLedPin = 2;
 const int buzzerPin = 32;
+const int alarmLedPin = 26;
 
 //---------------------- LCD config ----------------------
 int lcdColumns = 20;
@@ -36,27 +27,130 @@ int lcdI2CAddress = 0x27;
 //  firstStartUp indicates if it's the first time the device is starting up
 bool firstWifiStartUp = true;
 
+static void onMqttAlarmMessage(const char *topic, const char *payload)
+{
+  // check if the topic matches this event
+  if (strstr(topic, "/triggers/alarm-trigger") == nullptr)
+  {
+    return;
+  }
+  Serial.println("Event received 1");
+
+  AlarmMessage alarm;
+  Serial.println(payload);
+
+  if (!parseAlarmMessage(payload, alarm))
+  {
+    Serial.println("Invalid alarm JSON");
+    return;
+  }
+
+  displayShowMessage(alarm.message);
+  digitalWrite(alarmLedPin, HIGH);
+  if (alarm.useSound)
+  {
+    digitalWrite(buzzerPin, HIGH);
+  }
+
+  Serial.println("Alarm started");
+}
+static void onMqttClearAlarmMessage(const char *topic, const char *payload)
+{
+  // check if the topic matches this event
+  if (strstr(topic, "/triggers/clear-alarm-trigger") == nullptr)
+  {
+    return;
+  }
+  Serial.println("Event received");
+
+  displayShowMessage("all good fam.");
+  digitalWrite(alarmLedPin, LOW);
+
+  digitalWrite(buzzerPin, LOW);
+}
+
+static void onMqttMessage(const char *topic, const char *payload)
+{
+  // Dispatcher: route to the appropriate handler based on topic
+  onMqttAlarmMessage(topic, payload);
+  onMqttClearAlarmMessage(topic, payload);
+}
+
 void setup()
 {
   Wire.begin();
   displayInit(lcdI2CAddress, lcdColumns, lcdRows);
-  Serial.begin(serialFrequency);
+  Serial.begin(115200); // Start with default baud rate
   while (!Serial)
   {
     ; // Wait for Serial to be ready
   }
-  pinMode(redLedPin, OUTPUT);
-  pinMode(blueLedPin, OUTPUT);
-  pinMode(greenLedPin, OUTPUT);
+
+  pinMode(redWifiLedPin, OUTPUT);
+  pinMode(blueWifiLedPin, OUTPUT);
+  pinMode(greenWifiLedPin, OUTPUT);
   pinMode(buzzerPin, OUTPUT);
+  pinMode(alarmLedPin, OUTPUT);
 
-  Serial.println("Connecting to WiFi...");
+  wifiInitStatusLed(redWifiLedPin, greenWifiLedPin, blueWifiLedPin);
 
-  wifiInitStatusLed(redLedPin, greenLedPin, blueLedPin);
+  // Initialize storage and load configuration
+  Serial.println("Initializing storage...");
+  if (!storageInit())
+  {
+    Serial.println("Failed to initialize storage!");
+    // Blink red LED to indicate error
+    for (int i = 0; i < 10; i++)
+    {
+      digitalWrite(redWifiLedPin, HIGH);
+      digitalWrite(greenWifiLedPin, LOW);
+      digitalWrite(blueWifiLedPin, LOW);
+      delay(200);
+      digitalWrite(redWifiLedPin, LOW);
+      delay(200);
+    }
+    displayShowMessage("Storage error! Check Serial");
+    return;
+  }
+
+  // Load configuration
+  Serial.println("Loading configuration...");
+  if (!storageLoadConfig(config))
+  {
+    Serial.println("Failed to load config! Using defaults and saving...");
+    // Blink red LED to indicate config error
+    for (int i = 0; i < 10; i++)
+    {
+      digitalWrite(redWifiLedPin, HIGH);
+      digitalWrite(greenWifiLedPin, LOW);
+      digitalWrite(blueWifiLedPin, LOW);
+      delay(200);
+      digitalWrite(redWifiLedPin, LOW);
+      delay(200);
+    }
+
+    // Write default config and try again
+    if (!writeDefaultConfig() || !storageLoadConfig(config))
+    {
+      Serial.println("Failed to create default config!");
+      displayShowMessage("Config error! Check Serial");
+      return;
+    }
+  }
+  storagePrintConfig(config);
+
+  // Update serial baud rate if different from default
+  if (config.serialFrequency != 115200)
+  {
+    Serial.end();
+    Serial.begin(config.serialFrequency);
+    delay(100);
+  }
+
   updateWifiStatusLed(firstWifiStartUp);
   firstWifiStartUp = false;
 
-  if (!wifiConnect(WIFI_SSID, WIFI_PASSWORD, 10000))
+  if (!wifiConnect(config.wifiSsid.c_str(), config.wifiPassword.c_str(), 10000))
   {
     Serial.println("WiFi failed");
     updateWifiStatusLed(false);
@@ -69,58 +163,28 @@ void setup()
   updateWifiStatusLed(false);
 
   mqttInit(
-      MQTT_HOST,
-      MQTT_PORT,
-      nullptr, // user
-      nullptr, // pass
-      MQTT_TOPIC);
-}
-
-static void onMqttAlarmMessage(const char *topic, const char *payload)
-{
-  Serial.println("Event received");
-
-  if (strcmp(topic, "devices/1/triggers/alarm-trigger") != 0)
-    return;
-
-  AlarmMessage alarm;
-  Serial.println(payload);
-
-  if (!parseAlarmMessage(payload, alarm))
-  {
-    Serial.println("Invalid alarm JSON");
-    return;
-  }
-
-  displayShowMessage(alarm.message);
-  // displaySetColor(alarm.color);
-  displaySetColor("red");
-  if (alarm.useSound)
-  {
-    digitalWrite(buzzerPin, HIGH);
-  }
-}
-static void onMqttClearAlarmMessage(const char *topic, const char *payload)
-{
-  Serial.println("Event received");
-
-  if (strcmp(topic, "devices/1/triggers/clear-alarm-trigger") != 0)
-    return;
+      config.mqttHost.c_str(),
+      config.mqttPort,
+      config.mqttUser.isEmpty() ? nullptr : config.mqttUser.c_str(),
+      config.mqttPassword.isEmpty() ? nullptr : config.mqttPassword.c_str(),
+      config.mqttTopic.c_str());
 
   displayShowMessage("all good fam.");
-  // displaySetColor(alarm.color);
-
-  displaySetColor("green");
-  digitalWrite(buzzerPin, LOW);
+  mqttSetMessageHandler(onMqttMessage);
 }
+
 void loop()
 {
+  static unsigned long lastHeartbeat = 0;
+
   updateWifiStatusLed(false);
   mqttLoop();
-  // displayShowMessage(mqttGetLastMessage());
 
-  delay(500);
-
-  mqttSetMessageHandler(onMqttAlarmMessage);
-  mqttSetMessageHandler(onMqttClearAlarmMessage);
+  unsigned long currentMillis = millis();
+  if (currentMillis - lastHeartbeat >= config.heartbeatInterval)
+  {
+    String statusTopic = "devices/" + config.deviceId + "/status";
+    mqttPublish(statusTopic.c_str(), "online", true);
+    lastHeartbeat = currentMillis;
+  }
 }

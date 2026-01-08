@@ -3,9 +3,9 @@
 #include <LiquidCrystal_I2C.h>
 
 // -------- INTERNAL STATE --------
-static LiquidCrystal_I2C lcd(0x27, 20, 2);
+static LiquidCrystal_I2C lcd(0x27, 20, 4);
 static uint8_t g_cols = 20;
-static uint8_t g_rows = 2;
+static uint8_t g_rows = 4;
 static bool g_ready = false;
 // --------------------------------
 
@@ -71,24 +71,5 @@ void displayShowMessage(const char *msg)
         for (uint8_t i = 0; i < g_cols && *secondLine != '\0'; i++)
             secondLine++;
         printPadded(0, 1, secondLine, g_cols);
-    }
-}
-
-void displaySetColor(const char *colorName)
-{
-    // For standard single-color backlight LCDs:
-    if (!g_ready)
-        return;
-
-    // This is a placeholder implementation for standard LCDs
-    // If colorName is "off" or "black", turn backlight off
-    if (strcmp(colorName, "off") == 0 || strcmp(colorName, "black") == 0)
-    {
-        lcd.noBacklight();
-    }
-    else
-    {
-        // Any other color turns backlight on
-        lcd.backlight();
     }
 }
