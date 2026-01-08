@@ -15,5 +15,6 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[nginx]": {
     "editor.defaultFormatter": "ahmadalli.vscode-nginx-conf"
-  }
+  },
+  "C_Cpp.errorSquiggles": "disabled"
 }
