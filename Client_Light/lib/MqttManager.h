@@ -1,13 +1,8 @@
-#pragma once
 #ifndef MQTT_CLIENT_H
 #define MQTT_CLIENT_H
 
 #include <WiFi.h>
 #include <PubSubClient.h>
-
-// ---- CONFIG ----
-#define MQTT_MAX_MSG_LEN 64
-// ----------------
 
 // Called once
 void mqttInit(
@@ -29,5 +24,7 @@ typedef void (*MqttMessageHandler)(
     const char *payload);
 
 void mqttSetMessageHandler(MqttMessageHandler handler);
+
+bool mqttPublish(const char *topic, const char *payload, bool retained = false);
 
 #endif

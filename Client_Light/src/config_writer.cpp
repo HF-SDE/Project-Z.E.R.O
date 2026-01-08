@@ -1,5 +1,5 @@
-#include <Arduino.h>
 #include "../lib/StorageManager.h"
+#include <Arduino.h>
 
 const char *getChipId()
 {
@@ -14,7 +14,7 @@ const char *getChipId()
  * Call this function once during initial device setup
  * or when you need to reset to default settings
  */
-bool writeDefaultConfig()
+bool writeDefaultConfig(String mqttHost)
 {
     Serial.println("[ConfigWriter] Writing default configuration...");
 
@@ -30,7 +30,7 @@ bool writeDefaultConfig()
     config.wifiSsid = "Case-ZERO_2,4GHz";
     config.wifiPassword = "Nogetjegkanhuske";
     config.serialFrequency = 115200;
-    config.mqttHost = "192.168.1.147";
+    config.mqttHost = mqttHost;
     config.mqttPort = 1883;
     config.mqttUser = "";
     config.mqttPassword = "";
@@ -113,7 +113,7 @@ bool writeCustomConfig(
 /**
  * Display current configuration from storage
  */
-void displayStoredConfig()
+void displayStoredConfig1()
 {
     Serial.println("[ConfigWriter] Reading stored configuration...");
 
