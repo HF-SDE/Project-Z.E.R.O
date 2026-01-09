@@ -1,6 +1,6 @@
 import { Mutex } from 'async-mutex';
 import { UUID } from 'bson';
-import jwt from 'jsonwebtoken';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import passport from 'passport';
 
 import { UserToken } from '@api-types/JWTToken';
@@ -28,10 +28,10 @@ import { LoginSchema, TokenSchema } from '@schemas/auth.schema';
 function generateToken(
   user: UserToken,
   ip: string | null,
-  expiration: string,
+  expiration: SignOptions['expiresIn'],
   secret: string,
 ): string {
-  return jwt.sign(user, secret + (ip || ""), { expiresIn: expiration });
+  return jwt.sign(user, secret + (ip || ''), { expiresIn: expiration });
 }
 
 /**
@@ -231,7 +231,7 @@ export async function refreshUserTokens(
   try {
     userTemp = jwt.verify(
       tokenBody.token,
-      config.REFRESH_TOKEN_SECRET  + tokenBody.ip,
+      config.REFRESH_TOKEN_SECRET + tokenBody.ip,
     ) as unknown as UserToken;
   } catch {
     // Handle the verification failure gracefully

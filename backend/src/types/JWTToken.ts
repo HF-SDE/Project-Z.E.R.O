@@ -1,3 +1,8 @@
+import { UUID } from 'bson';
+
 export interface UserToken {
-  stats: '';
+  sub: string;
+  jti: UUID;
+  username: string;
+  permissions?: string[];
 }

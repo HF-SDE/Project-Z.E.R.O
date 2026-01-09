@@ -156,7 +156,7 @@ app.listen(config.PORT, () => {
     }
   }
 
-  setInterval(() => {
-    void processTimeseriesData();
-  }, 10000);
+  // setInterval(() => {
+  //   void processTimeseriesData();
+  // }, 10000);
 });
