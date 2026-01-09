@@ -50,6 +50,7 @@ bool firstWifiStartUp = true;
 static void onMqttMessage(const char *topic, const char *payload)
 {
   // Handle incoming MQTT messages here
+
   Serial.print("MQTT Message received on topic: ");
   Serial.println(topic);
   Serial.print("Payload: ");
@@ -147,9 +148,38 @@ static void initComponentConfig()
     String componentTopic = basicTopic + String(p.id.c_str());
     String payload = "{\"name\":\"" + String(p.config.name.c_str()) + "\"}";
 
-    mqttPublish(String(componentTopic + "value_type").c_str(), p.value_type.c_str(), true);
-    mqttPublish(String(componentTopic + "value").c_str(), 0, true);
-    mqttPublish(String(componentTopic + "config").c_str(), payload.c_str(), true);
+    bool value_typeExists = retainedMessageExists(String(componentTopic + "/value_type").c_str());
+    if (value_typeExists)
+    {
+      Serial.println(componentTopic + ": Retained message exists");
+    }
+    else
+    {
+      Serial.println(componentTopic + ": No retained message on topic");
+      mqttPublish(String(componentTopic + "/value_type").c_str(), p.value_type.c_str(), true);
+    }
+
+    bool valueExists = retainedMessageExists(String(componentTopic + "/value").c_str());
+    if (valueExists)
+    {
+      Serial.println(componentTopic + ": Retained message exists");
+    }
+    else
+    {
+      Serial.println(componentTopic + ": No retained message on topic");
+      mqttPublish(String(componentTopic + "/value").c_str(), "1", true);
+    }
+
+    bool configExists = retainedMessageExists(String(componentTopic + "/config").c_str());
+    if (configExists)
+    {
+      Serial.println(componentTopic + ": Retained message exists");
+    }
+    else
+    {
+      Serial.println(componentTopic + ": No retained message on topic");
+      mqttPublish(String(componentTopic + "/config").c_str(), payload.c_str(), true);
+    }
   }
 }
 
@@ -165,7 +195,7 @@ void setup()
   pinMode(blueWifiLedPin, OUTPUT);
   pinMode(greenWifiLedPin, OUTPUT);
 
-  Led::begin(LED_PIN);
+  Led::begin(LED_PIN, "devices/" + String(config.deviceId.c_str()) + "/White_LED");
   LightSensor::begin(LIGHT_SENSOR_PIN);
 
   // For INPUT_PULLUP wiring (button -> GND), press is FALLING.
@@ -185,11 +215,11 @@ void setup()
       config.mqttTopic.c_str());
 
   mqttSetMessageHandler(onMqttMessage);
+  initComponentConfig();
 }
 
 void loop()
 {
-  initComponentConfig();
   static unsigned long lastHeartbeat = 0;
 
   updateWifiStatusLed(false);
@@ -208,8 +238,8 @@ void loop()
     overwrite = !overwrite;
   }
 
-  const int lightValue = LightSensor::read();
-  Led::set(computeLedState(lightValue));
+  const int lightValue = LightSensor::read("devices/" + String(config.deviceId.c_str()) + "/PhotoResistor");
+  Led::set(computeLedState(lightValue), "devices/" + String(config.deviceId.c_str()) + "/White_LED");
 
   delay(5);
 }

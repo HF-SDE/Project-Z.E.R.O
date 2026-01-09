@@ -7,12 +7,28 @@ static PubSubClient mqtt(wifiClient);
 static const char *subTopic;
 static MqttMessageHandler userHandler = nullptr;
 
+static volatile bool messageReceived = false;
+static String retainedPayload;
+static uint32_t receivedAt = 0;
+
+static volatile bool gotMsg = false;
+static String payloadBuf;
+
 // ------------------------------------------------------
 
 // MQTT callback
 static void mqttCallback(char *topic, byte *payload, unsigned int length)
 {
+    mqtt.setBufferSize(2048);
+    messageReceived = true;
     Serial.println("Event received - callback");
+
+    payloadBuf = "";
+    payloadBuf.reserve(length);
+    for (unsigned int i = 0; i < length; i++)
+    {
+        payloadBuf += (char)payload[i];
+    }
 
     static char msg[256];
 
@@ -24,6 +40,39 @@ static void mqttCallback(char *topic, byte *payload, unsigned int length)
     {
         userHandler(topic, msg);
     }
+}
+
+bool retainedMessageExists(const char *topic, uint32_t windowMs)
+{
+    windowMs = 1500;
+    messageReceived = false;
+    retainedPayload = "";
+    receivedAt = 0;
+
+    if (!mqtt.connected())
+        return false;
+
+    mqtt.setCallback(mqttCallback);
+
+    if (!mqtt.subscribe(topic))
+        return false;
+
+    uint32_t start = millis();
+
+    while ((millis() - start) < windowMs)
+    {
+        mqtt.loop();
+        delay(2);
+        if (messageReceived)
+            break;
+    }
+
+    mqtt.unsubscribe(topic);
+
+    if (!messageReceived)
+        return false;
+
+    return true;
 }
 
 // Internal reconnect
@@ -90,4 +139,10 @@ bool mqttPublish(const char *topic, const char *payload, bool retained)
 
     // PubSubClient publish signature supports retained
     return mqtt.publish(topic, payload, retained);
+}
+
+void mqttSetComponentValue(const String &componentTopic, const String &status)
+{
+    String valueTopic = componentTopic + "/value";
+    mqttPublish(valueTopic.c_str(), status.c_str(), true);
 }

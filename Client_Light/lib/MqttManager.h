@@ -26,5 +26,10 @@ typedef void (*MqttMessageHandler)(
 void mqttSetMessageHandler(MqttMessageHandler handler);
 
 bool mqttPublish(const char *topic, const char *payload, bool retained = false);
+bool mqttPublish(const char *topic, const uint8_t *payload, bool retained = false);
+
+bool retainedMessageExists(const char *topic, uint32_t windowMs = 150);
+
+void mqttSetComponentValue(const String &componentTopic, const String &status);
 
 #endif
