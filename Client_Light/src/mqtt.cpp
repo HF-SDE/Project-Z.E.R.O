@@ -14,7 +14,7 @@ static void mqttCallback(char *topic, byte *payload, unsigned int length)
 {
     Serial.println("Event received - callback");
 
-    static char msg[128];
+    static char msg[256];
 
     unsigned int n = (length < sizeof(msg) - 1) ? length : sizeof(msg) - 1;
     memcpy(msg, payload, n);
@@ -79,4 +79,15 @@ void mqttLoop()
 bool mqttIsConnected()
 {
     return mqtt.connected();
+}
+
+bool mqttPublish(const char *topic, const char *payload, bool retained)
+{
+    if (!mqtt.connected())
+        return false;
+    if (!topic || !payload)
+        return false;
+
+    // PubSubClient publish signature supports retained
+    return mqtt.publish(topic, payload, retained);
 }

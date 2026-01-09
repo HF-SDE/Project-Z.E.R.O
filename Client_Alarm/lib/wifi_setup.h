@@ -8,7 +8,4 @@ bool wifiConnect(const char *ssid, const char *password, unsigned long timeoutMs
 bool wifiIsConnected();
 String wifiGetIp();
 
-void wifiInitStatusLed(int redPin, int greenPin, int bluePin);
-void updateWifiStatusLed(bool firstStartup);
-
 #endif

@@ -37,7 +37,7 @@ String wifiGetIp()
     return WiFi.localIP().toString();
 }
 
-void wifiInitStatusLed(int redPin, int greenPin, int bluePin)
+void wifiInitStatusLed(uint8_t redPin, uint8_t greenPin, uint8_t bluePin)
 {
     ledRed = redPin;
     ledGreen = greenPin;
