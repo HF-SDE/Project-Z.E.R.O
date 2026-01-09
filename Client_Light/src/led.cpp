@@ -21,8 +21,6 @@ namespace Led
 
     void set(bool on, const String &componentTopic)
     {
-        Serial.print("LED set to ");
-        Serial.println(on ? "ON" : "OFF");
         digitalWrite(g_pin, on ? HIGH : LOW);
         if (latestStatus != String(on ? "1" : "0"))
         {
