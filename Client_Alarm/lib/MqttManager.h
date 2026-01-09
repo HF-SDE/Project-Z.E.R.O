@@ -15,6 +15,9 @@ void mqttInit(
 // Call in loop()
 void mqttLoop();
 
+// Configure and handle heartbeat (call after mqttInit)
+void mqttSetHeartbeat(const char *deviceId, unsigned long intervalMs);
+
 // Optional helpers
 bool mqttIsConnected();
 const char *mqttGetLastMessage();

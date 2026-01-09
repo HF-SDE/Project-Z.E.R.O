@@ -15,6 +15,7 @@ struct DeviceConfig
     String mqttTopic;
     String deviceId;
     int heartbeatInterval;
+    bool status; // Indicates if the device is active
 };
 
 /**
@@ -59,6 +60,6 @@ bool storageFormat();
  * Print configuration to Serial
  * @param config The configuration object to print
  */
-void storagePrintConfig(const DeviceConfig &config);
+void printStorageConfig(const DeviceConfig &config);
 
 #endif // STORAGE_MANAGER_H

@@ -7,6 +7,11 @@ static PubSubClient mqtt(wifiClient);
 static const char *subTopic;
 static MqttMessageHandler userHandler = nullptr;
 
+// Heartbeat state
+static String g_heartbeatTopic = "heartbeat";
+static unsigned long g_heartbeatInterval = 0;
+static unsigned long g_lastHeartbeat = 0;
+
 // ------------------------------------------------------
 
 // MQTT callback
@@ -50,6 +55,13 @@ void mqttSetMessageHandler(MqttMessageHandler handler)
     userHandler = handler;
 }
 
+void mqttSetHeartbeat(const char *deviceId, unsigned long intervalMs)
+{
+    g_heartbeatTopic = "devices/" + String(deviceId) + "/heartbeat";
+    g_heartbeatInterval = intervalMs;
+    g_lastHeartbeat = 0;
+}
+
 // -------- PUBLIC FUNCTIONS --------
 
 void mqttInit(
@@ -74,6 +86,17 @@ void mqttLoop()
         mqttReconnect();
     }
     mqtt.loop();
+
+    // Handle heartbeat if configured
+    if (g_heartbeatInterval > 0)
+    {
+        unsigned long currentMillis = millis();
+        if (currentMillis - g_lastHeartbeat >= g_heartbeatInterval)
+        {
+            mqttPublish(g_heartbeatTopic.c_str(), "online", true);
+            g_lastHeartbeat = currentMillis;
+        }
+    }
 }
 
 bool mqttIsConnected()

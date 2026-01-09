@@ -10,6 +10,7 @@ bool parseConfigMessage(const char *json, ConfigMessage &out)
         return false;
 
     out.heartbeatInterval = doc["heartbeatInterval"] | 0;
+    out.status = doc["status"] | 0;
 
     return true;
 }

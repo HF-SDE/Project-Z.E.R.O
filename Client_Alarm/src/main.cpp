@@ -10,9 +10,21 @@
 #include <../lib/StorageManager.h>
 #include <../lib/config_message.h>
 #include <../lib/StatusLedManager.h>
+#include <../lib/AlarmOutputManager.h>
+#include <../lib/Component.h>
+#include <../lib/ComponentManager.h>
 
 // ---------------------- Global Config ----------------------
 DeviceConfig config;
+
+// ---------------------- Component Definitions ----------------------
+// Define all hardware components at compile time
+Component displayComponent("display", "text", "Main LCD Display", "20x2 character display");
+Component alarmLedComponent("led", "boolean", "Alarm LED", "Red LED indicating alarm state");
+Component buzzerComponent("buzzer", "boolean", "Alarm Buzzer", "Audio alarm indicator");
+Component statusRedLedComponent("led", "boolean", "Status Red LED", "WiFi/MQTT error indicator");
+Component statusGreenLedComponent("led", "boolean", "Status Green LED", "Connection OK indicator");
+Component statusBlueLedComponent("led", "boolean", "Status Blue LED", "WiFi connecting indicator");
 
 //---------------------- Pin config ----------------------
 const int blueWifiLedPin = 0;
@@ -23,16 +35,22 @@ const int alarmLedPin = 26;
 
 //---------------------- LCD config ----------------------
 int lcdColumns = 20;
-int lcdRows = 2;
+int lcdRows = 4;
 int lcdI2CAddress = 0x27;
 // vars
 //  firstStartUp indicates if it's the first time the device is starting up
 bool firstWifiStartUp = true;
+bool hasPublishedComponentState = false;
 
 static void onMqttAlarmMessage(const char *topic, const char *payload)
 {
   // check if the topic matches this event
   if (strstr(topic, "/triggers/alarm-trigger") == nullptr)
+  {
+    return;
+  }
+  // if config status is false, ignore alarm triggers
+  if (!config.status)
   {
     return;
   }
@@ -48,11 +66,7 @@ static void onMqttAlarmMessage(const char *topic, const char *payload)
   }
 
   displayShowMessage(alarm.message);
-  digitalWrite(alarmLedPin, HIGH);
-  if (alarm.useSound)
-  {
-    digitalWrite(buzzerPin, HIGH);
-  }
+  alarmOutputActivate(alarm.useSound);
 
   Serial.println("Alarm started");
 }
@@ -63,12 +77,14 @@ static void onMqttClearAlarmMessage(const char *topic, const char *payload)
   {
     return;
   }
+  if (!config.status)
+  {
+    return;
+  }
   Serial.println("Event received");
 
   displayShowMessage("all good fam.");
-  digitalWrite(alarmLedPin, LOW);
-
-  digitalWrite(buzzerPin, LOW);
+  alarmOutputDeactivate();
 }
 static void onMqttConfigMessage(const char *topic, const char *payload)
 {
@@ -90,8 +106,18 @@ static void onMqttConfigMessage(const char *topic, const char *payload)
 
   // write new config
   config.heartbeatInterval = configMsg.heartbeatInterval;
+  config.status = configMsg.status; // Update status from MQTT config
   storageSaveConfig(config);
 
+  if (!config.status)
+  {
+    displayShowMessage("Device inactive.");
+    alarmOutputDeactivate();
+  }
+  else
+  {
+    displayShowMessage("Config updated. All good.");
+  }
   Serial.println("Alarm started");
 }
 
@@ -105,21 +131,18 @@ static void onMqttMessage(const char *topic, const char *payload)
 
 void setup()
 {
-  Wire.begin();
-  displayInit(lcdI2CAddress, lcdColumns, lcdRows);
   Serial.begin(115200); // Start with default baud rate
   while (!Serial)
   {
     ; // Wait for Serial to be ready
   }
 
-  pinMode(redWifiLedPin, OUTPUT);
-  pinMode(blueWifiLedPin, OUTPUT);
-  pinMode(greenWifiLedPin, OUTPUT);
-  pinMode(buzzerPin, OUTPUT);
-  pinMode(alarmLedPin, OUTPUT);
+  // Wire.begin(); - This is called inside displayInit ! DELETE ME IF NEEDED
+  displayInit(lcdI2CAddress, lcdColumns, lcdRows);
 
+  // Initialize status LED and alarm output managers
   statusLedInit(redWifiLedPin, greenWifiLedPin, blueWifiLedPin);
+  alarmOutputInit(alarmLedPin, buzzerPin);
 
   // Initialize storage and load configuration
   Serial.println("Initializing storage...");
@@ -142,17 +165,22 @@ void setup()
 
   // Load configuration
   Serial.println("Loading configuration...");
+  displayOverrideLine(1, "Loading config...");
   if (!storageLoadConfig(config))
   {
     Serial.println("Failed to load config! Using defaults and saving...");
     // Blink red LED to indicate config error
+    displayOverrideLine(1, "Loading failed!");
+    displayOverrideLine(2, "Trying fallback...");
+
     for (int i = 0; i < 10; i++)
     {
       digitalWrite(redWifiLedPin, HIGH);
-      digitalWrite(greenWifiLedPin, LOW);
+      digitalWrite(greenWifiLedPin, HIGH);
       digitalWrite(blueWifiLedPin, LOW);
       delay(200);
       digitalWrite(redWifiLedPin, LOW);
+      digitalWrite(greenWifiLedPin, LOW);
       delay(200);
     }
 
@@ -161,18 +189,49 @@ void setup()
     {
       Serial.println("Failed to create default config!");
       displayShowMessage("Config error! Check Serial");
+
+      while (true)
+      {
+        // blink red and yellow
+        digitalWrite(redWifiLedPin, HIGH);
+        digitalWrite(greenWifiLedPin, HIGH);
+        digitalWrite(blueWifiLedPin, LOW);
+        delay(200);
+        digitalWrite(redWifiLedPin, LOW);
+        digitalWrite(greenWifiLedPin, LOW);
+        delay(200);
+      }
       return;
     }
   }
-  storagePrintConfig(config);
+  displayOverrideLine(1, "Loading wifi...");
+  displayOverrideLine(2, "");
 
-  // Update serial baud rate if different from default
+  printStorageConfig(config);
+
+  // If the default serial frequency is different from the device config, reinitialize Serial
   if (config.serialFrequency != 115200)
   {
     Serial.end();
     Serial.begin(config.serialFrequency);
     delay(100);
   }
+
+  // Initialize Component Manager
+  componentManagerInit(config.deviceId);
+
+  // Register all components
+  componentRegister(&displayComponent);
+  componentRegister(&alarmLedComponent);
+  componentRegister(&buzzerComponent);
+  componentRegister(&statusRedLedComponent);
+  componentRegister(&statusGreenLedComponent);
+  componentRegister(&statusBlueLedComponent);
+
+  // Set component pointers in managers so they auto-update
+  displaySetComponent(&displayComponent);
+  alarmOutputSetComponents(&alarmLedComponent, &buzzerComponent);
+  statusLedSetComponents(&statusRedLedComponent, &statusGreenLedComponent, &statusBlueLedComponent);
 
   statusLedUpdate(false, false, firstWifiStartUp);
   firstWifiStartUp = false;
@@ -181,6 +240,7 @@ void setup()
   {
     Serial.println("WiFi failed");
     statusLedUpdate(false, false, false);
+    displayShowMessage("WiFi failed!");
     return;
   }
 
@@ -188,6 +248,7 @@ void setup()
   Serial.println(wifiGetIp());
 
   statusLedUpdate(true, false, false);
+  displayOverrideLine(1, "Connecting mqtt...");
 
   mqttInit(
       config.mqttHost.c_str(),
@@ -196,22 +257,23 @@ void setup()
       config.mqttPassword.isEmpty() ? nullptr : config.mqttPassword.c_str(),
       config.mqttTopic.c_str());
 
-  displayShowMessage("all good fam.");
-  mqttSetMessageHandler(onMqttMessage);
+  mqttSetHeartbeat(config.deviceId.c_str(), config.heartbeatInterval);
+
+  mqttSetMessageHandler(onMqttMessage); // This will define the handlers that run on specific topics
+
+  if (config.status)
+    displayShowMessage("No alarms. All good.");
+  else
+    displayShowMessage("Device inactive.");
 }
 
 void loop()
 {
-  static unsigned long lastHeartbeat = 0;
-
+  if (!hasPublishedComponentState)
+  {
+    componentPublishAll();
+    hasPublishedComponentState = true;
+  }
   statusLedUpdate(wifiIsConnected(), mqttIsConnected(), false);
   mqttLoop();
-
-  unsigned long currentMillis = millis();
-  if (currentMillis - lastHeartbeat >= config.heartbeatInterval)
-  {
-    String statusTopic = "devices/" + config.deviceId + "/status";
-    mqttPublish(statusTopic.c_str(), "online", true);
-    lastHeartbeat = currentMillis;
-  }
 }

@@ -16,7 +16,9 @@ ESP32-based alarm client for Project Z.E.R.O. Receives alarm triggers via MQTT a
 ### Components
 - ESP32 Development Board
 - 20x4 LCD Display with I2C backpack (address 0x27)
-- RGB LED 
+- RGB LED  for WiFi status indicator
+- Resistors (220 ohm for LEDs)
+- Red LED for alarm indicator
 - Buzzer
 - Jumper wires
 - Breadboard 

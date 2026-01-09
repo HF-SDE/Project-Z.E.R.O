@@ -1,4 +1,5 @@
 #include "../lib/DisplayManager.h"
+#include "../lib/ComponentManager.h"
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
@@ -7,6 +8,7 @@ static LiquidCrystal_I2C lcd(0x27, 20, 4);
 static uint8_t g_cols = 20;
 static uint8_t g_rows = 4;
 static bool g_ready = false;
+static Component *g_displayComponent = nullptr;
 // --------------------------------
 
 bool displayInit(uint8_t i2cAddress, uint8_t cols, uint8_t rows, int sdaPin, int sclPin)
@@ -30,7 +32,14 @@ bool displayInit(uint8_t i2cAddress, uint8_t cols, uint8_t rows, int sdaPin, int
     lcd.clear();
 
     g_ready = true;
+
+    displayShowMessage("Starting up...");
     return true;
+}
+
+void displaySetComponent(Component *component)
+{
+    g_displayComponent = component;
 }
 
 void displayClear()
@@ -56,20 +65,43 @@ void displayShowMessage(const char *msg)
     if (!g_ready || msg == nullptr)
         return;
 
-    // Split message into rows of g_cols characters
-    // For 20x2: prints first 20 on row 0, next 20 on row 1
-    // Also pads with spaces so remnants of old text don't stay.
+    // Clear the entire screen first
+    lcd.clear();
 
-    // Row 0
-    printPadded(0, 0, msg, g_cols);
+    // Split message across all available rows (up to 4 lines)
+    // Automatically shifts to next line when running out of columns
+    const char *currentPos = msg;
 
-    // Row 1 (if exists)
-    if (g_rows > 1)
+    for (uint8_t row = 0; row < g_rows; row++)
     {
-        const char *secondLine = msg;
-        // advance pointer by g_cols chars, but stop if string ends
-        for (uint8_t i = 0; i < g_cols && *secondLine != '\0'; i++)
-            secondLine++;
-        printPadded(0, 1, secondLine, g_cols);
+        // Print up to g_cols characters for this row
+        lcd.setCursor(0, row);
+
+        // Print characters for this row
+        uint8_t i = 0;
+        for (; i < g_cols && *currentPos != '\0'; i++)
+        {
+            lcd.print(*currentPos);
+            currentPos++;
+        }
+
+        // Stop if we've reached the end of the string
+        if (*currentPos == '\0')
+            break;
     }
+
+    // Update component state and publish
+    if (g_displayComponent != nullptr)
+    {
+        componentUpdateValue(g_displayComponent, String(msg));
+    }
+}
+
+void displayOverrideLine(uint8_t lineNumber, const char *msg)
+{
+    if (!g_ready || msg == nullptr || lineNumber >= g_rows)
+        return;
+
+    // Display message on specified line and pad the rest
+    printPadded(0, lineNumber, msg, g_cols);
 }

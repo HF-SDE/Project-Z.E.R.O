@@ -1,10 +1,14 @@
 #include "../lib/StatusLedManager.h"
+#include "../lib/ComponentManager.h"
 #include <Arduino.h>
 
 // -------- INTERNAL STATE --------
 static int ledRed = -1;
 static int ledGreen = -1;
 static int ledBlue = -1;
+static Component *g_redComponent = nullptr;
+static Component *g_greenComponent = nullptr;
+static Component *g_blueComponent = nullptr;
 // --------------------------------
 
 void statusLedInit(int redPin, int greenPin, int bluePin)
@@ -18,6 +22,13 @@ void statusLedInit(int redPin, int greenPin, int bluePin)
     pinMode(ledBlue, OUTPUT);
 }
 
+void statusLedSetComponents(Component *redComponent, Component *greenComponent, Component *blueComponent)
+{
+    g_redComponent = redComponent;
+    g_greenComponent = greenComponent;
+    g_blueComponent = blueComponent;
+}
+
 void statusLedUpdate(bool wifiConnected, bool mqttConnected, bool firstStartup)
 {
     if (firstStartup)
@@ -26,6 +37,14 @@ void statusLedUpdate(bool wifiConnected, bool mqttConnected, bool firstStartup)
         digitalWrite(ledRed, HIGH);
         digitalWrite(ledGreen, HIGH);
         digitalWrite(ledBlue, LOW);
+
+        // Update components
+        if (g_redComponent)
+            componentUpdateValue(g_redComponent, "true");
+        if (g_greenComponent)
+            componentUpdateValue(g_greenComponent, "true");
+        if (g_blueComponent)
+            componentUpdateValue(g_blueComponent, "false");
         return;
     }
 
@@ -35,6 +54,14 @@ void statusLedUpdate(bool wifiConnected, bool mqttConnected, bool firstStartup)
         digitalWrite(ledRed, LOW);
         digitalWrite(ledGreen, HIGH);
         digitalWrite(ledBlue, LOW);
+
+        // Update components
+        if (g_redComponent)
+            componentUpdateValue(g_redComponent, "false");
+        if (g_greenComponent)
+            componentUpdateValue(g_greenComponent, "true");
+        if (g_blueComponent)
+            componentUpdateValue(g_blueComponent, "false");
         return;
     }
     else if (!mqttConnected)
@@ -43,6 +70,14 @@ void statusLedUpdate(bool wifiConnected, bool mqttConnected, bool firstStartup)
         digitalWrite(ledRed, HIGH);
         digitalWrite(ledGreen, LOW);
         digitalWrite(ledBlue, HIGH);
+
+        // Update components
+        if (g_redComponent)
+            componentUpdateValue(g_redComponent, "true");
+        if (g_greenComponent)
+            componentUpdateValue(g_greenComponent, "false");
+        if (g_blueComponent)
+            componentUpdateValue(g_blueComponent, "true");
     }
     else
     {
@@ -50,5 +85,13 @@ void statusLedUpdate(bool wifiConnected, bool mqttConnected, bool firstStartup)
         digitalWrite(ledRed, HIGH);
         digitalWrite(ledGreen, LOW);
         digitalWrite(ledBlue, LOW);
+
+        // Update components
+        if (g_redComponent)
+            componentUpdateValue(g_redComponent, "true");
+        if (g_greenComponent)
+            componentUpdateValue(g_greenComponent, "false");
+        if (g_blueComponent)
+            componentUpdateValue(g_blueComponent, "false");
     }
 }
