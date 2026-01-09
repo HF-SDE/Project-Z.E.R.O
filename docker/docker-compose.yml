@@ -93,6 +93,7 @@ services:
         target: /mosquitto/config/mosquitto.conf
     networks:
       - internal
+      - public
 
   # clickhouse:
   #   container_name: clickhouse
@@ -121,8 +122,8 @@ services:
     ports:
       - 443:443
       - 80:80
-      - 8080:8080
-      - 1883:1883
+      # - 8080:8080
+      # - 1883:1883
     depends_on:
       - backend
       # - grafana
