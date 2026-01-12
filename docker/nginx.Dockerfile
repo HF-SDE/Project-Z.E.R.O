@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1.4
 FROM nginx:alpine
 
-# Copy the Nginx configuration file into the container
-COPY config/nginx.conf /etc/nginx/nginx.conf
-COPY config/01-mqtt.stream /etc/nginx/conf.d/01-mqtt.stream
+# Config files will be mounted via docker-compose configs
+# COPY config/nginx.conf /etc/nginx/nginx.conf
+# COPY config/01-mqtt.stream /etc/nginx/conf.d/01-mqtt.stream
 
 # Create the directory for the SSL certificates
 RUN mkdir -p /etc/nginx/certs

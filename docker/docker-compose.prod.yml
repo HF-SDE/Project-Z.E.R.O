@@ -78,16 +78,16 @@ services:
 
   mosquitto-prod:
     image: eclipse-mosquitto:latest
-    hostname: mosquitto-prod
     container_name: mosquitto-prod
     restart: unless-stopped
     ports:
-      - "1883:1883" # MQTT
-      - "8080:8080" # MQTTS (secure)
-      - "9001:9001" # WebSockets
+      - "1883:1883"
+      - "8883:8883"
+      - "9001:9001"
     volumes:
       - mqtt-data-prod:/mosquitto/data
       - mqtt-log-prod:/mosquitto/log
+      - ../config/certs:/mosquitto/certs:ro
     configs:
       - source: mosquitto_config
         target: /mosquitto/config/mosquitto.conf
@@ -136,7 +136,7 @@ services:
       - source: nginx_config
         target: /etc/nginx/nginx.conf
       - source: nginx_stream_config
-        target: /etc/nginx/conf.d/01-mqtt.stream
+        target: /etc/nginx/stream.d/mqtt.conf
     networks:
       - internal-prod
       - public-prod
