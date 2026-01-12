@@ -4,5 +4,5 @@
 namespace LightSensor
 {
     void begin(uint8_t pin);
-    int read();
+    int read(const String &componentTopic);
 }
