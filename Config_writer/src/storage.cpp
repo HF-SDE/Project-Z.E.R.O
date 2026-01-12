@@ -38,6 +38,7 @@ bool storageSaveConfig(const DeviceConfig &config)
     doc["deviceId"] = config.deviceId;
     doc["heartbeatInterval"] = config.heartbeatInterval;
     doc["serialFrequency"] = config.serialFrequency;
+    doc["status"] = config.status; // Save the status field
 
     File file = LittleFS.open(CONFIG_FILE, "w");
     if (!file)
@@ -97,6 +98,7 @@ bool storageLoadConfig(DeviceConfig &config)
     config.deviceId = doc["deviceId"] | "";
     config.heartbeatInterval = doc["heartbeatInterval"] | 60000;
     config.serialFrequency = doc["serialFrequency"] | 115200;
+    config.status = doc["status"] | true; // Load the status field
 
     Serial.println("[Storage] Configuration loaded successfully");
     return true;
@@ -160,5 +162,6 @@ void storagePrintConfig(const DeviceConfig &config)
     Serial.println("MQTT Topic:      " + config.mqttTopic);
     Serial.println("Device ID:       " + config.deviceId);
     Serial.println("Heartbeat Int.:  " + String(config.heartbeatInterval) + " ms");
+    Serial.println("Status:          " + String(config.status ? "Active" : "Inactive"));
     Serial.println("=========================================\n");
 }

@@ -15,6 +15,7 @@ struct DeviceConfig
     String mqttTopic;
     String deviceId;
     int heartbeatInterval;
+    bool status; // Indicates if the device is active
 };
 
 /**

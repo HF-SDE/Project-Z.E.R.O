@@ -88,42 +88,53 @@ static void onMqttClearAlarmMessage(const char *topic, const char *payload)
 }
 static void onMqttConfigMessage(const char *topic, const char *payload)
 {
-  // check if the topic matches this event
-  if (strstr(topic, "/config") == nullptr)
+  // check if the topic matches this event (exact match: clients/DEVICE_ID)
+  if (topic == nullptr || strcmp(topic, config.mqttTopic.c_str()) != 0)
   {
     return;
   }
-  Serial.println("Event received 1");
+  Serial.print("Config event received on topic: ");
+  Serial.println(topic);
+  Serial.print("Payload: ");
+  Serial.println(payload);
 
   ConfigMessage configMsg;
-  Serial.println(payload);
 
   if (!parseConfigMessage(payload, configMsg))
   {
-    Serial.println("Invalid alarm JSON");
+    Serial.println("Invalid config JSON");
     return;
   }
 
   // write new config
   config.heartbeatInterval = configMsg.heartbeatInterval;
   config.status = configMsg.status; // Update status from MQTT config
+
   storageSaveConfig(config);
+
+  // Apply the new heartbeat interval immediately
+  mqttSetHeartbeat(config.deviceId.c_str(), config.heartbeatInterval);
+
+  Serial.println("Configuration updated via MQTT");
+  Serial.print("New heartbeat interval: ");
+  Serial.print(config.heartbeatInterval);
+  Serial.println(" ms");
+  Serial.println(config.status ? "Device active" : "Device inactive");
 
   if (!config.status)
   {
-    displayShowMessage("Device inactive.");
     alarmOutputDeactivate();
+    displayShowMessage("Device inactive.");
   }
   else
   {
-    displayShowMessage("Config updated. All good.");
+    displayShowMessage("Active. No alarm.");
   }
-  Serial.println("Alarm started");
 }
 
 static void onMqttMessage(const char *topic, const char *payload)
 {
-  // Dispatcher: route to the appropriate handler based on topic
+  // Dispatcher: each handler checks if the topic matches
   onMqttAlarmMessage(topic, payload);
   onMqttClearAlarmMessage(topic, payload);
   onMqttConfigMessage(topic, payload);
@@ -218,7 +229,7 @@ void setup()
   }
 
   // Initialize Component Manager
-  componentManagerInit(config.deviceId);
+  componentManagerInit(config.deviceId, config.mqttTopic);
 
   // Register all components
   componentRegister(&displayComponent);
@@ -250,12 +261,14 @@ void setup()
   statusLedUpdate(true, false, false);
   displayOverrideLine(1, "Connecting mqtt...");
 
+  String mqttTopicWithWildcard = config.mqttTopic + "/#";
   mqttInit(
       config.mqttHost.c_str(),
       config.mqttPort,
       config.mqttUser.isEmpty() ? nullptr : config.mqttUser.c_str(),
       config.mqttPassword.isEmpty() ? nullptr : config.mqttPassword.c_str(),
-      config.mqttTopic.c_str());
+      mqttTopicWithWildcard.c_str(),
+      config.mqttTopic);
 
   mqttSetHeartbeat(config.deviceId.c_str(), config.heartbeatInterval);
 

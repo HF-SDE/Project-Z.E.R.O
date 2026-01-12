@@ -7,10 +7,12 @@
 static Component *g_components[MAX_COMPONENTS];
 static int g_componentCount = 0;
 static String g_deviceId = "";
+static String mqttBaseTopic = "";
 
-void componentManagerInit(String deviceId)
+void componentManagerInit(String deviceId, String baseMqttTopic)
 {
     g_deviceId = deviceId;
+    mqttBaseTopic = baseMqttTopic;
     g_componentCount = 0;
     Serial.println("Component Manager initialized");
 }
@@ -24,11 +26,6 @@ void componentRegister(Component *component)
     }
 
     g_components[g_componentCount++] = component;
-    Serial.print("Registered component: ");
-    Serial.print(component->config.name);
-    Serial.print(" (");
-    Serial.print(component->type);
-    Serial.println(")");
 }
 
 void componentUpdateValue(Component *component, const String &newValue)
@@ -37,10 +34,6 @@ void componentUpdateValue(Component *component, const String &newValue)
     {
         component->value = newValue;
         component->stateChanged = true; // Mark component as changed
-        Serial.print("Component updated: ");
-        Serial.print(component->config.name);
-        Serial.print(" = ");
-        Serial.println(newValue);
 
         // Trigger publish of all component states
         componentPublishAll();
@@ -64,12 +57,8 @@ void componentPublishAll()
 
         if (comp->stateChanged) // Only publish if state has changed
         {
-            // Build topic: devices/[id]/components/[component_type]
-            snprintf(topic, sizeof(topic), "devices/%d/components/%s", g_deviceId, comp->type);
-            Serial.print("Publishing component ");
-            Serial.print(comp->config.name);
-            Serial.print(" to topic ");
-            Serial.println(topic);
+            // Build topic: client/[id]/components/[component_type]
+            snprintf(topic, sizeof(topic), "%s/components/%s", mqttBaseTopic.c_str(), comp->type);
 
             // Build JSON payload
             StaticJsonDocument<256> doc;
@@ -86,13 +75,11 @@ void componentPublishAll()
             // Serialize to string
             serializeJson(doc, payload, sizeof(payload));
 
+            Serial.print("Publishing component to topic: ");
+            Serial.println(topic);
+
             // Publish to MQTT
             mqttPublish(topic, payload, true); // retained = true
-
-            Serial.print("Published to ");
-            Serial.print(topic);
-            Serial.print(": ");
-            Serial.println(payload);
 
             comp->stateChanged = false; // Reset stateChanged flag
         }

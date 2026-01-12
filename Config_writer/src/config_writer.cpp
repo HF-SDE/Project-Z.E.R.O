@@ -30,13 +30,14 @@ bool writeDefaultConfig()
     config.wifiSsid = "Case-ZERO_2,4GHz";
     config.wifiPassword = "Nogetjegkanhuske";
     config.serialFrequency = 115200;
-    config.mqttHost = "192.168.1.147";
+    config.mqttHost = "192.168.1.143";
     config.mqttPort = 1883;
     config.mqttUser = "";
     config.mqttPassword = "";
-    config.mqttTopic = "devices/" + String(getChipId()) + "/#";
+    config.mqttTopic = "clients/" + String(getChipId());
     config.deviceId = getChipId();
     config.heartbeatInterval = 1000 * 60; // 1 minute
+    config.status = true;                 // Default to active
 
     // Save configuration
     if (!storageSaveConfig(config))
@@ -53,6 +54,7 @@ bool writeDefaultConfig()
     Serial.println("[ConfigWriter] Device ID: " + config.deviceId);
     Serial.println("[ConfigWriter] Heartbeat Interval: " + String(config.heartbeatInterval) + " ms");
     Serial.println("[ConfigWriter] Serial Frequency: " + String(config.serialFrequency) + " bps");
+    Serial.println("[ConfigWriter] Status: " + String(config.status ? "Active" : "Inactive"));
 
     return true;
 }
@@ -67,6 +69,7 @@ bool writeDefaultConfig()
  * @param deviceId Device ID for identification
  * @param heartbeatInterval Heartbeat interval in milliseconds
  * @param serialFrequency Serial communication frequency in bps
+ * @param status Device active status
  *
  */
 bool writeCustomConfig(
@@ -77,7 +80,8 @@ bool writeCustomConfig(
     const String &mqttTopic,
     const String &deviceId,
     int heartbeatInterval,
-    int serialFrequency)
+    int serialFrequency,
+    bool status)
 
 {
     Serial.println("[ConfigWriter] Writing custom configuration...");
@@ -99,6 +103,7 @@ bool writeCustomConfig(
     config.deviceId = deviceId;
     config.heartbeatInterval = heartbeatInterval;
     config.serialFrequency = serialFrequency;
+    config.status = status;
 
     if (!storageSaveConfig(config))
     {
@@ -147,5 +152,6 @@ void displayStoredConfig()
     Serial.println("Device ID:      " + config.deviceId);
     Serial.println("Heartbeat Int.: " + String(config.heartbeatInterval) + " ms");
     Serial.println("Serial Freq.:   " + String(config.serialFrequency) + " bps");
+    Serial.println("Status:         " + String(config.status ? "Active" : "Inactive"));
     Serial.println("==========================================\n");
 }

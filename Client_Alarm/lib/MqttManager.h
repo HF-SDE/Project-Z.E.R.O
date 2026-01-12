@@ -10,7 +10,8 @@ void mqttInit(
     int port,
     const char *user,
     const char *pass,
-    const char *subscribeTopic);
+    const char *subscribeTopic,
+    String baseMqttTopic);
 
 // Call in loop()
 void mqttLoop();

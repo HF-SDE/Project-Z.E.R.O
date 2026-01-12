@@ -27,6 +27,7 @@ bool writeDefaultConfig();
  * @param deviceId Device ID for identification
  * @param heartbeatInterval Heartbeat interval in milliseconds
  * @param serialFrequency Serial communication frequency in bps
+ * @param status Device active status
  * @return true if successful, false otherwise
  */
 bool writeCustomConfig(
@@ -37,7 +38,8 @@ bool writeCustomConfig(
     const String &mqttTopic,
     const String &deviceId,
     int heartbeatInterval,
-    int serialFrequency);
+    int serialFrequency,
+    bool status);
 
 /**
  * Display current configuration from storage
