@@ -90,7 +90,7 @@ services:
       - mqtt-log:/mosquitto/log
     configs:
       - source: mosquitto_config
-        target: /mosquitto/config/mosquitto.conf
+        target: /mosquitto/config/mosquitto.dev.conf
     networks:
       - internal
       - public
@@ -158,9 +158,9 @@ volumes:
 
 configs:
   nginx_config:
-    file: ../config/nginx.conf
+    file: ../config/nginx.dev.conf
   nginx_stream_config:
-    file: ../config/01-mqtt.stream
+    file: ../config/01-mqtt.dev.stream
   mosquitto_config:
     file: ../config/mosquitto.dev.conf
   backend_nodemon:
