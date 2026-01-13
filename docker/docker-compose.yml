@@ -3,6 +3,7 @@ name: zero
 services:
   frontend:
     container_name: frontend
+    restart: unless-stopped
     build:
       context: ../frontend/
       dockerfile: Dockerfile
@@ -42,6 +43,7 @@ services:
 
   backend:
     container_name: backend
+    restart: unless-stopped
     build:
       context: ../backend/
       dockerfile: Dockerfile
@@ -63,6 +65,7 @@ services:
 
   db:
     container_name: db
+    restart: unless-stopped
     image: timescale/timescaledb:latest-pg17
     expose:
       - "5432"
@@ -116,6 +119,7 @@ services:
 
   reverse-proxy:
     container_name: reverse-proxy
+    restart: unless-stopped
     build:
       context: ..
       dockerfile: docker/nginx.Dockerfile
