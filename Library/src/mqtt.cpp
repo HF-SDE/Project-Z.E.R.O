@@ -1,5 +1,7 @@
+
 #include <MqttManager.h>
 #include <Environment.h>
+#include <wifi_setup.h>
 
 // -------- INTERNAL STATE (private to this file) --------
 static WiFiClient wifiClient;
@@ -109,12 +111,15 @@ void mqttInit(
     const char *pass,
     const char *subscribeTopic)
 {
-    subTopic = subscribeTopic;
+    if (wifiIsConnected())
+    {
+        subTopic = subscribeTopic;
 
-    mqtt.setServer(host, port);
-    mqtt.setCallback(mqttCallback);
+        mqtt.setServer(host, port);
+        mqtt.setCallback(mqttCallback);
 
-    mqttReconnect();
+        mqttReconnect();
+    }
 }
 
 void mqttLoop()

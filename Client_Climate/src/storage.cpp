@@ -10,7 +10,7 @@ bool storageInit()
     if (g_initialized)
         return true;
 
-    if (!LittleFS.begin(true)) // true = format on fail
+    if (!LittleFS.begin()) // true = format on fail
     {
         Serial.println("[Storage] Failed to mount LittleFS");
         return false;
@@ -99,6 +99,7 @@ bool storageLoadConfig(DeviceConfig &config)
     config.heartbeatInterval = doc["heartbeatInterval"] | 60000;
     config.serialFrequency = doc["serialFrequency"] | 115200;
     config.status = doc["status"] | true; // Load the status field
+    config.frequency = doc["frequency"] | 10000;
 
     Serial.println("[Storage] Configuration loaded successfully");
     return true;
@@ -160,8 +161,9 @@ void storagePrintConfig(const DeviceConfig &config)
     Serial.println("MQTT User:       " + String(config.mqttUser.isEmpty() ? "(empty)" : config.mqttUser));
     Serial.println("MQTT Password:   " + String(config.mqttPassword.isEmpty() ? "(empty)" : "********"));
     Serial.println("MQTT Topic:      " + config.mqttTopic);
-    Serial.println("Device ID:       " + config.deviceId);
+    Serial.println("Client ID:       " + config.deviceId);
     Serial.println("Heartbeat Int.:  " + String(config.heartbeatInterval) + " ms");
     Serial.println("Status:          " + String(config.status ? "Active" : "Inactive"));
+    Serial.println("Frequency:       " + String(config.frequency) + " ms");
     Serial.println("=========================================\n");
 }

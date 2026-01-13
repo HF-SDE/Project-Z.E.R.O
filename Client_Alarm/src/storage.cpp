@@ -40,6 +40,9 @@ bool storageSaveConfig(const DeviceConfig &config)
     doc["serialFrequency"] = config.serialFrequency;
     doc["status"] = config.status; // Save the status field
 
+    Serial.print("[Storage] Saving heartbeatInterval: ");
+    Serial.println(config.heartbeatInterval);
+
     File file = LittleFS.open(CONFIG_FILE, "w");
     if (!file)
     {
@@ -55,6 +58,12 @@ bool storageSaveConfig(const DeviceConfig &config)
     }
 
     file.close();
+
+    // Debug: Print what was written to file
+    Serial.println("[Storage] JSON written:");
+    serializeJsonPretty(doc, Serial);
+    Serial.println();
+
     Serial.println("[Storage] Configuration saved successfully");
     return true;
 }
@@ -99,6 +108,18 @@ bool storageLoadConfig(DeviceConfig &config)
     config.heartbeatInterval = doc["heartbeatInterval"] | 60000;
     config.serialFrequency = doc["serialFrequency"] | 115200;
     config.status = doc["status"] | true; // Load the status field, default to true
+
+    Serial.print("[Storage] Loaded heartbeatInterval from JSON: ");
+    Serial.println(config.heartbeatInterval);
+    Serial.print("[Storage] Raw JSON heartbeatInterval value: ");
+    if (doc.containsKey("heartbeatInterval"))
+    {
+        Serial.println(doc["heartbeatInterval"].as<int>());
+    }
+    else
+    {
+        Serial.println("(key not found, using default)");
+    }
 
     Serial.println("[Storage] Configuration loaded successfully");
     return true;
@@ -162,5 +183,6 @@ void printStorageConfig(const DeviceConfig &config)
     Serial.println("MQTT Topic:      " + config.mqttTopic);
     Serial.println("Device ID:       " + config.deviceId);
     Serial.println("Heartbeat Int.:  " + String(config.heartbeatInterval) + " ms");
+    Serial.println("Device Status:   " + String(config.status ? "Active" : "Inactive"));
     Serial.println("=========================================\n");
 }

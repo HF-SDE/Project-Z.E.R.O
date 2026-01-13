@@ -16,12 +16,12 @@
 DeviceConfig config;
 
 //---------------------- Pin config ----------------------
-constexpr uint8_t blueWifiLedPin = 0;
-constexpr uint8_t greenWifiLedPin = 4;
-constexpr uint8_t redWifiLedPin = 2;
-constexpr uint8_t LIGHT_SENSOR_PIN = 36;
-constexpr uint8_t BUTTON_PIN = 21;
-constexpr uint8_t LED_PIN = 22;
+constexpr uint8_t blueWifiLedPin = 27;
+constexpr uint8_t greenWifiLedPin = 26;
+constexpr uint8_t redWifiLedPin = 25;
+constexpr uint8_t LIGHT_SENSOR_PIN = 33;
+constexpr uint8_t BUTTON_PIN = 14;
+constexpr uint8_t LED_PIN = 32;
 
 // Wifi
 const String WIFI_SSID = "Case-ZERO_2,4GHz";

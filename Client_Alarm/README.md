@@ -14,19 +14,20 @@ ESP32-based alarm client for Project Z.E.R.O. Receives alarm triggers via MQTT a
 ## Hardware Requirements
 
 ### Components
+
 - ESP32 Development Board
 - 20x4 LCD Display with I2C backpack (address 0x27)
-- RGB LED  for WiFi status indicator
+- RGB LED for WiFi status indicator
 - Resistors (220 ohm for LEDs)
 - Red LED for alarm indicator
 - Buzzer
 - Jumper wires
-- Breadboard 
+- Breadboard
 
 ### Pin Connections
 
 | Component | ESP32 Pin |
-|-----------|-----------|
+| --------- | --------- |
 | LCD SDA   | GPIO 21   |
 | LCD SCL   | GPIO 22   |
 | Red LED   | GPIO 2    |
@@ -48,7 +49,9 @@ ESP32-based alarm client for Project Z.E.R.O. Receives alarm triggers via MQTT a
 ## Installation
 
 ### 1. Configure WiFi/MQTT
+
 Edit [src/main.cpp](src/main.cpp) (lines 11-19):
+
 ```cpp
 const char *WIFI_SSID = "your-wifi-ssid";
 const char *WIFI_PASSWORD = "your-wifi-password";
@@ -56,6 +59,7 @@ const char *MQTT_HOST = "192.168.1.143";  // Your MQTT broker IP
 ```
 
 ### 2. Build & Upload
+
 ```bash
 # Build the project
 platformio run
@@ -71,19 +75,34 @@ Or use PlatformIO IDE buttons: **Build** → **Upload** → **Monitor**
 
 ## Usage
 
+### Startup process
+
+1. ESP32 boots and initializes peripherals.
+2. Sets up Serial communication at 115200 bps.
+3. Inits components: LCD, RGB LED, Buzzer.
+4. Reads config from disk (LittleFS).
+5. Changes Serial frequency if config differs.
+6. Connects to WiFi, shows status via RGB LED.
+7. Connects to MQTT broker, starts heartbeat publishing, and subscribes to all topics under its deviceId topic.
+8. Registering MQTT message event handlers.
+9. Setup loop to keep sending heartbeat and update WiFi status LED.
+
 ### MQTT Topics
 
 #### Subscribe (Device listens to):
+
 - `devices/1/triggers/#` - Wildcard for all trigger types
   - `devices/1/triggers/alarm-trigger` - Activate alarm
   - `devices/1/triggers/clear-alarm-trigger` - Clear alarm
 
 #### Publish (Device sends):
+
 - `devices/1/status` - "online" every 60 seconds (retained)
 
 ### Alarm Message Format
 
 Send JSON payload to `devices/1/triggers/alarm-trigger`:
+
 ```json
 {
   "message": "Fire detected in Zone A! Evacuate immediately.",
@@ -93,6 +112,7 @@ Send JSON payload to `devices/1/triggers/alarm-trigger`:
 ```
 
 **Fields:**
+
 - `message` (string): Text to display (40 chars max for 20x2 LCD)
 - `color` (string): LED color - `"red"`, `"green"`, or `"white"` _(Note: currently forces red)_
 - `useSound` (boolean): Enable/disable buzzer
@@ -100,6 +120,7 @@ Send JSON payload to `devices/1/triggers/alarm-trigger`:
 ### Clear Alarm
 
 Send any payload to `devices/1/triggers/clear-alarm-trigger`:
+
 ```json
 {}
 ```
@@ -126,7 +147,9 @@ Client_Alarm/
 ## Debugging
 
 ### Serial Monitor
+
 Connect at **115200 baud** to see:
+
 - WiFi connection status
 - IP address assignment
 - MQTT connection attempts
@@ -134,6 +157,7 @@ Connect at **115200 baud** to see:
 - JSON parsing errors
 
 ### LED Status Indicators
+
 - **Blue pulsing**: Connecting to WiFi
 - **Green solid**: WiFi connected
 - **Red**: WiFi failed (or alarm active)
@@ -141,20 +165,24 @@ Connect at **115200 baud** to see:
 ### Common Issues
 
 **"WiFi failed"**
+
 - Check SSID/password in [main.cpp](src/main.cpp)
 - Verify 2.4GHz network (ESP32 doesn't support 5GHz)
 
 **"MQTT not connecting"**
+
 - Verify broker IP is reachable: `ping 192.168.1.143`
 - Check broker allows anonymous connections
 - Confirm broker port is 1883
 
 **"LCD shows garbage"**
+
 - Verify I2C address with `i2cdetect` (usually 0x27 or 0x3F)
 - Check SDA/SCL wiring
 - Adjust LCD contrast potentiometer
 
 **"Upload failed"**
+
 - Hold BOOT button on ESP32 during upload
 - Check USB cable supports data transfer
 - Verify correct COM/tty port in PlatformIO

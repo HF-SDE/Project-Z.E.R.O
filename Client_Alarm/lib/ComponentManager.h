@@ -4,7 +4,7 @@
 #include "Component.h"
 
 // Initialize the component manager with device ID
-void componentManagerInit(String deviceId);
+void componentManagerInit(String deviceId, String baseMqttTopic);
 
 // Register a component (called at startup)
 void componentRegister(Component *component);

@@ -9,8 +9,18 @@ bool parseConfigMessage(const char *json, ConfigMessage &out)
     if (err)
         return false;
 
-    out.heartbeatInterval = doc["heartbeatInterval"] | 0;
-    out.status = doc["status"] | 0;
+    // Reject if required fields are missing or null
+    if (!doc.containsKey("heartbeatInterval") || doc["heartbeatInterval"].isNull())
+    {
+        return false;
+    }
+    if (!doc.containsKey("status") || doc["status"].isNull())
+    {
+        return false;
+    }
+
+    out.heartbeatInterval = doc["heartbeatInterval"];
+    out.status = doc["status"];
 
     return true;
 }

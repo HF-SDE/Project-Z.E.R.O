@@ -3,9 +3,9 @@
 
 const char *getChipId()
 {
-    static char chipId[17];
-    uint64_t mac = ESP.getEfuseMac();
-    snprintf(chipId, sizeof(chipId), "%016llX", mac);
+    static char chipId[9];
+    uint32_t id = ESP.getChipId();
+    snprintf(chipId, sizeof(chipId), "%08X", id);
     return chipId;
 }
 
@@ -30,14 +30,16 @@ bool writeDefaultConfig()
     config.wifiSsid = "Case-ZERO_2,4GHz";
     config.wifiPassword = "Nogetjegkanhuske";
     config.serialFrequency = 115200;
-    config.mqttHost = "192.168.1.5";
+    config.mqttHost = "192.168.1.149";
     config.mqttPort = 1883;
     config.mqttUser = "";
     config.mqttPassword = "";
     config.mqttTopic = "clients/" + String(getChipId());
+    config.qos = 0;
     config.deviceId = getChipId();
     config.heartbeatInterval = 1000 * 60; // 1 minute
     config.status = true;                 // Default to active
+    config.frequency = 10 * 1000;         // 10 seconds
 
     // Save configuration
     if (!storageSaveConfig(config))
@@ -51,10 +53,11 @@ bool writeDefaultConfig()
     Serial.println("[ConfigWriter] MQTT Host: " + config.mqttHost);
     Serial.println("[ConfigWriter] MQTT Port: " + String(config.mqttPort));
     Serial.println("[ConfigWriter] MQTT Topic: " + config.mqttTopic);
-    Serial.println("[ConfigWriter] Device ID: " + config.deviceId);
+    Serial.println("[ConfigWriter] Client ID: " + config.deviceId);
     Serial.println("[ConfigWriter] Heartbeat Interval: " + String(config.heartbeatInterval) + " ms");
     Serial.println("[ConfigWriter] Serial Frequency: " + String(config.serialFrequency) + " bps");
     Serial.println("[ConfigWriter] Status: " + String(config.status ? "Active" : "Inactive"));
+    Serial.println("[ConfigWriter] Frequency: " + String(config.frequency) + " ms");
 
     return true;
 }
@@ -104,6 +107,7 @@ bool writeCustomConfig(
     config.heartbeatInterval = heartbeatInterval;
     config.serialFrequency = serialFrequency;
     config.status = status;
+    config.frequency = 10000;
 
     if (!storageSaveConfig(config))
     {
@@ -149,9 +153,10 @@ void displayStoredConfig()
     Serial.println("MQTT User:      " + String(config.mqttUser.isEmpty() ? "(empty)" : config.mqttUser.c_str()));
     Serial.println("MQTT Password:  " + String(config.mqttPassword.isEmpty() ? "(empty)" : "********"));
     Serial.println("MQTT Topic:     " + config.mqttTopic);
-    Serial.println("Device ID:      " + config.deviceId);
+    Serial.println("Client ID:      " + config.deviceId);
     Serial.println("Heartbeat Int.: " + String(config.heartbeatInterval) + " ms");
     Serial.println("Serial Freq.:   " + String(config.serialFrequency) + " bps");
     Serial.println("Status:         " + String(config.status ? "Active" : "Inactive"));
+    Serial.println("Frequency:      " + String(config.frequency) + " ms");
     Serial.println("==========================================\n");
 }

@@ -24,6 +24,7 @@ bool writeDefaultConfig();
  * @param mqttHost MQTT broker host/IP
  * @param mqttPort MQTT broker port
  * @param mqttTopic MQTT topic to subscribe to
+ * @param qos MQTT Quality of Service level
  * @param deviceId Device ID for identification
  * @param heartbeatInterval Heartbeat interval in milliseconds
  * @param serialFrequency Serial communication frequency in bps
@@ -39,7 +40,8 @@ bool writeCustomConfig(
     const String &deviceId,
     int heartbeatInterval,
     int serialFrequency,
-    bool status);
+    bool status,
+    int frequency);
 
 /**
  * Display current configuration from storage
