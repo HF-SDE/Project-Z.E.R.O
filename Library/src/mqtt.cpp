@@ -1,4 +1,5 @@
-#include "../lib/MqttManager.h"
+#include <MqttManager.h>
+#include <Environment.h>
 
 // -------- INTERNAL STATE (private to this file) --------
 static WiFiClient wifiClient;
@@ -21,7 +22,7 @@ static void mqttCallback(char *topic, byte *payload, unsigned int length)
 {
     mqtt.setBufferSize(2048);
     messageReceived = true;
-    Serial.println("Event received - callback");
+    Environment::print("Event received - callback");
 
     payloadBuf = "";
     payloadBuf.reserve(length);

@@ -15,7 +15,7 @@ const char *getChipId();
  * or when you need to reset to default settings
  * @return true if successful, false otherwise
  */
-bool writeDefaultConfig(String mqttHost);
+[[nodiscard]] bool writeDefaultConfig(const String &mqttHost, const String &wifiSsid, const String &wifiPassword);
 
 /**
  * Write custom configuration to device storage

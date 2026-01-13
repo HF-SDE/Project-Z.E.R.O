@@ -1,5 +1,6 @@
-#include "../lib/StorageManager.h"
+#include <StorageManager.h>
 #include <Arduino.h>
+#include <Environment.h>
 
 const char *getChipId()
 {
@@ -14,21 +15,21 @@ const char *getChipId()
  * Call this function once during initial device setup
  * or when you need to reset to default settings
  */
-bool writeDefaultConfig(String mqttHost)
+[[nodiscard]] bool writeDefaultConfig(const String &mqttHost, const String &wifiSsid, const String &wifiPassword)
 {
-    Serial.println("[ConfigWriter] Writing default configuration...");
+    Environment::print("[ConfigWriter] Writing default configuration...");
 
     // Initialize storage
     if (!storageInit())
     {
-        Serial.println("[ConfigWriter] Failed to initialize storage");
+        Environment::print("[ConfigWriter] Failed to initialize storage");
         return false;
     }
 
     // Create default configuration
     DeviceConfig config;
-    config.wifiSsid = "Case-ZERO_2,4GHz";
-    config.wifiPassword = "Nogetjegkanhuske";
+    config.wifiSsid = wifiSsid;
+    config.wifiPassword = wifiPassword;
     config.serialFrequency = 115200;
     config.mqttHost = mqttHost;
     config.mqttPort = 1883;
@@ -41,18 +42,18 @@ bool writeDefaultConfig(String mqttHost)
     // Save configuration
     if (!storageSaveConfig(config))
     {
-        Serial.println("[ConfigWriter] Failed to save configuration");
+        Environment::print("[ConfigWriter] Failed to save configuration");
         return false;
     }
 
-    Serial.println("[ConfigWriter] Configuration written successfully");
-    Serial.println("[ConfigWriter] WiFi SSID: " + config.wifiSsid);
-    Serial.println("[ConfigWriter] MQTT Host: " + config.mqttHost);
-    Serial.println("[ConfigWriter] MQTT Port: " + String(config.mqttPort));
-    Serial.println("[ConfigWriter] MQTT Topic: " + config.mqttTopic);
-    Serial.println("[ConfigWriter] Device ID: " + config.deviceId);
-    Serial.println("[ConfigWriter] Heartbeat Interval: " + String(config.heartbeatInterval) + " ms");
-    Serial.println("[ConfigWriter] Serial Frequency: " + String(config.serialFrequency) + " bps");
+    Environment::print("[ConfigWriter] Configuration written successfully");
+    Environment::print("[ConfigWriter] WiFi SSID: " + config.wifiSsid);
+    Environment::print("[ConfigWriter] MQTT Host: " + config.mqttHost);
+    Environment::print("[ConfigWriter] MQTT Port: " + String(config.mqttPort));
+    Environment::print("[ConfigWriter] MQTT Topic: " + config.mqttTopic);
+    Environment::print("[ConfigWriter] Device ID: " + config.deviceId);
+    Environment::print("[ConfigWriter] Heartbeat Interval: " + String(config.heartbeatInterval) + " ms");
+    Environment::print("[ConfigWriter] Serial Frequency: " + String(config.serialFrequency) + " bps");
 
     return true;
 }

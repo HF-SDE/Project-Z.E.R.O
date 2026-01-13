@@ -1,6 +1,7 @@
-#include "../lib/StorageManager.h"
+#include "StorageManager.h"
 #include <LittleFS.h>
 #include <ArduinoJson.h>
+#include <Environment.h>
 
 static const char *CONFIG_FILE = "/config.json";
 static bool g_initialized = false;
@@ -12,12 +13,12 @@ bool storageInit()
 
     if (!LittleFS.begin(true)) // true = format on fail
     {
-        Serial.println("[Storage] Failed to mount LittleFS");
+        Environment::print("[Storage] Failed to mount LittleFS");
         return false;
     }
 
     g_initialized = true;
-    Serial.println("[Storage] LittleFS mounted successfully");
+    Environment::print("[Storage] LittleFS mounted successfully");
     return true;
 }
 
@@ -42,19 +43,19 @@ bool storageSaveConfig(const DeviceConfig &config)
     File file = LittleFS.open(CONFIG_FILE, "w");
     if (!file)
     {
-        Serial.println("[Storage] Failed to open config file for writing");
+        Environment::print("[Storage] Failed to open config file for writing");
         return false;
     }
 
     if (serializeJson(doc, file) == 0)
     {
-        Serial.println("[Storage] Failed to write config to file");
+        Environment::print("[Storage] Failed to write config to file");
         file.close();
         return false;
     }
 
     file.close();
-    Serial.println("[Storage] Configuration saved successfully");
+    Environment::print("[Storage] Configuration saved successfully");
     return true;
 }
 
@@ -65,14 +66,14 @@ bool storageLoadConfig(DeviceConfig &config)
 
     if (!LittleFS.exists(CONFIG_FILE))
     {
-        Serial.println("[Storage] Config file does not exist");
+        Environment::print("[Storage] Config file does not exist");
         return false;
     }
 
     File file = LittleFS.open(CONFIG_FILE, "r");
     if (!file)
     {
-        Serial.println("[Storage] Failed to open config file for reading");
+        Environment::print("[Storage] Failed to open config file for reading");
         return false;
     }
 
@@ -82,8 +83,8 @@ bool storageLoadConfig(DeviceConfig &config)
 
     if (err)
     {
-        Serial.print("[Storage] Failed to parse config file: ");
-        Serial.println(err.c_str());
+        Environment::print("[Storage] Failed to parse config file: ");
+        Environment::print(err.c_str());
         return false;
     }
 
@@ -98,7 +99,7 @@ bool storageLoadConfig(DeviceConfig &config)
     config.heartbeatInterval = doc["heartbeatInterval"] | 60000;
     config.serialFrequency = doc["serialFrequency"] | 115200;
 
-    Serial.println("[Storage] Configuration loaded successfully");
+    Environment::print("[Storage] Configuration loaded successfully");
     return true;
 }
 
@@ -117,17 +118,17 @@ bool storageDeleteConfig()
 
     if (!LittleFS.exists(CONFIG_FILE))
     {
-        Serial.println("[Storage] Config file does not exist");
+        Environment::print("[Storage] Config file does not exist");
         return true; // Not an error
     }
 
     if (LittleFS.remove(CONFIG_FILE))
     {
-        Serial.println("[Storage] Configuration deleted successfully");
+        Environment::print("[Storage] Configuration deleted successfully");
         return true;
     }
 
-    Serial.println("[Storage] Failed to delete configuration");
+    Environment::print("[Storage] Failed to delete configuration");
     return false;
 }
 
@@ -136,29 +137,29 @@ bool storageFormat()
     if (!g_initialized && !storageInit())
         return false;
 
-    Serial.println("[Storage] Formatting filesystem...");
+    Environment::print("[Storage] Formatting filesystem...");
     if (LittleFS.format())
     {
-        Serial.println("[Storage] Filesystem formatted successfully");
+        Environment::print("[Storage] Filesystem formatted successfully");
         return true;
     }
 
-    Serial.println("[Storage] Failed to format filesystem");
+    Environment::print("[Storage] Failed to format filesystem");
     return false;
 }
 
 void storagePrintConfig(const DeviceConfig &config)
 {
-    Serial.println("\n========== Device Configuration ==========");
-    Serial.println("WiFi SSID:       " + config.wifiSsid);
-    Serial.println("WiFi Password:   " + String(config.wifiPassword.isEmpty() ? "(empty)" : "********"));
-    Serial.println("Serial Freq:     " + String(config.serialFrequency) + " bps");
-    Serial.println("MQTT Host:       " + config.mqttHost);
-    Serial.println("MQTT Port:       " + String(config.mqttPort));
-    Serial.println("MQTT User:       " + String(config.mqttUser.isEmpty() ? "(empty)" : config.mqttUser));
-    Serial.println("MQTT Password:   " + String(config.mqttPassword.isEmpty() ? "(empty)" : "********"));
-    Serial.println("MQTT Topic:      " + config.mqttTopic);
-    Serial.println("Device ID:       " + config.deviceId);
-    Serial.println("Heartbeat Int.:  " + String(config.heartbeatInterval) + " ms");
-    Serial.println("=========================================\n");
+    Environment::print("\n========== Device Configuration ==========");
+    Environment::print("WiFi SSID:       " + config.wifiSsid);
+    Environment::print("WiFi Password:   " + String(config.wifiPassword.isEmpty() ? "(empty)" : "********"));
+    Environment::print("Serial Freq:     " + String(config.serialFrequency) + " bps");
+    Environment::print("MQTT Host:       " + config.mqttHost);
+    Environment::print("MQTT Port:       " + String(config.mqttPort));
+    Environment::print("MQTT User:       " + String(config.mqttUser.isEmpty() ? "(empty)" : config.mqttUser));
+    Environment::print("MQTT Password:   " + String(config.mqttPassword.isEmpty() ? "(empty)" : "********"));
+    Environment::print("MQTT Topic:      " + config.mqttTopic);
+    Environment::print("Device ID:       " + config.deviceId);
+    Environment::print("Heartbeat Int.:  " + String(config.heartbeatInterval) + " ms");
+    Environment::print("=========================================\n");
 }

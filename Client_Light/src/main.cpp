@@ -1,15 +1,16 @@
 #include <Arduino.h>
-#include "Button.h"
+#include <Button.h>
 #include <vector>
-#include "LightSensor.h"
-#include "Led.h"
-#include <config.h>
-#include <../lib/wifi_setup.h>
+#include <LightSensor.h>
+#include <Led.h>
+#include <Config.h>
+#include <wifi_setup.h>
 #include <Wire.h>
 #include <PubSubClient.h>
-#include <../lib/MqttManager.h>
-#include <../lib/ConfigWriter.h>
-#include <../lib/StorageManager.h>
+#include <MqttManager.h>
+#include <ConfigWriter.h>
+#include <StorageManager.h>
+#include <environment.h>
 
 // ---------------------- Global Config ----------------------
 DeviceConfig config;
@@ -21,6 +22,10 @@ constexpr uint8_t redWifiLedPin = 2;
 constexpr uint8_t LIGHT_SENSOR_PIN = 36;
 constexpr uint8_t BUTTON_PIN = 21;
 constexpr uint8_t LED_PIN = 22;
+
+// Wifi
+const String WIFI_SSID = "Case-ZERO_2,4GHz";
+const String WIFI_PASSWORD = "Nogetjegkanhuske";
 
 // Config component
 const String components[4] = {"PhotoResistor", "button", "RGB_Light", "White_LED"};
@@ -51,10 +56,10 @@ static void onMqttMessage(const char *topic, const char *payload)
 {
   // Handle incoming MQTT messages here
 
-  Serial.print("MQTT Message received on topic: ");
-  Serial.println(topic);
-  Serial.print("Payload: ");
-  Serial.println(payload);
+  Environment::print("MQTT Message received on topic: ");
+  Environment::print(topic);
+  Environment::print("Payload: ");
+  Environment::print(payload);
 }
 
 static void wifiSetup()
@@ -64,23 +69,23 @@ static void wifiSetup()
 
   if (!wifiConnect(config.wifiSsid.c_str(), config.wifiPassword.c_str(), 10000))
   {
-    Serial.println("WiFi failed");
+    Environment::print("WiFi failed");
     updateWifiStatusLed(false);
     return;
   }
 
-  Serial.print("IP: ");
-  Serial.println(wifiGetIp());
+  Environment::print("IP: ");
+  Environment::print(wifiGetIp());
 
   updateWifiStatusLed(false);
 }
 
 static void initConfig()
 {
-  Serial.println("Initializing storage...");
+  Environment::print("Initializing storage...");
   if (!storageInit())
   {
-    Serial.println("Failed to initialize storage!");
+    Environment::print("Failed to initialize storage!");
     // Blink red LED to indicate error
     for (int i = 0; i < 10; i++)
     {
@@ -94,10 +99,10 @@ static void initConfig()
     return;
   }
 
-  Serial.println("Loading configuration...");
+  Environment::print("Loading configuration...");
   if (!storageLoadConfig(config))
   {
-    Serial.println("Failed to load config! Using defaults and saving...");
+    Environment::print("Failed to load config! Using defaults and saving...");
     // Blink red LED to indicate config error
     for (int i = 0; i < 10; i++)
     {
@@ -110,9 +115,9 @@ static void initConfig()
     }
 
     // Write default config and try again
-    if (!writeDefaultConfig(MQTT_HOST) || !storageLoadConfig(config))
+    if (!writeDefaultConfig(MQTT_HOST, WIFI_SSID, WIFI_PASSWORD) || !storageLoadConfig(config))
     {
-      Serial.println("Failed to create default config!");
+      Environment::print("Failed to create default config!");
       return;
     }
   }
@@ -151,33 +156,33 @@ static void initComponentConfig()
     bool value_typeExists = retainedMessageExists(String(componentTopic + "/value_type").c_str());
     if (value_typeExists)
     {
-      Serial.println(componentTopic + ": Retained message exists");
+      Environment::print(componentTopic + ": Retained message exists");
     }
     else
     {
-      Serial.println(componentTopic + ": No retained message on topic");
+      Environment::print(componentTopic + ": No retained message on topic");
       mqttPublish(String(componentTopic + "/value_type").c_str(), p.value_type.c_str(), true);
     }
 
     bool valueExists = retainedMessageExists(String(componentTopic + "/value").c_str());
     if (valueExists)
     {
-      Serial.println(componentTopic + ": Retained message exists");
+      Environment::print(componentTopic + ": Retained message exists");
     }
     else
     {
-      Serial.println(componentTopic + ": No retained message on topic");
+      Environment::print(componentTopic + ": No retained message on topic");
       mqttPublish(String(componentTopic + "/value").c_str(), "1", true);
     }
 
     bool configExists = retainedMessageExists(String(componentTopic + "/config").c_str());
     if (configExists)
     {
-      Serial.println(componentTopic + ": Retained message exists");
+      Environment::print(componentTopic + ": Retained message exists");
     }
     else
     {
-      Serial.println(componentTopic + ": No retained message on topic");
+      Environment::print(componentTopic + ": No retained message on topic");
       mqttPublish(String(componentTopic + "/config").c_str(), payload.c_str(), true);
     }
   }

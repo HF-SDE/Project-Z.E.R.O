@@ -1,5 +1,5 @@
-#include "LightSensor.h"
-#include <../lib/MqttManager.h>
+#include <LightSensor.h>
+#include <MqttManager.h>
 
 namespace
 {

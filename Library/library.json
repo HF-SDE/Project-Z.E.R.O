@@ -1,0 +1,37 @@
+{
+  "name": "Z.E.R.O Library",
+  "version": "0.0.1",
+  "description": "This is the Z.E.R.O IoT management system library for supporting the clients.",
+  "keywords": "iot, system, management, zero",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/username/hello-world.git"
+  },
+  "authors":
+  [
+    {
+      "name": "Nima",
+      "email": "nima@exploit4you.zip",
+      "maintainer": true
+    },
+    {
+      "name": "Kenni",
+      "email": "kenni@exploit4you.zip",
+      "maintainer": true
+    },
+    {
+      "name": "Philip Guldborg",
+      "email": "pgu@exploit4you.zip",
+      "maintainer": true
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://exploit4you.zip/",
+  "dependencies": {
+    "ArduinoJson": "bblanchon/ArduinoJson@^7.4.2",
+    "PubSubClient": "knolleary/PubSubClient@^2.8.0"
+  },
+  "frameworks": "*",
+  "platforms": "*"
+}

@@ -1,4 +1,4 @@
-#include "../lib/wifi_setup.h"
+#include "wifi_setup.h"
 
 // -------- INTERNAL STATE --------
 static int ledRed = -1;
