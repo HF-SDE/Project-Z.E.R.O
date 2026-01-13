@@ -12,7 +12,10 @@ namespace LightSensor
     void begin(uint8_t pin)
     {
         g_pin = pin;
+#if defined(ESP32)
         analogSetAttenuation(ADC_11db); // ESP32: up to ~3.3V
+#endif
+        pinMode(g_pin, INPUT);
     }
 
     int read(const String &componentTopic)

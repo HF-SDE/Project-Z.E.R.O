@@ -81,6 +81,20 @@ bool retainedMessageExists(const char *topic, uint32_t windowMs)
     return true;
 }
 
+static String deviceIdHex()
+{
+#if defined(ESP32)
+    uint64_t mac = ESP.getEfuseMac();
+    char buf[13];
+    snprintf(buf, sizeof(buf), "%012llX", (unsigned long long)(mac & 0xFFFFFFFFFFFFULL));
+    return String(buf);
+#elif defined(ESP8266)
+    return String(ESP.getChipId(), HEX);
+#else
+    return "UNKNOWN";
+#endif
+}
+
 // Internal reconnect
 static void mqttReconnect()
 {
@@ -94,7 +108,7 @@ static void mqttReconnect()
     while (!mqtt.connected())
     {
         String clientId = "esp32-";
-        clientId += String((uint32_t)ESP.getEfuseMac(), HEX);
+        clientId += deviceIdHex();
 
         if (mqtt.connect(clientId.c_str()))
         {

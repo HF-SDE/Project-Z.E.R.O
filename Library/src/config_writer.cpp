@@ -2,20 +2,18 @@
 #include <Arduino.h>
 #include <Environment.h>
 
-const char *getChipId()
+static String getChipId()
 {
-    static char chipId[17];
+#if defined(ESP8266)
+    return String(ESP.getChipId(), HEX);
+#elif defined(ESP32)
     uint64_t mac = ESP.getEfuseMac();
-    snprintf(chipId, sizeof(chipId), "%016llX", mac);
-    return chipId;
-}
-
-const char *getChipIdEsp8266()
-{
-    static char chipId[9];
-    uint32_t id = ESP.getChipId();
-    snprintf(chipId, sizeof(chipId), "%08X", id);
-    return chipId;
+    char buf[13];
+    snprintf(buf, sizeof(buf), "%012llX", (unsigned long long)(mac & 0xFFFFFFFFFFFFULL));
+    return String(buf);
+#else
+    return "UNKNOWN";
+#endif
 }
 
 /**
@@ -89,11 +87,11 @@ bool writeCustomConfig(
     int serialFrequency)
 
 {
-    Serial.println("[ConfigWriter] Writing custom configuration...");
+    Environment::print("[ConfigWriter] Writing custom configuration...");
 
     if (!storageInit())
     {
-        Serial.println("[ConfigWriter] Failed to initialize storage");
+        Environment::print("[ConfigWriter] Failed to initialize storage");
         return false;
     }
 
@@ -111,11 +109,11 @@ bool writeCustomConfig(
 
     if (!storageSaveConfig(config))
     {
-        Serial.println("[ConfigWriter] Failed to save configuration");
+        Environment::print("[ConfigWriter] Failed to save configuration");
         return false;
     }
 
-    Serial.println("[ConfigWriter] Configuration written successfully");
+    Environment::print("[ConfigWriter] Configuration written successfully");
     return true;
 }
 
@@ -124,37 +122,36 @@ bool writeCustomConfig(
  */
 void displayStoredConfig1()
 {
-    Serial.println("[ConfigWriter] Reading stored configuration...");
-
+    Environment::print("[ConfigWriter] Reading stored configuration...");
     if (!storageInit())
     {
-        Serial.println("[ConfigWriter] Failed to initialize storage");
+        Environment::print("[ConfigWriter] Failed to initialize storage");
         return;
     }
 
     if (!storageConfigExists())
     {
-        Serial.println("[ConfigWriter] No configuration found in storage");
+        Environment::print("[ConfigWriter] No configuration found in storage");
         return;
     }
 
     DeviceConfig config;
     if (!storageLoadConfig(config))
     {
-        Serial.println("[ConfigWriter] Failed to load configuration");
+        Environment::print("[ConfigWriter] Failed to load configuration");
         return;
     }
 
-    Serial.println("\n========== Stored Configuration ==========");
-    Serial.println("WiFi SSID:      " + config.wifiSsid);
-    Serial.println("WiFi Password:  " + String(config.wifiPassword.isEmpty() ? "(empty)" : "********"));
-    Serial.println("MQTT Host:      " + config.mqttHost);
-    Serial.println("MQTT Port:      " + String(config.mqttPort));
-    Serial.println("MQTT User:      " + String(config.mqttUser.isEmpty() ? "(empty)" : config.mqttUser.c_str()));
-    Serial.println("MQTT Password:  " + String(config.mqttPassword.isEmpty() ? "(empty)" : "********"));
-    Serial.println("MQTT Topic:     " + config.mqttTopic);
-    Serial.println("Device ID:      " + config.deviceId);
-    Serial.println("Heartbeat Int.: " + String(config.heartbeatInterval) + " ms");
-    Serial.println("Serial Freq.:   " + String(config.serialFrequency) + " bps");
-    Serial.println("==========================================\n");
+    Environment::print("\n========== Stored Configuration ==========");
+    Environment::print("WiFi SSID:      " + config.wifiSsid);
+    Environment::print("WiFi Password:  " + String(config.wifiPassword.isEmpty() ? "(empty)" : "********"));
+    Environment::print("MQTT Host:      " + config.mqttHost);
+    Environment::print("MQTT Port:      " + String(config.mqttPort));
+    Environment::print("MQTT User:      " + String(config.mqttUser.isEmpty() ? "(empty)" : config.mqttUser.c_str()));
+    Environment::print("MQTT Password:  " + String(config.mqttPassword.isEmpty() ? "(empty)" : "********"));
+    Environment::print("MQTT Topic:     " + config.mqttTopic);
+    Environment::print("Device ID:      " + config.deviceId);
+    Environment::print("Heartbeat Int.: " + String(config.heartbeatInterval) + " ms");
+    Environment::print("Serial Freq.:   " + String(config.serialFrequency) + " bps");
+    Environment::print("==========================================\n");
 }

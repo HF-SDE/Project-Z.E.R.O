@@ -8,8 +8,18 @@ static int ledBlue = -1;
 
 bool wifiConnect(const char *ssid, const char *password, unsigned long timeoutMs)
 {
+#if defined(ESP8266)
+    // Some ESP8266 cores/libraries declare begin(char*).
+    char ssidBuf[33];
+    strncpy(ssidBuf, ssid, sizeof(ssidBuf) - 1);
+    ssidBuf[sizeof(ssidBuf) - 1] = '\0';
+
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssidBuf, password);
+#else
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
+#endif
 
     unsigned long start = millis();
 

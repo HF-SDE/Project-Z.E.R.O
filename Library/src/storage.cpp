@@ -11,12 +11,27 @@ bool storageInit()
 {
     if (g_initialized)
         return true;
-
-    if (!LittleFS.begin(true)) // true = format on fail
+#if defined(ESP32)
+    if (!LittleFS.begin(true)) // format on fail
     {
         Environment::print("[Storage] Failed to mount LittleFS");
         return false;
     }
+#elif defined(ESP8266)
+    if (!LittleFS.begin())
+    {
+        Environment::print("[Storage] LittleFS mount failed; formatting...");
+        LittleFS.format();
+        if (!LittleFS.begin())
+        {
+            Environment::print("[Storage] Failed to mount LittleFS after format");
+            return false;
+        }
+    }
+#else
+    Environment::print("[Storage] Unsupported platform");
+    return false;
+#endif
 
     g_initialized = true;
     Environment::print("[Storage] LittleFS mounted successfully");

@@ -7,8 +7,7 @@
  * Get unique chip ID from ESP32 MAC address
  * @return Hex string representation of chip ID
  */
-const char *getChipId();
-const char *getChipIdEsp8266();
+static String getChipId();
 
 /**
  * Write default configuration to device storage
