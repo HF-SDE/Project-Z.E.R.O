@@ -30,7 +30,7 @@ bool writeDefaultConfig()
     config.wifiSsid = "Case-ZERO_2,4GHz";
     config.wifiPassword = "Nogetjegkanhuske";
     config.serialFrequency = 115200;
-    config.mqttHost = "192.168.1.143";
+    config.mqttHost = "192.168.1.5";
     config.mqttPort = 1883;
     config.mqttUser = "";
     config.mqttPassword = "";

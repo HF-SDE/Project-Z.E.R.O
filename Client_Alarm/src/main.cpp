@@ -288,5 +288,7 @@ void loop()
     hasPublishedComponentState = true;
   }
   statusLedUpdate(wifiIsConnected(), mqttIsConnected(), false);
+
+  delay(500); // Small delay to avoid busy loop
   mqttLoop();
 }
