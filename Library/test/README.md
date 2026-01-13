@@ -72,5 +72,3 @@ This document explains how to run and extend the unit and integration tests for 
 - Native tests write a `config.json` file into the repository working directory; this will be removed by the test suite but avoid running on important working trees.
 
 ---
-
-If you want, I can add a convenience script to run a subset of tests or add instructions for running a single test case. Would you like that? 🎯
