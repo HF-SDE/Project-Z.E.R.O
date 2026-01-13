@@ -6,6 +6,8 @@ const client = mqtt.connect(config.MQTT_BROKER);
 
 client.on('connect', () => console.log('MQTT: \tConnected'));
 client.on('disconnect', () => console.log('MQTT: \tisconnected'));
+client.on('end', () => console.log('MQTT: \tended'));
+client.on('error', (error) => console.error('MQTT: \tError', error));
 
 const maxTemp = 23;
 
@@ -14,7 +16,7 @@ const alarmActivateTopic = `clients/${alarmClientId}/triggers/alarm-trigger`;
 const alarmDeactivateTopic = `clients/${alarmClientId}/triggers/clear-alarm-trigger`;
 
 client
-  .subscribe('clients/+/tempature/value')
+  .subscribe('clients/+/temperature/value')
   .on('message', async (topic, message) => {
     const value = parseFloat(message.toString());
 
