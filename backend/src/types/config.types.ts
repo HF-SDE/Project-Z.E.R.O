@@ -1,3 +1,5 @@
+import type { StringValue } from 'ms';
+
 /**
  * Represents the environment in which the application is running.
  */
@@ -44,11 +46,12 @@ export interface Config {
   RATE_LIMIT_RESET_SEC: number;
   ACCESS_TOKEN_SECRET: string;
   REFRESH_TOKEN_SECRET: string;
-  ACCESS_TOKEN_EXPIRATION: string;
-  REFRESH_TOKEN_EXPIRATION: string;
+  ACCESS_TOKEN_EXPIRATION: StringValue;
+  REFRESH_TOKEN_EXPIRATION: StringValue;
   MAX_FAILED_LOGIN_ATTEMPTS: number;
   ATTEMPT_WINDOW_MINUTES: number;
   MQTT_BROKER: string;
   MQTT_USERNAME: string;
   MQTT_PASSWORD: string;
+  MQTT_TOPIC: string;
 }

@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+import type { StringValue } from 'ms';
 import path from 'path';
 
 import { Config, NODE_ENV, isPort } from '@api-types/config.types';
@@ -20,8 +21,10 @@ const config: Config = {
   REFRESH_TOKEN_SECRET:
     process.env.REFRESH_TOKEN_SECRET ||
     'this_is_a_super_secret_key_for_the_refresh_token_please_change_it',
-  ACCESS_TOKEN_EXPIRATION: process.env.ACCESS_TOKEN_EXPIRATION || '5m',
-  REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION || '1h',
+  ACCESS_TOKEN_EXPIRATION:
+    (process.env.ACCESS_TOKEN_EXPIRATION as StringValue) || '5m',
+  REFRESH_TOKEN_EXPIRATION:
+    (process.env.REFRESH_TOKEN_EXPIRATION as StringValue) || '1h',
   MAX_FAILED_LOGIN_ATTEMPTS: Number(process.env.MAX_FAILED_LOGIN_ATTEMPTS) || 5,
   ATTEMPT_WINDOW_MINUTES: Number(process.env.ATTEMPT_WINDOW_MINUTES) || 15,
   MQTT_BROKER: process.env.MQTT_BROKER || 'mqtt://mqtt5:1883',

@@ -1,31 +1,24 @@
 #ifndef DISPLAY_MANAGER_H
 #define DISPLAY_MANAGER_H
 
-#include <LiquidCrystal_I2C.h>
+#include <Arduino.h>
+#include "Component.h"
 
-// Declare the lcd object globally
-LiquidCrystal_I2C lcd(0x27, 20, 2);
+// Initialize LCD (address + size + I2C pins optional)
+bool displayInit(uint8_t i2cAddress, uint8_t cols, uint8_t rows, int sdaPin = 21, int sclPin = 22);
 
-void setupLcd(const int lcdColumns, const int lcdRows)
-{
-    lcd.begin(lcdColumns, lcdRows);
-    // turn on LCD backlight
-    lcd.backlight();
-}
+// Set the component for automatic state tracking
+void displaySetComponent(Component *component);
 
-void displayOnLcd(const char *msg)
-{
-    lcd.clear();
+// Show a message (auto-splits across lines)
+void displayShowMessage(const char *msg);
 
-    // line 1: first 16 chars
-    lcd.setCursor(0, 0);
-    for (int i = 0; i < 16 && msg[i] != '\0'; i++)
-        lcd.print(msg[i]);
+// Display message on specific line (0-indexed), clearing rest of line
+void displayOverrideLine(uint8_t lineNumber, const char *msg);
 
-    // line 2: next 16 chars
-    lcd.setCursor(0, 1);
-    for (int i = 16; i < 32 && msg[i] != '\0'; i++)
-        lcd.print(msg[i]);
-}
+// Optional helpers
+void displayClear();
+
+void displaySetColor(const char *colorName);
 
 #endif // DISPLAY_MANAGER_H

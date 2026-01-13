@@ -19,6 +19,7 @@ import stats from '@routes/stats.routes';
 import timeSeriesRoutes from '@routes/timeSeries.routes';
 import tsAlertsRoutes from '@routes/tsAlerts.routes';
 
+import './mqtt';
 import './passport';
 
 const limiter = rateLimit({
@@ -156,7 +157,7 @@ app.listen(config.PORT, () => {
     }
   }
 
-  setInterval(() => {
-    void processTimeseriesData();
-  }, 10000);
+  // setInterval(() => {
+  //   void processTimeseriesData();
+  // }, 10000);
 });

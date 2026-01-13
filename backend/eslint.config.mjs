@@ -35,6 +35,7 @@ export default [
       '**/seed.ts',
       'eslint.config.mjs',
     ],
+    ignorePatterns: ['.eslintrc.js']
   },
   ...compat.extends(
     'plugin:@typescript-eslint/recommended',

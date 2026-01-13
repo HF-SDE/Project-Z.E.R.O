@@ -5,22 +5,31 @@ static WiFiClient wifiClient;
 static PubSubClient mqtt(wifiClient);
 
 static const char *subTopic;
+static MqttMessageHandler userHandler = nullptr;
 
-static char lastMessage[MQTT_MAX_MSG_LEN + 1];
+// Heartbeat state
+static String g_heartbeatTopic = "heartbeat";
+static String mqttBaseTopic = "";
+static unsigned long g_heartbeatInterval = 0;
+static unsigned long g_lastHeartbeat = 0;
+
 // ------------------------------------------------------
 
 // MQTT callback
 static void mqttCallback(char *topic, byte *payload, unsigned int length)
 {
-    unsigned int n = (length < MQTT_MAX_MSG_LEN)
-                         ? length
-                         : MQTT_MAX_MSG_LEN;
+    Serial.println("Event received - callback");
 
-    for (unsigned int i = 0; i < n; i++)
+    static char msg[256];
+
+    unsigned int n = (length < sizeof(msg) - 1) ? length : sizeof(msg) - 1;
+    memcpy(msg, payload, n);
+    msg[n] = '\0';
+
+    if (userHandler)
     {
-        lastMessage[i] = (char)payload[i];
+        userHandler(topic, msg);
     }
-    lastMessage[n] = '\0';
 }
 
 // Internal reconnect
@@ -42,6 +51,18 @@ static void mqttReconnect()
     }
 }
 
+void mqttSetMessageHandler(MqttMessageHandler handler)
+{
+    userHandler = handler;
+}
+
+void mqttSetHeartbeat(const char *deviceId, unsigned long intervalMs)
+{
+    g_heartbeatTopic = mqttBaseTopic + "/heartbeat";
+    g_heartbeatInterval = intervalMs;
+    g_lastHeartbeat = 0;
+}
+
 // -------- PUBLIC FUNCTIONS --------
 
 void mqttInit(
@@ -49,9 +70,11 @@ void mqttInit(
     int port,
     const char *user,
     const char *pass,
-    const char *subscribeTopic)
+    const char *subscribeTopic,
+    String baseMqttTopic)
 {
     subTopic = subscribeTopic;
+    mqttBaseTopic = baseMqttTopic;
 
     mqtt.setServer(host, port);
     mqtt.setCallback(mqttCallback);
@@ -66,6 +89,19 @@ void mqttLoop()
         mqttReconnect();
     }
     mqtt.loop();
+
+    // Handle heartbeat if configured
+    if (g_heartbeatInterval > 0)
+    {
+        unsigned long currentMillis = millis();
+        if (currentMillis - g_lastHeartbeat >= g_heartbeatInterval)
+        {
+            Serial.println("Sending heartbeat");
+            Serial.println(g_heartbeatTopic.c_str());
+            mqttPublish(g_heartbeatTopic.c_str(), "online", true);
+            g_lastHeartbeat = currentMillis;
+        }
+    }
 }
 
 bool mqttIsConnected()
@@ -73,7 +109,13 @@ bool mqttIsConnected()
     return mqtt.connected();
 }
 
-const char *mqttGetLastMessage()
+bool mqttPublish(const char *topic, const char *payload, bool retained)
 {
-    return lastMessage;
+    if (!mqtt.connected())
+        return false;
+    if (!topic || !payload)
+        return false;
+
+    // PubSubClient publish signature supports retained
+    return mqtt.publish(topic, payload, retained);
 }

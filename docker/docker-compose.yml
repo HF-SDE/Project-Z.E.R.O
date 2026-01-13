@@ -83,12 +83,17 @@ services:
     restart: unless-stopped
     ports:
       - "1883:1883" # MQTT
-      - "8883:8883" # MQTTS (secure)
+      - "8080:8080" # MQTTS (secure)
       - "9001:9001" # WebSockets
     volumes:
       - mqtt-data:/mosquitto/data
       - mqtt-log:/mosquitto/log
-      - ./config/mosquitto.dev.conf:/mosquitto/config/mosquitto.conf
+    configs:
+      - source: mosquitto_config
+        target: /mosquitto/config/mosquitto.conf
+    networks:
+      - internal
+      - public
 
   # clickhouse:
   #   container_name: clickhouse
@@ -117,8 +122,8 @@ services:
     ports:
       - 443:443
       - 80:80
-      - 8080:8080
-      - 1883:1883
+      # - 8080:8080
+      # - 1883:1883
     depends_on:
       - backend
       # - grafana

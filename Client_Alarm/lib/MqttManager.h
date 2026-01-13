@@ -4,23 +4,31 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
-// ---- CONFIG ----
-#define MQTT_MAX_MSG_LEN 64
-// ----------------
-
 // Called once
 void mqttInit(
     const char *host,
     int port,
     const char *user,
     const char *pass,
-    const char *subscribeTopic);
+    const char *subscribeTopic,
+    String baseMqttTopic);
 
 // Call in loop()
 void mqttLoop();
 
+// Configure and handle heartbeat (call after mqttInit)
+void mqttSetHeartbeat(const char *deviceId, unsigned long intervalMs);
+
 // Optional helpers
 bool mqttIsConnected();
 const char *mqttGetLastMessage();
+
+typedef void (*MqttMessageHandler)(
+    const char *topic,
+    const char *payload);
+
+void mqttSetMessageHandler(MqttMessageHandler handler);
+
+bool mqttPublish(const char *topic, const char *payload, bool retained = false);
 
 #endif

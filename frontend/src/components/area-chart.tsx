@@ -72,12 +72,12 @@ export function SAreaChart() {
               date: dateStr,
               sales: item.sales,
             };
-          },
+          }
         );
 
         // Sort chronologically (oldest first).
         data.sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
         setChartData(data);
       } catch (error) {
