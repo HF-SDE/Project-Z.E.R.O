@@ -8,6 +8,7 @@
  * @return Hex string representation of chip ID
  */
 const char *getChipId();
+const char *getChipIdEsp8266();
 
 /**
  * Write default configuration to device storage

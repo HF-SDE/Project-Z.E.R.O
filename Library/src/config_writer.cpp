@@ -10,6 +10,14 @@ const char *getChipId()
     return chipId;
 }
 
+const char *getChipIdEsp8266()
+{
+    static char chipId[9];
+    uint32_t id = ESP.getChipId();
+    snprintf(chipId, sizeof(chipId), "%08X", id);
+    return chipId;
+}
+
 /**
  * Write default configuration to device storage
  * Call this function once during initial device setup
