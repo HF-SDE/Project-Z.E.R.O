@@ -17,7 +17,7 @@ namespace LightSensor
 
     int read(const String &componentTopic)
     {
-        int value = analogRead(g_pin);
+        uint16_t value = analogRead(g_pin);
         if (latestStatus != String(value))
         {
             mqttPublish(String(componentTopic + "/value").c_str(), String(value).c_str(), true);
