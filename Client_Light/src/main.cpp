@@ -30,7 +30,7 @@ const String WIFI_PASSWORD = "Nogetjegkanhuske";
 // Config component
 const String components[4] = {"PhotoResistor", "button", "RGB_Light", "White_LED"};
 
-std::vector<ButtonConfig::keys> component_config = {
+std::vector<ConfigComponents::keys> component_config = {
     {"PhotoResistor", 0, "light", {"Light Sensor"}},
     {"Button", 0, "boolean", {"Button State"}},
     {"RGB_Light", 0, "rgb_light_state", {"RGB Light State"}},
@@ -51,36 +51,6 @@ constexpr uint32_t DEBOUNCE_MS = 50;
 // App state
 static bool overwrite = false;
 static bool ledState = false;
-
-bool firstWifiStartUp = true;
-
-static void onMqttMessage(const char *topic, const char *payload)
-{
-  // Handle incoming MQTT messages here
-
-  Environment::print("MQTT Message received on topic: ");
-  Environment::print(topic);
-  Environment::print("Payload: ");
-  Environment::print(payload);
-}
-
-static void wifiSetup()
-{
-  updateWifiStatusLed(firstWifiStartUp);
-  firstWifiStartUp = false;
-
-  if (!wifiConnect(config.wifiSsid.c_str(), config.wifiPassword.c_str(), 10000))
-  {
-    Environment::print("WiFi failed");
-    updateWifiStatusLed(false);
-    return;
-  }
-
-  Environment::print("IP: ");
-  Environment::print(wifiGetIp());
-
-  updateWifiStatusLed(false);
-}
 
 static void initConfig()
 {
@@ -215,7 +185,7 @@ void setup()
 
   initConfig();
 
-  wifiSetup();
+  wifiSetup(config);
 
   mqttInit(
       config.mqttHost.c_str(),
