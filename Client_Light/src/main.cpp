@@ -10,7 +10,7 @@
 #include <MqttManager.h>
 #include <ConfigWriter.h>
 #include <StorageManager.h>
-#include <environment.h>
+#include <Environment.h>
 
 // ---------------------- Global Config ----------------------
 DeviceConfig config;
@@ -37,7 +37,9 @@ std::vector<ButtonConfig::keys> component_config = {
     {"White_LED", 0, "boolean", {"White LED State"}}};
 
 // MQTT
-const String MQTT_HOST = "192.168.1.147";
+const String HOST_DEV = "192.168.1.147";
+const String HOST_TEST = "192.168.1.147";
+const String HOST_PROD = "192.168.1.5";
 
 // Hysteresis thresholds
 constexpr int THRESH_ON = 3100;
@@ -82,6 +84,9 @@ static void wifiSetup()
 
 static void initConfig()
 {
+  Environment::print("Initializing Environment...");
+  Environment::configureEnvironment(Environment::EnvironmentMode::DEVELOPMENT, HOST_DEV, HOST_TEST, HOST_PROD);
+
   Environment::print("Initializing storage...");
   if (!storageInit())
   {
@@ -115,7 +120,7 @@ static void initConfig()
     }
 
     // Write default config and try again
-    if (!writeDefaultConfig(MQTT_HOST, WIFI_SSID, WIFI_PASSWORD) || !storageLoadConfig(config))
+    if (!writeDefaultConfig(Environment::getServerIP(), WIFI_SSID, WIFI_PASSWORD) || !storageLoadConfig(config))
     {
       Environment::print("Failed to create default config!");
       return;
@@ -220,7 +225,10 @@ void setup()
       config.mqttTopic.c_str());
 
   mqttSetMessageHandler(onMqttMessage);
-  initComponentConfig();
+  if (wifiIsConnected() && mqttIsConnected())
+  {
+    initComponentConfig();
+  }
 }
 
 void loop()
