@@ -17,13 +17,14 @@
 
 ## Requirements 🔧
 
-- ESP32/Arduino framework
+- ESP32/Arduino framework (supported)
+- ESP8266/Arduino framework (supported)
 - LittleFS
 - ArduinoJson (>= 7.4.2)
 - PubSubClient (>= 2.8.0)
 - PlatformIO or Arduino IDE (Library is provided in `Library/` for PlatformIO projects)
 
-The dependencies are already listed in `library.json`.
+The dependencies are already listed in `library.json` for PlatformIO; they will be automatically installed when building the project.
 
 ---
 
@@ -147,10 +148,14 @@ void loop() {
 
 ## Contributing & Tests 🤝
 
+- ESP8266 builds are supported via the `[env:esp8266]` environment in `platformio.ini`. To build or upload for ESP8266, use:
+  - `pio run -e esp8266` (build)
+  - `pio run -e esp8266 --target upload` (upload)
 - See [test/README.md](test/README.md) for full testing documentation, instructions, and a list of available tests and mocks.
 - Quick commands:
   - Host (no hardware): `pio test -e native`
-  - Hardware (device): `pio test -e esp-wrover-kit` (requires a connected board)
+  - ESP32 (device): `pio test -e esp-wrover-kit`
+  - ESP8266 (device): `pio test -e esp8266`
 - CI: `.github/workflows/ci.yml` runs native tests on push/PR.
 - Please submit PRs with clear descriptions and small, focused changes.
 
