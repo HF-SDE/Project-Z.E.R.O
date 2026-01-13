@@ -30,7 +30,7 @@ bool writeDefaultConfig()
     config.wifiSsid = "Case-ZERO_2,4GHz";
     config.wifiPassword = "Nogetjegkanhuske";
     config.serialFrequency = 115200;
-    config.mqttHost = "192.168.1.149";
+    config.mqttHost = "192.168.1.5";
     config.mqttPort = 1883;
     config.mqttUser = "";
     config.mqttPassword = "";
@@ -84,7 +84,8 @@ bool writeCustomConfig(
     const String &deviceId,
     int heartbeatInterval,
     int serialFrequency,
-    bool status)
+    bool status,
+    int frequency)
 
 {
     Serial.println("[ConfigWriter] Writing custom configuration...");

@@ -1,5 +1,7 @@
-#include "../lib/MqttManager.h"
-#include <../lib/wifi_setup.h>
+
+#include <MqttManager.h>
+#include <Environment.h>
+#include <wifi_setup.h>
 
 // -------- INTERNAL STATE (private to this file) --------
 static WiFiClient wifiClient;
@@ -15,6 +17,9 @@ static uint32_t receivedAt = 0;
 static volatile bool gotMsg = false;
 static String payloadBuf;
 
+static int max_retry = 20;
+static int retry_count = 0;
+
 // ------------------------------------------------------
 
 // MQTT callback
@@ -22,7 +27,7 @@ static void mqttCallback(char *topic, byte *payload, unsigned int length)
 {
     mqtt.setBufferSize(2048);
     messageReceived = true;
-    Serial.println("Event received - callback");
+    Environment::print("Event received - callback");
 
     payloadBuf = "";
     payloadBuf.reserve(length);
@@ -76,13 +81,34 @@ bool retainedMessageExists(const char *topic, uint32_t windowMs)
     return true;
 }
 
+static String deviceIdHex()
+{
+#if defined(ESP32)
+    uint64_t mac = ESP.getEfuseMac();
+    char buf[13];
+    snprintf(buf, sizeof(buf), "%012llX", (unsigned long long)(mac & 0xFFFFFFFFFFFFULL));
+    return String(buf);
+#elif defined(ESP8266)
+    return String(ESP.getChipId(), HEX);
+#else
+    return "UNKNOWN";
+#endif
+}
+
 // Internal reconnect
 static void mqttReconnect()
 {
+    const int maxAttempts = max_retry;
+    int attempt = retry_count;
+    if (attempt >= maxAttempts)
+    {
+        return;
+    }
+
     while (!mqtt.connected())
     {
         String clientId = "esp32-";
-        clientId += String((uint32_t)ESP.getEfuseMac(), HEX);
+        clientId += deviceIdHex();
 
         if (mqtt.connect(clientId.c_str()))
         {
@@ -90,6 +116,14 @@ static void mqttReconnect()
         }
         else
         {
+            if (attempt >= maxAttempts)
+            {
+                Environment::print("MQTT reconnect failed after max attempts");
+                retry_count = attempt;
+                break;
+            }
+            attempt++;
+            Environment::print("MQTT reconnect failed, retrying...");
             delay(1000);
         }
     }
@@ -122,7 +156,7 @@ void mqttInit(
 
 void mqttLoop()
 {
-    if (!mqtt.connected())
+    if (!mqtt.connected() && wifiIsConnected())
     {
         mqttReconnect();
     }

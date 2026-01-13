@@ -7,7 +7,7 @@
  * Get unique chip ID from ESP32 MAC address
  * @return Hex string representation of chip ID
  */
-const char *getChipId();
+static String getChipId();
 
 /**
  * Write default configuration to device storage
@@ -15,7 +15,7 @@ const char *getChipId();
  * or when you need to reset to default settings
  * @return true if successful, false otherwise
  */
-bool writeDefaultConfig(String mqttHost);
+[[nodiscard]] bool writeDefaultConfig(const String &mqttHost, const String &wifiSsid, const String &wifiPassword);
 
 /**
  * Write custom configuration to device storage
