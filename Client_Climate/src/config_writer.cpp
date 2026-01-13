@@ -3,7 +3,7 @@
 
 const char *getChipId()
 {
-    static char chipId[9]; // 8 hex chars + null terminator
+    static char chipId[9];
     uint32_t id = ESP.getChipId();
     snprintf(chipId, sizeof(chipId), "%08X", id);
     return chipId;

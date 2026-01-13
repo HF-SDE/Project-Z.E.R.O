@@ -19,6 +19,7 @@ import stats from '@routes/stats.routes';
 import timeSeriesRoutes from '@routes/timeSeries.routes';
 import tsAlertsRoutes from '@routes/tsAlerts.routes';
 
+import './mqtt';
 import './passport';
 
 const limiter = rateLimit({
