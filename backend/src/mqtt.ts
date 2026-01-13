@@ -7,6 +7,26 @@ const client = mqtt.connect(config.MQTT_BROKER);
 client.on('connect', () => console.log('Connected'));
 client.on('disconnect', () => console.log('Disconnected'));
 
-client.subscribe('clients/+/+/value').on('message', (topic, message) => {
-  console.log(`Topic: ${topic} Message: ${message.toString()}`);
-});
+const maxTemp = 23;
+
+const alarmClientId = '000094A4E48E0D84';
+const alarmActivateTopic = `clients/${alarmClientId}/triggers/alarm-trigger`;
+const alarmDeactivateTopic = `clients/${alarmClientId}/triggers/clear-alarm-trigger`;
+
+client
+  .subscribe('clients/+/tempature/value')
+  .on('message', async (topic, message) => {
+    const value = parseFloat(message.toString());
+
+    if (value > maxTemp) {
+      client.publish(
+        alarmActivateTopic,
+        JSON.stringify({
+          useSound: true,
+          message: `High temperature detected: ${value}°C`,
+        }),
+      );
+    } else {
+      client.publish(alarmDeactivateTopic, '');
+    }
+  });
