@@ -1,0 +1,154 @@
+# Z.E.R.O Library ⚙️
+
+**Z.E.R.O Library** provides common utilities and drivers used by the Z.E.R.O IoT clients (ESP32-based). It centralizes configuration storage, MQTT helpers, WiFi utilities, and simple drivers for LEDs, buttons, and light sensors.
+
+---
+
+## Features ✅
+
+- Persistent device configuration (LittleFS JSON storage)
+- Config writer utilities (defaults + custom config helpers)
+- MQTT helper wrapper (PubSubClient integration, retained value helpers)
+- WiFi helpers with connection and status LED management
+- Basic components: Button (debounced ISR), LED driver (with retained MQTT value), Light sensor (ADC read + retained publish)
+- Environment utilities for compile-time/runtime environment selection and conditional logging
+
+---
+
+## Requirements 🔧
+
+- ESP32/Arduino framework
+- LittleFS
+- ArduinoJson (>= 7.4.2)
+- PubSubClient (>= 2.8.0)
+- PlatformIO or Arduino IDE (Library is provided in `Library/` for PlatformIO projects)
+
+The dependencies are already listed in `library.json`.
+
+---
+
+## Quick start (example) 💡
+
+Include the headers you need in your sketch and initialize components in `setup()`:
+
+```cpp
+#include <StorageManager.h>
+#include <ConfigWriter.h>
+#include <MqttManager.h>
+#include <wifi_setup.h>
+#include <Led.h>
+#include <LightSensor.h>
+#include <Button.h>
+#include <Environment.h>
+
+void setup() {
+  Environment::configureEnvironment(Environment::EnvironmentMode::DEVELOPMENT, "prod.ip", "test.ip", "dev.ip");
+
+  // Storage & config
+  storageInit();
+  DeviceConfig cfg;
+  if (!storageLoadConfig(cfg)) {
+    // write a default config once
+    writeDefaultConfig("mqtt.example", "MySSID", "MyPass");
+    storageLoadConfig(cfg);
+  }
+
+  // WiFi & MQTT
+  wifiConnect(cfg.wifiSsid.c_str(), cfg.wifiPassword.c_str(), 10000);
+  mqttInit(cfg.mqttHost.c_str(), cfg.mqttPort, cfg.mqttUser.c_str(), cfg.mqttPassword.c_str(), cfg.mqttTopic.c_str());
+
+  // Components
+  Led::begin(2, String("devices/") + cfg.deviceId + "/led1");
+  LightSensor::begin(34);
+  Button::begin(0, 50, Button::Edge::Falling);
+}
+
+void loop() {
+  mqttLoop();
+
+  if (Button::consumePress()) {
+    Led::set(true, "devices/<id>/led1");
+  }
+
+  LightSensor::read("devices/<id>/light1");
+}
+```
+
+---
+
+## Examples 🧪
+
+- `examples/simple_device/simple_device.cpp` — Minimal demo showing configuration, WiFi/MQTT, LED/button/light sensor. The sketch reinitializes the serial port from the saved `DeviceConfig.serialFrequency` (validated; falls back to `115200` if invalid).
+
+---
+
+## Storage details 📁
+
+- Config file path: `/config.json` on LittleFS
+- Format: JSON (fields defined in `DeviceConfig` structure in `StorageManager.h`)
+- Utilities: `storageInit()`, `storageSaveConfig()`, `storageLoadConfig()`, `storageConfigExists()`, `storageDeleteConfig()`, `storageFormat()`, `storagePrintConfig()`
+
+---
+
+## API reference (high-level) 📚
+
+- ConfigWriter
+
+  - `getChipId()` — unique chip id based on ESP MAC
+  - `writeDefaultConfig(mqttHost, wifiSsid, wifiPassword)` — write reasonable defaults
+  - `writeCustomConfig(...)` — save custom config
+  - `displayStoredConfig1()` — print saved config
+
+- StorageManager
+
+  - `storageInit()` — initialize LittleFS
+  - `storageSaveConfig(const DeviceConfig&)`
+  - `storageLoadConfig(DeviceConfig &)`
+  - `storageConfigExists()`, `storageDeleteConfig()`, `storageFormat()`, `storagePrintConfig()`
+
+- MqttManager
+
+  - `mqttInit(host, port, user, pass, subscribeTopic)`
+  - `mqttLoop()` — call from `loop()`
+  - `mqttPublish(...)`, `mqttIsConnected()`, `retainedMessageExists(...)`
+  - `mqttSetMessageHandler()` — register callback
+  - `mqttSetComponentValue(componentTopic, status)` — convenience publish
+
+- WiFi (wifi_setup)
+
+  - `wifiConnect(ssid, password, timeoutMs)`
+  - `wifiIsConnected()`, `wifiGetIp()`
+  - `wifiInitStatusLed(...)`, `updateWifiStatusLed(...)`
+
+- Components
+
+  - `Button::begin(pin, debounceMs, edge)`, `Button::consumePress()`
+  - `Led::begin(pin, componentTopic)`, `Led::set(on, componentTopic)`
+  - `LightSensor::begin(pin)`, `LightSensor::read(componentTopic)`
+
+- Environment
+  - `Environment::configureEnvironment(mode, prodIP, testIP, devIP)`
+  - `Environment::print(...)`, `getServerIP()`, `isProduction()` etc.
+
+---
+
+## Topics & Conventions 🛰️
+
+- Components publish values to their component topic with a `/value` suffix (e.g. `devices/<deviceId>/led1/value`).
+- LED and sensor publishes are retained by default to reflect current state to new subscribers.
+
+---
+
+## Contributing & Tests 🤝
+
+- The repository follows PlatformIO layout; add unit tests under `test/` if needed.
+- Please submit PRs with clear descriptions and small, focused changes.
+
+---
+
+## License & Authors
+
+- **License:** MIT (see `LICENSE` in the repo)
+- **Authors/Maintainers:** Nima, Kenni, Philip Guldborg (see `library.json`)
+
+---
