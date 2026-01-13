@@ -49,33 +49,41 @@ constexpr uint8_t I2C_SDA_PIN = 21; // SDA
 constexpr uint8_t I2C_SCL_PIN = 22; // SCL
 
 // MFRC522 RFID reader on VSPI
-constexpr uint8_t SPI_MOSI_PIN = 23;   // VSPI MOSI
-constexpr uint8_t SPI_MISO_PIN = 19;   // VSPI MISO
-constexpr uint8_t SPI_SCK_PIN = 18;    // VSPI SCK
-constexpr uint8_t MFRC522_SS_PIN = 5;  // MFRC522 SDA/SS (chip select)
-constexpr uint8_t MFRC522_RST_PIN = 4; // MFRC522 RST
+constexpr uint8_t SPI_MOSI_PIN = 23;    // VSPI MOSI
+constexpr uint8_t SPI_MISO_PIN = 19;    // VSPI MISO
+constexpr uint8_t SPI_SCK_PIN = 18;     // VSPI SCK
+constexpr uint8_t MFRC522_SS_PIN = 5;   // MFRC522 SDA/SS (chip select)
+constexpr uint8_t MFRC522_RST_PIN = 25; // MFRC522 RST
 
 // Keypad (PmodKYPD)
-// Rows are inputs (input-only GPIOs are used intentionally)
-constexpr uint8_t KYPD_ROW1 = 36; // ROW1
-constexpr uint8_t KYPD_ROW2 = 39; // ROW2
-constexpr uint8_t KYPD_ROW3 = 34; // ROW3
-constexpr uint8_t KYPD_ROW4 = 35; // ROW4
+// Rows on input-only pins with EXTERNAL pull-ups (per schematic)
+constexpr uint8_t KYPD_ROW1 = 27; // ROW1
+constexpr uint8_t KYPD_ROW2 = 26; // ROW2
+constexpr uint8_t KYPD_ROW3 = 33; // ROW3
+constexpr uint8_t KYPD_ROW4 = 32; // ROW4
 
 // Columns are driven as outputs
-constexpr uint8_t KYPD_COL1 = 32; // COL1
-constexpr uint8_t KYPD_COL2 = 33; // COL2
-constexpr uint8_t KYPD_COL3 = 25; // COL3
-constexpr uint8_t KYPD_COL4 = 26; // COL4
+constexpr uint8_t KYPD_COL1 = 16; // COL1
+constexpr uint8_t KYPD_COL2 = 17; // COL2
+constexpr uint8_t KYPD_COL3 = 14; // COL3
+constexpr uint8_t KYPD_COL4 = 13; // COL4
+
+const uint8_t rows[4] = {KYPD_ROW1, KYPD_ROW2, KYPD_ROW3, KYPD_ROW4};
+const uint8_t cols[4] = {KYPD_COL1, KYPD_COL2, KYPD_COL3, KYPD_COL4};
+const char keys[4][4] = {
+    {'9', '7', '8', 'C'},
+    {'6', '4', '5', 'B'},
+    {'3', '1', '2', 'A'},
+    {'E', '0', 'F', 'D'}};
 
 // White LED (external, with 220Ω series resistor)
-constexpr uint8_t WHITE_LED_PIN = 2; // LED anode via resistor -> GPIO2
+constexpr uint8_t WHITE_LED_PIN = 3; // LED anode via resistor -> GPIO2
 
 // Status indicator (three LEDs with 220Ω resistors)
 // Adjust if needed to match your actual wiring colours.
-constexpr uint8_t STATUS_LED_RED_PIN = 16;
-constexpr uint8_t STATUS_LED_GREEN_PIN = 17;
-constexpr uint8_t STATUS_LED_BLUE_PIN = 27;
+constexpr uint8_t STATUS_LED_RED_PIN = 4;
+constexpr uint8_t STATUS_LED_GREEN_PIN = 0;
+constexpr uint8_t STATUS_LED_BLUE_PIN = 2;
 
 // MFRC522 and LCD instances
 MFRC522DriverPinSimple ss_pin(MFRC522_SS_PIN);
@@ -101,7 +109,10 @@ static void initConfig()
   Environment::print("Initializing Environment...");
   Environment::configureEnvironment(Environment::EnvironmentMode::DEVELOPMENT, HOST_DEV, HOST_TEST, HOST_PROD);
 
-  displayInit(0x27, 16, 2);
+  if (!displayInit(0x27, 16, 2, I2C_SDA_PIN, I2C_SCL_PIN))
+  {
+    Environment::print("LCD init failed (I2C not ready)");
+  }
   statusLedInit(STATUS_LED_RED_PIN, STATUS_LED_GREEN_PIN, STATUS_LED_BLUE_PIN);
 
   Environment::print("Initializing storage...");
@@ -192,7 +203,7 @@ static void initComponentConfig()
 
 static inline void setupKeypadPins()
 {
-  // Rows sit on input-only pins (34–39) so they cannot use internal pull-ups; add external pull-ups on the board
+  // Rows as plain inputs (external 10Ω pull-ups per schematic; input-only pins can't use internal pull-ups)
   pinMode(KYPD_ROW1, INPUT);
   pinMode(KYPD_ROW2, INPUT);
   pinMode(KYPD_ROW3, INPUT);
@@ -217,18 +228,10 @@ void setup()
     ; // Wait for Serial to be ready
   }
 
-  Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
   SPI.begin(SPI_SCK_PIN, SPI_MISO_PIN, SPI_MOSI_PIN);
 
   // LEDs
-  pinMode(WHITE_LED_PIN, OUTPUT);
   Led::begin(WHITE_LED_PIN, "devices/" + String(config.deviceId.c_str()) + "/White_LED");
-  pinMode(STATUS_LED_RED_PIN, OUTPUT);
-  pinMode(STATUS_LED_GREEN_PIN, OUTPUT);
-  pinMode(STATUS_LED_BLUE_PIN, OUTPUT);
-  digitalWrite(STATUS_LED_RED_PIN, LOW);
-  digitalWrite(STATUS_LED_GREEN_PIN, LOW);
-  digitalWrite(STATUS_LED_BLUE_PIN, LOW);
 
   wifiInitStatusLed(STATUS_LED_RED_PIN, STATUS_LED_GREEN_PIN, STATUS_LED_BLUE_PIN);
 
@@ -259,40 +262,41 @@ void setup()
   // Initialize MFRC522 RFID
   rfid.PCD_Init();
   MFRC522Debug::PCD_DumpVersionToSerial(rfid, Serial);
-  Serial.println("MFRC522 v2 initialized.");
+  Environment::print("MFRC522 v2 initialized.");
 
   // Initialize LCD
+  Environment::print("LCD initialized.");
+
+  Environment::print("Pins configured per schematic.");
   displayOverrideLine(0, "System Initialized");
   displayOverrideLine(1, "System Ready");
-  Serial.println("LCD initialized.");
-
-  Serial.println("Pins configured per schematic.");
 }
 
 // Keypad scan: returns the key pressed, or 0 if none
 static char scanKeypad()
 {
-  const uint8_t rows[4] = {KYPD_ROW1, KYPD_ROW2, KYPD_ROW3, KYPD_ROW4};
-  const uint8_t cols[4] = {KYPD_COL1, KYPD_COL2, KYPD_COL3, KYPD_COL4};
-  const char keys[4][4] = {
-      {'1', '2', '3', 'A'},
-      {'4', '5', '6', 'B'},
-      {'7', '8', '9', 'C'},
-      {'*', '0', '#', 'D'}};
+  // Ensure all columns HIGH before scan
+  for (uint8_t i = 0; i < 4; i++)
+    digitalWrite(cols[i], HIGH);
+  delayMicroseconds(10);
 
   for (uint8_t col = 0; col < 4; col++)
   {
     digitalWrite(cols[col], LOW); // Activate column
-    delayMicroseconds(100);
+    delayMicroseconds(500);       // Longer settle time for external pull-ups
 
     for (uint8_t row = 0; row < 4; row++)
     {
       if (digitalRead(rows[row]) == LOW) // Row pulled low?
       {
-        digitalWrite(cols[col], HIGH); // Deactivate
-        delayMicroseconds(20);         // Debounce
+        // Multi-sample debounce
+        delay(20);
         if (digitalRead(rows[row]) == LOW)
-        { // Confirm press
+        {
+          // Wait for release
+          while (digitalRead(rows[row]) == LOW)
+            delay(10);
+          digitalWrite(cols[col], HIGH);
           return keys[row][col];
         }
       }
@@ -326,8 +330,7 @@ void loop()
     char key = scanKeypad();
     if (key)
     {
-      Serial.print("Key pressed: ");
-      Serial.println(key);
+      Environment::print("Key pressed: " + String(key));
       displayOverrideLine(1, ("Key: " + String(key)).c_str());
     }
   }
