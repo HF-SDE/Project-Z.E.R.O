@@ -4,8 +4,8 @@ import config from '@config';
 
 const client = mqtt.connect(config.MQTT_BROKER);
 
-client.on('connect', () => console.log('Connected'));
-client.on('disconnect', () => console.log('Disconnected'));
+client.on('connect', () => console.log('MQTT: \tConnected'));
+client.on('disconnect', () => console.log('MQTT: \tisconnected'));
 
 const maxTemp = 23;
 
@@ -22,7 +22,7 @@ client
       client.publish(
         alarmActivateTopic,
         JSON.stringify({
-          useSound: true,
+          useSound: false,
           message: `High temperature detected: ${value}°C`,
         }),
       );
