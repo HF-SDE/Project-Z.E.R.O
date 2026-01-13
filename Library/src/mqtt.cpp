@@ -17,6 +17,9 @@ static uint32_t receivedAt = 0;
 static volatile bool gotMsg = false;
 static String payloadBuf;
 
+static int max_retry = 20;
+static int retry_count = 0;
+
 // ------------------------------------------------------
 
 // MQTT callback
@@ -81,6 +84,13 @@ bool retainedMessageExists(const char *topic, uint32_t windowMs)
 // Internal reconnect
 static void mqttReconnect()
 {
+    const int maxAttempts = max_retry;
+    int attempt = retry_count;
+    if (attempt >= maxAttempts)
+    {
+        return;
+    }
+
     while (!mqtt.connected())
     {
         String clientId = "esp32-";
@@ -92,6 +102,14 @@ static void mqttReconnect()
         }
         else
         {
+            if (attempt >= maxAttempts)
+            {
+                Environment::print("MQTT reconnect failed after max attempts");
+                retry_count = attempt;
+                break;
+            }
+            attempt++;
+            Environment::print("MQTT reconnect failed, retrying...");
             delay(1000);
         }
     }
@@ -124,7 +142,7 @@ void mqttInit(
 
 void mqttLoop()
 {
-    if (!mqtt.connected())
+    if (!mqtt.connected() && wifiIsConnected())
     {
         mqttReconnect();
     }
