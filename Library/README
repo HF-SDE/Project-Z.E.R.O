@@ -141,7 +141,7 @@ void loop() {
 
 ## Contributing & Tests 🤝
 
-- Full testing documentation and guidelines are in `test/README.md` — see it for running native (host) and hardware tests, a list of available tests, mocks, and CI instructions.
+- See [test/README.md](test/README.md) for full testing documentation, instructions, and a list of available tests and mocks.
 - Quick commands:
   - Host (no hardware): `pio test -e native`
   - Hardware (device): `pio test -e esp-wrover-kit` (requires a connected board)
