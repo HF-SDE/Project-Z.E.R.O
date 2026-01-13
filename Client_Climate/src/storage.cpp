@@ -26,7 +26,7 @@ bool storageSaveConfig(const DeviceConfig &config)
     if (!g_initialized && !storageInit())
         return false;
 
-    StaticJsonDocument<512> doc;
+    JsonDocument doc;
 
     doc["wifiSsid"] = config.wifiSsid;
     doc["wifiPassword"] = config.wifiPassword;
@@ -39,6 +39,7 @@ bool storageSaveConfig(const DeviceConfig &config)
     doc["heartbeatInterval"] = config.heartbeatInterval;
     doc["serialFrequency"] = config.serialFrequency;
     doc["status"] = config.status; // Save the status field
+    doc["frequency"] = config.frequency;
 
     File file = LittleFS.open(CONFIG_FILE, "w");
     if (!file)
@@ -77,7 +78,7 @@ bool storageLoadConfig(DeviceConfig &config)
         return false;
     }
 
-    StaticJsonDocument<512> doc;
+    JsonDocument doc;
     DeserializationError err = deserializeJson(doc, file);
     file.close();
 
