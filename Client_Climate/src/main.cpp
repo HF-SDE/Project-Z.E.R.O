@@ -35,6 +35,8 @@ static unsigned long g_lastYellowBlinkMs = 0;
 static bool g_blueLedOn = false;
 static bool g_yellowLedOn = false;
 
+String alarmClientId = "000094A4E48E0D84";
+
 static void blinkLed(uint8_t pin, unsigned long &lastBlinkMs, bool &ledOn, unsigned long intervalMs)
 {
   const unsigned long now = millis();
@@ -81,6 +83,29 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
     unsigned long frequency = doc["frequency"].as<unsigned long>();
 
     g_deviceConfig.frequency = frequency;
+
+    storageSaveConfig(g_deviceConfig);
+  }
+
+  String tempConfigTopic = g_deviceConfig.mqttTopic + "/temperature/config";
+
+  if (String(topic) == tempConfigTopic)
+  {
+    Serial.println("Incomming temperature configuration message, saving to config...");
+
+    JsonDocument doc;
+    DeserializationError err = deserializeJson(doc, payload, len);
+
+    if (err)
+    {
+      Serial.print("JSON parse failed: ");
+      Serial.println(err.c_str());
+      return;
+    }
+
+    float max_value = doc["max_value"].as<float>();
+
+    g_deviceConfig.max_value = max_value;
 
     storageSaveConfig(g_deviceConfig);
   }
@@ -181,8 +206,22 @@ void loop()
   hum = dht.readHumidity();
   temp = dht.readTemperature();
 
+  const String alarmActivateTopic = "clients/" + alarmClientId + "/triggers/alarm-trigger";
+  const String alarmDeactivateTopic = "clients/" + alarmClientId + "/triggers/clear-alarm-trigger";
+
   if (isnan(hum) || isnan(temp))
   {
+    String line1 = "Sensor error!";
+    String line2 = "Could not read data.";
+    String line3 = "Device ID:";
+    String line4 = g_deviceConfig.deviceId;
+
+    JsonDocument doc;
+    doc["useSound"] = false;
+    doc["message"] = line1 + "\n" + line2 + "\n" + line3 + "\n" + line4;
+
+    mqttClient.publish(alarmActivateTopic.c_str(), g_deviceConfig.qos, false, doc.as<String>().c_str());
+
     digitalWrite(RED_LED_PIN, HIGH);
     return;
   }
@@ -194,4 +233,21 @@ void loop()
 
   mqttClient.publish(tempTopic.c_str(), g_deviceConfig.qos, true, String(temp).c_str());
   mqttClient.publish(humTopic.c_str(), g_deviceConfig.qos, true, String(hum).c_str());
+
+  if (temp > g_deviceConfig.max_value)
+  {
+    String line1 = "Temp limit reached!";
+    String line2 = "Value: " + String(temp) + " C";
+    String line3 = "Max: " + String(g_deviceConfig.max_value) + " C";
+
+    JsonDocument doc;
+    doc["useSound"] = false;
+    doc["message"] = line1 + "\n" + line2 + "\n" + line3;
+
+    mqttClient.publish(alarmActivateTopic.c_str(), g_deviceConfig.qos, false, doc.as<String>().c_str());
+  }
+  else
+  {
+    mqttClient.publish(alarmDeactivateTopic.c_str(), g_deviceConfig.qos, false, "");
+  }
 }

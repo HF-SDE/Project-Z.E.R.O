@@ -29,6 +29,8 @@ bool writeDefaultConfig();
  * @param heartbeatInterval Heartbeat interval in milliseconds
  * @param serialFrequency Serial communication frequency in bps
  * @param status Device active status
+ * @param frequency Data publishing frequency in milliseconds
+ * @param max_value Maximum threshold value
  * @return true if successful, false otherwise
  */
 bool writeCustomConfig(
@@ -41,7 +43,8 @@ bool writeCustomConfig(
     int heartbeatInterval,
     int serialFrequency,
     bool status,
-    int frequency);
+    int frequency,
+    float max_value);
 
 /**
  * Display current configuration from storage

@@ -15,15 +15,17 @@ void connectToMqtt()
 void onMqttConnect(bool sessionPresent)
 {
   Serial.println("Connected to MQTT.");
-
+  
   String tempTypeTopic = String(g_deviceConfig.mqttTopic + "/temperature/value_type");
   String humTypeTopic = String(g_deviceConfig.mqttTopic + "/humidity/value_type");
-
+  
   uint16_t packetIdPubType1 = mqttClient.publish(tempTypeTopic.c_str(), 1, true, "temperature");
   uint16_t packetIdPubType2 = mqttClient.publish(humTypeTopic.c_str(), 1, true, "humidity");
-
+  
   String configTopic = String(g_deviceConfig.mqttTopic + "/config");
+  String tempConfigTopic = String(g_deviceConfig.mqttTopic + "/temperature/config");
   uint16_t packetIdSub = mqttClient.subscribe(configTopic.c_str(), g_deviceConfig.qos);
+  uint16_t packetIdSubTemp = mqttClient.subscribe(tempConfigTopic.c_str(), g_deviceConfig.qos);
 
   if (!devMode)
     return;

@@ -18,6 +18,9 @@ const alarmDeactivateTopic = `clients/${alarmClientId}/triggers/clear-alarm-trig
 client
   .subscribe('clients/+/temperature/value')
   .on('message', async (topic, message) => {
+    if (!topic.startsWith('clients/') && !topic.endsWith('/temperature/value'))
+      return;
+
     const value = parseFloat(message.toString());
 
     if (value > maxTemp) {
@@ -25,7 +28,7 @@ client
         alarmActivateTopic,
         JSON.stringify({
           useSound: false,
-          message: `High temperature detected: ${value}°C`,
+          message: `High temperature detected: ${value} C`,
         }),
       );
     } else {
