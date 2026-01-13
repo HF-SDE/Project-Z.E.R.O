@@ -129,6 +129,12 @@ void loop() {
 - Environment
   - `Environment::configureEnvironment(mode, prodIP, testIP, devIP)`
   - `Environment::print(...)`, `getServerIP()`, `isProduction()` etc.
+  - **Logging control:** Define `ENV_DISABLE_LOGS` in your build flags or before including Environment headers to completely remove all logging code at compile time (zero-cost logging). This is recommended for production builds to save flash and RAM. Example:
+    ```cpp
+    #define ENV_DISABLE_LOGS
+    #include <Environment.h>
+    ```
+    Or add `-DENV_DISABLE_LOGS` to your PlatformIO or compiler flags.
 
 ---
 
