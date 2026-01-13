@@ -141,7 +141,11 @@ void loop() {
 
 ## Contributing & Tests 🤝
 
-- The repository follows PlatformIO layout; add unit tests under `test/` if needed.
+- Full testing documentation and guidelines are in `test/README.md` — see it for running native (host) and hardware tests, a list of available tests, mocks, and CI instructions.
+- Quick commands:
+  - Host (no hardware): `pio test -e native`
+  - Hardware (device): `pio test -e esp-wrover-kit` (requires a connected board)
+- CI: `.github/workflows/ci.yml` runs native tests on push/PR.
 - Please submit PRs with clear descriptions and small, focused changes.
 
 ---
