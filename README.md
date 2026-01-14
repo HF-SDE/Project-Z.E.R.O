@@ -2,8 +2,8 @@
 
 Welcome to the Project Z.E.R.O! This repository contains everything you need to get the backend and website server running for the project. Follow the steps below to get started.
 
-| Welcome to the Project Z.E.R.O! This repository contains everything you need to get the backend and website server running for the project. Follow the steps below to get started. | |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Welcome to the Project Z.E.R.O! This repository contains everything you need to get the backend and website server running for the project. Follow the steps below to get started. |     |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
 
 ## Prerequisites
 
@@ -82,8 +82,8 @@ To navigate between the different pages in the app, use the nav bar at the botto
 1. **Profile**
 2. **Admin**
 3. **User**
-2. **Stats**
-3. **Device**
+4. **Stats**
+5. **Device**
 
 ### Profile Page:
 
@@ -142,3 +142,10 @@ To delete a device swipe from left to right on it and then press the delete icon
 <br/>
 
 Press **Submit** to place the order.
+
+## Other readmes
+
+- [Library README](Library/README.md)
+- [Client Light README](Client_Light/README.md)
+- [Client First Door README](Client_First_Door/README.md)
+- [Client Alarm README](Client_Alarm/README.md)
