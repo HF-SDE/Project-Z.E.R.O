@@ -1,0 +1,37 @@
+# Client_Light
+
+This project is an ESP32-based client for controlling and monitoring room lighting, including manual override and status indication.
+
+## Hardware Schematic
+
+![ESP32 Wroom Schematic](schematic.png)
+
+- **Status light:** Indicates system status using three LEDs.
+- **Manual override:** Allows direct control of the room light via a pushbutton.
+- **Room light:** Controlled via a relay or transistor (see schematic for wiring).
+- **Resistors:** 220Ω for LEDs, 10Ω for room light control.
+
+## Features
+
+- ESP32 Wroom microcontroller
+- Manual and remote control of room lighting
+- Status indication via LEDs
+- Integration-ready for Z.E.R.O IoT system
+
+## Getting Started
+
+- Flash firmware using PlatformIO or Arduino IDE
+- Connect hardware as shown in the schematic
+- Configure WiFi and MQTT settings in code or via configuration tools
+
+## File Overview
+
+- `main.cpp` — main application logic
+- `CMakeLists.txt`, `platformio.ini` — build configuration
+- `include/` — header files
+- `src/` — source files
+- `test/` — unit and integration tests
+
+---
+
+For more details, see the main [Z.E.R.O Library documentation](../Library/README).

@@ -26,7 +26,7 @@ bool storageSaveConfig(const DeviceConfig &config)
     if (!g_initialized && !storageInit())
         return false;
 
-    StaticJsonDocument<512> doc;
+    JsonDocument doc;
 
     doc["wifiSsid"] = config.wifiSsid;
     doc["wifiPassword"] = config.wifiPassword;
@@ -39,6 +39,8 @@ bool storageSaveConfig(const DeviceConfig &config)
     doc["heartbeatInterval"] = config.heartbeatInterval;
     doc["serialFrequency"] = config.serialFrequency;
     doc["status"] = config.status; // Save the status field
+    doc["frequency"] = config.frequency;
+    doc["max_value"] = config.max_value;
 
     File file = LittleFS.open(CONFIG_FILE, "w");
     if (!file)
@@ -77,7 +79,7 @@ bool storageLoadConfig(DeviceConfig &config)
         return false;
     }
 
-    StaticJsonDocument<512> doc;
+    JsonDocument doc;
     DeserializationError err = deserializeJson(doc, file);
     file.close();
 
@@ -100,6 +102,7 @@ bool storageLoadConfig(DeviceConfig &config)
     config.serialFrequency = doc["serialFrequency"] | 115200;
     config.status = doc["status"] | true; // Load the status field
     config.frequency = doc["frequency"] | 10000;
+    config.max_value = doc["max_value"] | 25.0;
 
     Serial.println("[Storage] Configuration loaded successfully");
     return true;
@@ -165,5 +168,6 @@ void storagePrintConfig(const DeviceConfig &config)
     Serial.println("Heartbeat Int.:  " + String(config.heartbeatInterval) + " ms");
     Serial.println("Status:          " + String(config.status ? "Active" : "Inactive"));
     Serial.println("Frequency:       " + String(config.frequency) + " ms");
+    Serial.println("Max Value:       " + String(config.max_value));
     Serial.println("=========================================\n");
 }

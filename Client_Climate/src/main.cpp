@@ -1,3 +1,5 @@
+// Denne device er inspirieret af følgende tutorial https://randomnerdtutorials.com/esp8266-nodemcu-mqtt-publish-dht11-dht22-arduino/
+
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
@@ -7,29 +9,43 @@
 #include "../lib/ConfigWriter.h"
 #include "../lib/wifi.h"
 #include "../lib/mqtt.h"
+// #include <Environment.h>
 
 // ESP8266: Avoid GPIO0/GPIO2/GPIO15 for peripherals (boot strap pins). Use GPIO4 (D2) instead.
-#define DHTPIN 2      // D2 on many ESP8266 dev boards
+#define DHTPIN 2
 #define DHTTYPE DHT22 // DHT 22 (AM2302)
+
+#define RED_LED_PIN 16
+#define YELLOW_LED_PIN 14
+#define BLUE_LED_PIN 12
 
 DHT dht(DHTPIN, DHTTYPE);
 
 float temp = 0.0;
 float hum = 0.0;
 
-// Understående er fundet fra https://randomnerdtutorials.com/esp8266-nodemcu-mqtt-publish-dht11-dht22-arduino/
-
-char *MQTT_PUB_TEMP = "";
-char *MQTT_PUB_HUM = "";
-
 DeviceConfig g_deviceConfig;
 
-unsigned long previousMillis = 0; // Stores last time temperature was published
+unsigned long previousMillis = 0;
 
-char *getPublishTopic(String componentType)
+static unsigned long g_lastWifiAttemptMs = 0;
+static unsigned long g_lastMqttAttemptMs = 0;
+static unsigned long g_lastBlueBlinkMs = 0;
+static unsigned long g_lastYellowBlinkMs = 0;
+static bool g_blueLedOn = false;
+static bool g_yellowLedOn = false;
+
+String alarmClientId = "000094A4E48E0D84";
+
+static void blinkLed(uint8_t pin, unsigned long &lastBlinkMs, bool &ledOn, unsigned long intervalMs)
 {
-  String topic = g_deviceConfig.mqttTopic + "/" + componentType + "/value";
-  return strdup(topic.c_str());
+  const unsigned long now = millis();
+  if (now - lastBlinkMs >= intervalMs)
+  {
+    lastBlinkMs = now;
+    ledOn = !ledOn;
+    digitalWrite(pin, ledOn ? HIGH : LOW);
+  }
 }
 
 char *getConfigTopic()
@@ -54,7 +70,7 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
   {
     Serial.println("Incomming configuration message, saving to config...");
 
-    StaticJsonDocument<256> doc;
+    JsonDocument doc;
     DeserializationError err = deserializeJson(doc, payload, len);
 
     if (err)
@@ -70,17 +86,36 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
 
     storageSaveConfig(g_deviceConfig);
   }
+
+  String tempConfigTopic = g_deviceConfig.mqttTopic + "/temperature/config";
+
+  if (String(topic) == tempConfigTopic)
+  {
+    Serial.println("Incomming temperature configuration message, saving to config...");
+
+    JsonDocument doc;
+    DeserializationError err = deserializeJson(doc, payload, len);
+
+    if (err)
+    {
+      Serial.print("JSON parse failed: ");
+      Serial.println(err.c_str());
+      return;
+    }
+
+    float max_value = doc["max_value"].as<float>();
+
+    g_deviceConfig.max_value = max_value;
+
+    storageSaveConfig(g_deviceConfig);
+  }
 }
 
 void setup()
 {
   Serial.begin(115200);
-  Serial.println();
-  Serial.println("Booting...");
-  Serial.print("Reset reason: ");
-  Serial.println(ESP.getResetReason());
-  Serial.print("Free heap: ");
-  Serial.println(ESP.getFreeHeap());
+
+  // Environment::configureEnvironment(Environment::EnvironmentMode::DEVELOPMENT, "prod.ip", "test.ip", "dev.ip");
 
   storageInit();
   if (!storageLoadConfig(g_deviceConfig))
@@ -92,6 +127,10 @@ void setup()
   storagePrintConfig(g_deviceConfig);
 
   dht.begin();
+
+  pinMode(RED_LED_PIN, OUTPUT);
+  pinMode(YELLOW_LED_PIN, OUTPUT);
+  pinMode(BLUE_LED_PIN, OUTPUT);
 
   wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
   wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
@@ -117,43 +156,98 @@ void setup()
 
 void loop()
 {
-  unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= g_deviceConfig.frequency)
+  yield();
+
+  const unsigned long now = millis();
+  const unsigned long publishIntervalMs = ((unsigned long)g_deviceConfig.frequency < 1000UL) ? 1000UL : (unsigned long)g_deviceConfig.frequency;
+
+  if (!WiFi.isConnected())
   {
-    previousMillis = currentMillis;
+    blinkLed(BLUE_LED_PIN, g_lastBlueBlinkMs, g_blueLedOn, 250); // Blink BLUE while connecting to WiFi
 
-    hum = dht.readHumidity();
-    temp = dht.readTemperature();
+    digitalWrite(YELLOW_LED_PIN, LOW);
+    g_yellowLedOn = false;
 
-    if (isnan(hum) || isnan(temp))
+    // Retry WiFi connect every 10 seconds
+    if (now - g_lastWifiAttemptMs >= 10000UL)
     {
-      Serial.println("Failed to read from DHT sensor!");
-      return;
-    }
-
-    if (!WiFi.isConnected())
-    {
-      Serial.println("Wi-Fi not connected, skipping publish");
+      g_lastWifiAttemptMs = now;
       connectToWifi(g_deviceConfig.wifiSsid, g_deviceConfig.wifiPassword);
-      return;
     }
 
-    if (!mqttClient.connected())
+    return;
+  }
+
+  digitalWrite(BLUE_LED_PIN, HIGH);
+  g_blueLedOn = true;
+
+  if (!mqttClient.connected())
+  {
+
+    blinkLed(YELLOW_LED_PIN, g_lastYellowBlinkMs, g_yellowLedOn, 250); // Blink YELLOW while connecting to MQTT
+
+    if (now - g_lastMqttAttemptMs >= 10000UL)
     {
-      Serial.println("MQTT not connected, skipping publish");
+      g_lastMqttAttemptMs = now;
       connectToMqtt();
-      return;
     }
 
-    char *tempTopic = getPublishTopic("tempature");
-    char *humTopic = getPublishTopic("humidity");
+    return;
+  }
 
-    uint16_t packetIdPub1 = mqttClient.publish(tempTopic, g_deviceConfig.qos, true, String(temp).c_str());
-    Serial.printf("Publishing on topic %s at QoS 0, packetId: %i ", tempTopic, packetIdPub1);
-    Serial.printf("Message: %.2f \n", temp);
+  digitalWrite(YELLOW_LED_PIN, HIGH);
+  g_yellowLedOn = true;
 
-    uint16_t packetIdPub2 = mqttClient.publish(humTopic, g_deviceConfig.qos, true, String(hum).c_str());
-    Serial.printf("Publishing on topic %s at QoS 0, packetId %i: ", humTopic, packetIdPub2);
-    Serial.printf("Message: %.2f \n", hum);
+  if (now - previousMillis < publishIntervalMs)
+    return;
+
+  previousMillis = now;
+
+  hum = dht.readHumidity();
+  temp = dht.readTemperature();
+
+  const String alarmActivateTopic = "clients/" + alarmClientId + "/triggers/alarm-trigger";
+  const String alarmDeactivateTopic = "clients/" + alarmClientId + "/triggers/clear-alarm-trigger";
+
+  if (isnan(hum) || isnan(temp))
+  {
+    String line1 = "Sensor error!";
+    String line2 = "Could not read data";
+    String line3 = "Device ID:";
+    String line4 = g_deviceConfig.deviceId;
+
+    JsonDocument doc;
+    doc["useSound"] = false;
+    doc["message"] = line1 + "\n" + line2 + "\n" + line3 + "\n" + line4;
+
+    mqttClient.publish(alarmActivateTopic.c_str(), g_deviceConfig.qos, false, doc.as<String>().c_str());
+
+    digitalWrite(RED_LED_PIN, HIGH);
+    return;
+  }
+
+  digitalWrite(RED_LED_PIN, LOW);
+
+  const String tempTopic = g_deviceConfig.mqttTopic + "/temperature/value";
+  const String humTopic = g_deviceConfig.mqttTopic + "/humidity/value";
+
+  mqttClient.publish(tempTopic.c_str(), g_deviceConfig.qos, true, String(temp).c_str());
+  mqttClient.publish(humTopic.c_str(), g_deviceConfig.qos, true, String(hum).c_str());
+
+  if (temp > g_deviceConfig.max_value)
+  {
+    String line1 = "Temp limit reached!";
+    String line2 = "Value: " + String(temp) + " C";
+    String line3 = "Max: " + String(g_deviceConfig.max_value) + " C";
+
+    JsonDocument doc;
+    doc["useSound"] = false;
+    doc["message"] = line1 + "\n" + line2 + "\n" + line3;
+
+    mqttClient.publish(alarmActivateTopic.c_str(), g_deviceConfig.qos, false, doc.as<String>().c_str());
+  }
+  else
+  {
+    mqttClient.publish(alarmDeactivateTopic.c_str(), g_deviceConfig.qos, false, "");
   }
 }

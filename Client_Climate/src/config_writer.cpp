@@ -30,7 +30,7 @@ bool writeDefaultConfig()
     config.wifiSsid = "Case-ZERO_2,4GHz";
     config.wifiPassword = "Nogetjegkanhuske";
     config.serialFrequency = 115200;
-    config.mqttHost = "192.168.1.149";
+    config.mqttHost = "192.168.1.5";
     config.mqttPort = 1883;
     config.mqttUser = "";
     config.mqttPassword = "";
@@ -40,6 +40,7 @@ bool writeDefaultConfig()
     config.heartbeatInterval = 1000 * 60; // 1 minute
     config.status = true;                 // Default to active
     config.frequency = 10 * 1000;         // 10 seconds
+    config.max_value = 25.0;              // Default maximum threshold value
 
     // Save configuration
     if (!storageSaveConfig(config))
@@ -58,6 +59,7 @@ bool writeDefaultConfig()
     Serial.println("[ConfigWriter] Serial Frequency: " + String(config.serialFrequency) + " bps");
     Serial.println("[ConfigWriter] Status: " + String(config.status ? "Active" : "Inactive"));
     Serial.println("[ConfigWriter] Frequency: " + String(config.frequency) + " ms");
+    Serial.println("[ConfigWriter] Max Value: " + String(config.max_value));
 
     return true;
 }
@@ -73,6 +75,8 @@ bool writeDefaultConfig()
  * @param heartbeatInterval Heartbeat interval in milliseconds
  * @param serialFrequency Serial communication frequency in bps
  * @param status Device active status
+ * @param frequency Data publishing frequency in milliseconds
+ * @param max_value Maximum threshold value
  *
  */
 bool writeCustomConfig(
@@ -84,7 +88,9 @@ bool writeCustomConfig(
     const String &deviceId,
     int heartbeatInterval,
     int serialFrequency,
-    bool status)
+    bool status,
+    int frequency,
+    float max_value)
 
 {
     Serial.println("[ConfigWriter] Writing custom configuration...");
@@ -108,6 +114,7 @@ bool writeCustomConfig(
     config.serialFrequency = serialFrequency;
     config.status = status;
     config.frequency = 10000;
+    config.max_value = max_value;
 
     if (!storageSaveConfig(config))
     {
@@ -158,5 +165,6 @@ void displayStoredConfig()
     Serial.println("Serial Freq.:   " + String(config.serialFrequency) + " bps");
     Serial.println("Status:         " + String(config.status ? "Active" : "Inactive"));
     Serial.println("Frequency:      " + String(config.frequency) + " ms");
+    Serial.println("Max Value:      " + String(config.max_value));
     Serial.println("==========================================\n");
 }

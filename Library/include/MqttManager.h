@@ -19,6 +19,8 @@ void mqttLoop();
 bool mqttIsConnected();
 const char *mqttGetLastMessage();
 
+static String deviceIdHex();
+
 typedef void (*MqttMessageHandler)(
     const char *topic,
     const char *payload);

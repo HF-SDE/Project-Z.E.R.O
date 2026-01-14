@@ -142,3 +142,6 @@ To delete a device swipe from left to right on it and then press the delete icon
 <br/>
 
 Press **Submit** to place the order.
+
+## Other readmes
+- 

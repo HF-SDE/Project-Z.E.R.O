@@ -18,6 +18,7 @@ struct DeviceConfig
     int heartbeatInterval;
     bool status;   // Indicates if the device is active
     int frequency; // Data reporting frequency in milliseconds
+    float max_value; // Maximum threshold value
 };
 
 /**
