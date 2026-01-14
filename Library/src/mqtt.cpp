@@ -48,6 +48,16 @@ static void mqttCallback(char *topic, byte *payload, unsigned int length)
     }
 }
 
+void onMqttMessage(const char *topic, const char *payload)
+{
+    // Handle incoming MQTT messages here
+
+    Environment::print("MQTT Message received on topic: ");
+    Environment::print(topic);
+    Environment::print("Payload: ");
+    Environment::print(payload);
+}
+
 bool retainedMessageExists(const char *topic, uint32_t windowMs)
 {
     windowMs = 1500;

@@ -1,6 +1,11 @@
 #include <string>
-namespace ButtonConfig
+#include <variant>
+
+namespace ConfigComponents
 {
+    using std::string;
+    using std::variant;
+    
     struct Config
     {
         std::string name;
@@ -10,7 +15,7 @@ namespace ButtonConfig
     struct keys
     {
         std::string id;
-        int value;
+        variant<int, string> value;
         std::string value_type;
         Config config;
     };

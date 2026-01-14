@@ -34,4 +34,6 @@ bool retainedMessageExists(const char *topic, uint32_t windowMs = 150);
 
 void mqttSetComponentValue(const String &componentTopic, const String &status);
 
+void onMqttMessage(const char *topic, const char *payload);
+
 #endif

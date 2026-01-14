@@ -1,9 +1,12 @@
 #include "wifi_setup.h"
+#include <Environment.h>
+#include <StorageManager.h>
 
 // -------- INTERNAL STATE --------
 static int ledRed = -1;
 static int ledGreen = -1;
 static int ledBlue = -1;
+static bool firstWifiStartUp = true;
 // --------------------------------
 
 bool wifiConnect(const char *ssid, const char *password, unsigned long timeoutMs)
@@ -86,4 +89,21 @@ void updateWifiStatusLed(bool firstStartup)
         digitalWrite(ledGreen, LOW);
         digitalWrite(ledBlue, LOW);
     }
+}
+
+void wifiSetup(DeviceConfig config)
+{
+    updateWifiStatusLed(firstWifiStartUp);
+    firstWifiStartUp = false;
+
+    if (!wifiConnect(config.wifiSsid.c_str(), config.wifiPassword.c_str(), 10000))
+    {
+        Environment::print("WiFi failed");
+        updateWifiStatusLed(false);
+        return;
+    }
+
+    Environment::print("IP: " + wifiGetIp());
+
+    updateWifiStatusLed(false);
 }
