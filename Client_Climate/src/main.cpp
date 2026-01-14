@@ -212,7 +212,7 @@ void loop()
   if (isnan(hum) || isnan(temp))
   {
     String line1 = "Sensor error!";
-    String line2 = "Could not read data.";
+    String line2 = "Could not read data";
     String line3 = "Device ID:";
     String line4 = g_deviceConfig.deviceId;
 
