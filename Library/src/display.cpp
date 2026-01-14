@@ -37,15 +37,6 @@ bool displayInit(uint8_t i2cAddress, uint8_t cols, uint8_t rows, int sdaPin, int
     }
     delay(50); // additional settle time after successful probe
 
-    // Recreate lcd with the chosen address/size.
-    // LiquidCrystal_I2C doesn't let us change address after construction in many libs,
-    // so we construct with defaults above and rely on setAddress patterns not being portable.
-    // The simplest widely-working approach: keep address fixed OR use a library that supports setAddress.
-    // If your library supports changing address, we can adapt.
-    // For now: assume your address is 0x27 and your constructor matches it.
-
-    // If you NEED dynamic address support, tell me which LiquidCrystal_I2C library you installed.
-
     lcd.init(); // common for many LiquidCrystal_I2C libs
     lcd.backlight();
     lcd.clear();
@@ -137,6 +128,47 @@ void displayOverrideLine(uint8_t lineNumber, const char *msg)
         return;
     }
 
+    displayOverrideLine(0, lineNumber, msg);
+}
+
+void displayOverrideLine(uint8_t col, uint8_t lineNumber, const char *msg)
+{
+    if (!g_ready || msg == nullptr || lineNumber >= g_rows)
+        return;
+
+    // Check I2C device is still responding
+    Wire.beginTransmission(0x27);
+    if (Wire.endTransmission() != 0)
+    {
+        g_ready = false;
+        return;
+    }
+
     // Display message on specified line and pad the rest
-    printPadded(0, lineNumber, msg, g_cols);
+    printPadded(col, lineNumber, msg, g_cols);
+}
+
+void displaySetColor(const char *colorName)
+{
+    if (!g_ready || colorName == nullptr)
+        return;
+
+    // Check I2C device is still responding
+    Wire.beginTransmission(0x27);
+    if (Wire.endTransmission() != 0)
+    {
+        g_ready = false;
+        return;
+    }
+
+    // Simple backlight control - turn on for colors, off for "off"
+    if (strcmp(colorName, "off") == 0 || strcmp(colorName, "OFF") == 0)
+    {
+        lcd.noBacklight();
+    }
+    else
+    {
+        // Turn on backlight for all color names (white, red, green, blue, yellow)
+        lcd.backlight();
+    }
 }
