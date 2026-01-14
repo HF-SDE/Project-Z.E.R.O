@@ -69,7 +69,7 @@ void displayShowMessage(const char *msg)
     lcd.clear();
 
     // Split message across all available rows (up to 4 lines)
-    // Automatically shifts to next line when running out of columns
+    // Automatically shifts to next line when running out of columns or encountering \n
     const char *currentPos = msg;
 
     for (uint8_t row = 0; row < g_rows; row++)
@@ -81,6 +81,13 @@ void displayShowMessage(const char *msg)
         uint8_t i = 0;
         for (; i < g_cols && *currentPos != '\0'; i++)
         {
+            // Check for newline character
+            if (*currentPos == '\n')
+            {
+                currentPos++; // Skip the newline
+                break;        // Move to next row
+            }
+
             lcd.print(*currentPos);
             currentPos++;
         }

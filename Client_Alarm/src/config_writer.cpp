@@ -16,12 +16,9 @@ const char *getChipId()
  */
 bool writeDefaultConfig()
 {
-    Serial.println("[ConfigWriter] Writing default configuration...");
-
     // Initialize storage
     if (!storageInit())
     {
-        Serial.println("[ConfigWriter] Failed to initialize storage");
         return false;
     }
 
@@ -42,19 +39,8 @@ bool writeDefaultConfig()
     // Save configuration
     if (!storageSaveConfig(config))
     {
-        Serial.println("[ConfigWriter] Failed to save configuration");
         return false;
     }
-
-    Serial.println("[ConfigWriter] Configuration written successfully");
-    Serial.println("[ConfigWriter] WiFi SSID: " + config.wifiSsid);
-    Serial.println("[ConfigWriter] MQTT Host: " + config.mqttHost);
-    Serial.println("[ConfigWriter] MQTT Port: " + String(config.mqttPort));
-    Serial.println("[ConfigWriter] MQTT Topic: " + config.mqttTopic);
-    Serial.println("[ConfigWriter] Device ID: " + config.deviceId);
-    Serial.println("[ConfigWriter] Heartbeat Interval: " + String(config.heartbeatInterval) + " ms");
-    Serial.println("[ConfigWriter] Serial Frequency: " + String(config.serialFrequency) + " bps");
-    Serial.println("[ConfigWriter] Device Status: " + String(config.status ? "Active" : "Inactive"));
 
     return true;
 }

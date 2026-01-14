@@ -10,7 +10,6 @@ bool parseAlarmMessage(const char *json, AlarmMessage &out)
         return false;
 
     out.message = doc["message"] | "";
-    out.color = doc["color"] | "white";
     out.useSound = doc["useSound"] | false;
 
     return true;

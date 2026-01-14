@@ -10,15 +10,12 @@ The Z.E.R.O. Alarm Client is a smart alarm display device that receives alerts a
 - Displays up to 80 characters (automatically wraps across 4 lines)
 - Always shows current device status or active alarm
 
-### Status LEDs (Top of Device)
-Three colored LEDs indicate the device's connection status:
-- **Blue LED** - Flashing: Device is connecting to WiFi
-- **Green LED** - Solid: Device is connected and online  
-- **Red LED** - Solid: Connection error (WiFi or MQTT failed)
-
 ### Alarm Indicators
 - **Red Alarm LED** - Lights up when an alarm is active
 - **Buzzer** - Sounds when an alarm with audio is triggered
+
+### Status LED
+Indicates device connectivity status. Refer to the Connection Status (Status LEDs)
 
 ## Normal Operation
 

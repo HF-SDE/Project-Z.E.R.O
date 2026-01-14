@@ -14,14 +14,12 @@ void componentManagerInit(String deviceId, String baseMqttTopic)
     g_deviceId = deviceId;
     mqttBaseTopic = baseMqttTopic;
     g_componentCount = 0;
-    Serial.println("Component Manager initialized");
 }
 
 void componentRegister(Component *component)
 {
     if (g_componentCount >= MAX_COMPONENTS)
     {
-        Serial.println("ERROR: Max components reached!");
         return;
     }
 
@@ -44,7 +42,6 @@ void componentPublishAll()
 {
     if (!mqttIsConnected())
     {
-        Serial.println("MQTT not connected, skipping component publish");
         return;
     }
 
@@ -72,16 +69,13 @@ void componentPublishAll()
                 configObj["comment"] = comp->config.comment;
             }
 
-            // Serialize to string
-            serializeJson(doc, payload, sizeof(payload));
-
-            Serial.print("Publishing component to topic: ");
-            Serial.println(topic);
-
             // Publish to MQTT
             mqttPublish(topic, payload, true); // retained = true
 
             comp->stateChanged = false; // Reset stateChanged flag
+
+            // Small delay between publishes to avoid overwhelming the connection
+            delay(50);
         }
     }
 }

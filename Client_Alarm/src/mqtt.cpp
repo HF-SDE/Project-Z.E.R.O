@@ -18,7 +18,6 @@ static unsigned long g_lastHeartbeat = 0;
 // MQTT callback
 static void mqttCallback(char *topic, byte *payload, unsigned int length)
 {
-    Serial.println("Event received - callback");
 
     static char msg[256];
 
@@ -32,10 +31,11 @@ static void mqttCallback(char *topic, byte *payload, unsigned int length)
     }
 }
 
-// Internal reconnect
+// Internal reconnect - non-blocking
 static void mqttReconnect()
 {
-    while (!mqtt.connected())
+    // Only attempt reconnect if not connected
+    if (!mqtt.connected())
     {
         String clientId = "esp32-";
         clientId += String((uint32_t)ESP.getEfuseMac(), HEX);
@@ -43,10 +43,6 @@ static void mqttReconnect()
         if (mqtt.connect(clientId.c_str()))
         {
             mqtt.subscribe(subTopic);
-        }
-        else
-        {
-            delay(1000);
         }
     }
 }
@@ -86,9 +82,19 @@ void mqttLoop()
 {
     if (!mqtt.connected())
     {
-        mqttReconnect();
+        // Throttle reconnect attempts to avoid spamming
+        static unsigned long lastReconnectAttempt = 0;
+        unsigned long now = millis();
+        if (now - lastReconnectAttempt > 5000) // Try every 5 seconds
+        {
+            lastReconnectAttempt = now;
+            mqttReconnect();
+        }
     }
-    mqtt.loop();
+    else
+    {
+        mqtt.loop();
+    }
 
     // Handle heartbeat if configured
     if (g_heartbeatInterval > 0)
@@ -96,8 +102,7 @@ void mqttLoop()
         unsigned long currentMillis = millis();
         if (currentMillis - g_lastHeartbeat >= g_heartbeatInterval)
         {
-            Serial.println("Sending heartbeat");
-            Serial.println(g_heartbeatTopic.c_str());
+
             mqttPublish(g_heartbeatTopic.c_str(), "online", true);
             g_lastHeartbeat = currentMillis;
         }

@@ -6,7 +6,6 @@
 struct AlarmMessage
 {
     const char *message;
-    const char *color;
     bool useSound;
 };
 

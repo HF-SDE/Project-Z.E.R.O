@@ -54,21 +54,16 @@ static void onMqttAlarmMessage(const char *topic, const char *payload)
   {
     return;
   }
-  Serial.println("Event received 1");
 
   AlarmMessage alarm;
-  Serial.println(payload);
 
   if (!parseAlarmMessage(payload, alarm))
   {
-    Serial.println("Invalid alarm JSON");
     return;
   }
 
   displayShowMessage(alarm.message);
   alarmOutputActivate(alarm.useSound);
-
-  Serial.println("Alarm started");
 }
 static void onMqttClearAlarmMessage(const char *topic, const char *payload)
 {
@@ -81,9 +76,8 @@ static void onMqttClearAlarmMessage(const char *topic, const char *payload)
   {
     return;
   }
-  Serial.println("Event received");
 
-  displayShowMessage("all good fam.");
+  displayShowMessage("No alarms. All good.");
   alarmOutputDeactivate();
 }
 static void onMqttConfigMessage(const char *topic, const char *payload)
@@ -93,16 +87,11 @@ static void onMqttConfigMessage(const char *topic, const char *payload)
   {
     return;
   }
-  Serial.print("Config event received on topic: ");
-  Serial.println(topic);
-  Serial.print("Payload: ");
-  Serial.println(payload);
 
   ConfigMessage configMsg;
 
   if (!parseConfigMessage(payload, configMsg))
   {
-    Serial.println("Invalid config JSON");
     return;
   }
 
@@ -114,12 +103,6 @@ static void onMqttConfigMessage(const char *topic, const char *payload)
 
   // Apply the new heartbeat interval immediately
   mqttSetHeartbeat(config.deviceId.c_str(), config.heartbeatInterval);
-
-  Serial.println("Configuration updated via MQTT");
-  Serial.print("New heartbeat interval: ");
-  Serial.print(config.heartbeatInterval);
-  Serial.println(" ms");
-  Serial.println(config.status ? "Device active" : "Device inactive");
 
   if (!config.status)
   {
@@ -142,26 +125,24 @@ static void onMqttMessage(const char *topic, const char *payload)
 
 void setup()
 {
-  Serial.begin(115200); // Start with default baud rate
-  while (!Serial)
-  {
-    ; // Wait for Serial to be ready
-  }
+  // uncomment for serial debugging
+  // Serial.begin(115200); // Start with default settings
+  // while (!Serial)
+  // {
+  //   ; // Wait for Serial to be ready
+  // }
 
-  // Wire.begin(); - This is called inside displayInit ! DELETE ME IF NEEDED
-  displayInit(lcdI2CAddress, lcdColumns, lcdRows);
-
-  // Initialize status LED and alarm output managers
-  statusLedInit(redWifiLedPin, greenWifiLedPin, blueWifiLedPin);
-  alarmOutputInit(alarmLedPin, buzzerPin);
+  displayInit(lcdI2CAddress, lcdColumns, lcdRows);               // Initialize display
+  statusLedInit(redWifiLedPin, greenWifiLedPin, blueWifiLedPin); // Initialize status LEDs
+  alarmOutputInit(alarmLedPin, buzzerPin);                       // Initialize alarm output
 
   // Initialize storage and load configuration
-  Serial.println("Initializing storage...");
-  if (!storageInit())
+  if (!storageInit()) // returns true if successful
   {
-    Serial.println("Failed to initialize storage!");
     // Blink red LED to indicate error
-    for (int i = 0; i < 10; i++)
+    displayShowMessage("Storage error!");
+
+    while (true)
     {
       digitalWrite(redWifiLedPin, HIGH);
       digitalWrite(greenWifiLedPin, LOW);
@@ -170,20 +151,17 @@ void setup()
       digitalWrite(redWifiLedPin, LOW);
       delay(200);
     }
-    displayShowMessage("Storage error! Check Serial");
-    return;
   }
 
   // Load configuration
-  Serial.println("Loading configuration...");
   displayOverrideLine(1, "Loading config...");
-  if (!storageLoadConfig(config))
+  if (!storageLoadConfig(config)) // returns true if successful
   {
-    Serial.println("Failed to load config! Using defaults and saving...");
     // Blink red LED to indicate config error
     displayOverrideLine(1, "Loading failed!");
-    displayOverrideLine(2, "Trying fallback...");
+    displayOverrideLine(2, "Using default config...");
 
+    // blink yellow to indicate fallback attempt
     for (int i = 0; i < 10; i++)
     {
       digitalWrite(redWifiLedPin, HIGH);
@@ -195,11 +173,11 @@ void setup()
       delay(200);
     }
 
-    // Write default config and try again
-    if (!writeDefaultConfig() || !storageLoadConfig(config))
+    // Write default config and try to load it again
+    if (!writeDefaultConfig() || !storageLoadConfig(config)) // returns true if successful
     {
-      Serial.println("Failed to create default config!");
-      displayShowMessage("Config error! Check Serial");
+
+      displayShowMessage("Config error!");
 
       while (true)
       {
@@ -221,12 +199,12 @@ void setup()
   printStorageConfig(config);
 
   // If the default serial frequency is different from the device config, reinitialize Serial
-  if (config.serialFrequency != 115200)
-  {
-    Serial.end();
-    Serial.begin(config.serialFrequency);
-    delay(100);
-  }
+  // if (config.serialFrequency != 115200)
+  // {
+  //   Serial.end();
+  //   Serial.begin(config.serialFrequency);
+  //   delay(100);
+  // }
 
   // Initialize Component Manager
   componentManagerInit(config.deviceId, config.mqttTopic);
@@ -249,14 +227,10 @@ void setup()
 
   if (!wifiConnect(config.wifiSsid.c_str(), config.wifiPassword.c_str(), 10000))
   {
-    Serial.println("WiFi failed");
     statusLedUpdate(false, false, false);
     displayShowMessage("WiFi failed!");
     return;
   }
-
-  Serial.print("IP: ");
-  Serial.println(wifiGetIp());
 
   statusLedUpdate(true, false, false);
   displayOverrideLine(1, "Connecting mqtt...");
