@@ -109,7 +109,8 @@ static void initConfig()
   Environment::print("Initializing Environment...");
   Environment::configureEnvironment(Environment::EnvironmentMode::DEVELOPMENT, HOST_DEV, HOST_TEST, HOST_PROD);
 
-  if (!displayInit(0x27, 16, 2, I2C_SDA_PIN, I2C_SCL_PIN))
+  // Temporarily disable LCD to isolate gpio_pullup_en errors
+  if (!displayInit(0x27, 20, 4, I2C_SDA_PIN, I2C_SCL_PIN))
   {
     Environment::print("LCD init failed (I2C not ready)");
   }
@@ -318,6 +319,7 @@ void loop()
     lastLedCycle = now;
     static uint8_t ledState = 0;
     ledState = (ledState + 1) % 3;
+    digitalWrite(WHITE_LED_PIN, ledState == 0 ? HIGH : LOW);
     digitalWrite(STATUS_LED_RED_PIN, ledState == 0 ? HIGH : LOW);
     digitalWrite(STATUS_LED_GREEN_PIN, ledState == 1 ? HIGH : LOW);
     digitalWrite(STATUS_LED_BLUE_PIN, ledState == 2 ? HIGH : LOW);
