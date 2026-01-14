@@ -138,10 +138,10 @@ On the **Edit Device**, you can modify the details of an existing stock item. Se
 
 ##### Delete Device (Coming soon)
 
-## Other readmes
-- 
-
 To delete a device swipe from left to right on it and then press the delete icon and confirm your action
 <br/>
 
 Press **Submit** to place the order.
+
+## Other readmes
+- 
