@@ -576,17 +576,13 @@ void loop()
     if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
     {
       String rfidUID = "";
-      Serial.print("RFID Card UID: ");
       for (byte i = 0; i < rfid.uid.size; i++)
       {
         if (rfid.uid.uidByte[i] < 0x10)
-          Serial.print("0");
-        Serial.print(rfid.uid.uidByte[i], HEX);
-        if (rfid.uid.uidByte[i] < 0x10)
-          rfidUID += "0";
+          if (rfid.uid.uidByte[i] < 0x10)
+            rfidUID += "0";
         rfidUID += String(rfid.uid.uidByte[i], HEX);
       }
-      Serial.println();
       rfid.PICC_HaltA();
       rfid.PCD_StopCrypto1();
 
