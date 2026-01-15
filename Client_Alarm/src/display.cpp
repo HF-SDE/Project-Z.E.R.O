@@ -13,19 +13,11 @@ static Component *g_displayComponent = nullptr;
 
 bool displayInit(uint8_t i2cAddress, uint8_t cols, uint8_t rows, int sdaPin, int sclPin)
 {
+    // prepare LCD component
     g_cols = cols;
     g_rows = rows;
 
     Wire.begin(sdaPin, sclPin);
-
-    // Recreate lcd with the chosen address/size.
-    // LiquidCrystal_I2C doesn't let us change address after construction in many libs,
-    // so we construct with defaults above and rely on setAddress patterns not being portable.
-    // The simplest widely-working approach: keep address fixed OR use a library that supports setAddress.
-    // If your library supports changing address, we can adapt.
-    // For now: assume your address is 0x27 and your constructor matches it.
-
-    // If you NEED dynamic address support, tell me which LiquidCrystal_I2C library you installed.
 
     lcd.init(); // common for many LiquidCrystal_I2C libs
     lcd.backlight();
@@ -49,7 +41,7 @@ void displayClear()
     lcd.clear();
 }
 
-static void printPadded(uint8_t col, uint8_t row, const char *s, uint8_t len)
+void printPadded(uint8_t col, uint8_t row, const char *s, uint8_t len)
 {
     lcd.setCursor(col, row);
     // print up to len chars, pad rest with spaces to overwrite old text

@@ -16,14 +16,9 @@ const char *getChipId()
  */
 bool writeDefaultConfig()
 {
-    Serial.println("[ConfigWriter] Writing default configuration...");
-
     // Initialize storage
     if (!storageInit())
-    {
-        Serial.println("[ConfigWriter] Failed to initialize storage");
         return false;
-    }
 
     // Create default configuration
     DeviceConfig config;
@@ -41,10 +36,7 @@ bool writeDefaultConfig()
 
     // Save configuration
     if (!storageSaveConfig(config))
-    {
-        Serial.println("[ConfigWriter] Failed to save configuration");
         return false;
-    }
 
     Serial.println("[ConfigWriter] Configuration written successfully");
     Serial.println("[ConfigWriter] WiFi SSID: " + config.wifiSsid);

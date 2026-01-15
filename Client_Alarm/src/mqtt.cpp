@@ -18,10 +18,7 @@ static unsigned long g_lastHeartbeat = 0;
 // MQTT callback
 static void mqttCallback(char *topic, byte *payload, unsigned int length)
 {
-    Serial.println("Event received - callback");
-
     static char msg[256];
-
     unsigned int n = (length < sizeof(msg) - 1) ? length : sizeof(msg) - 1;
     memcpy(msg, payload, n);
     msg[n] = '\0';
@@ -96,8 +93,6 @@ void mqttLoop()
         unsigned long currentMillis = millis();
         if (currentMillis - g_lastHeartbeat >= g_heartbeatInterval)
         {
-            Serial.println("Sending heartbeat");
-            Serial.println(g_heartbeatTopic.c_str());
             mqttPublish(g_heartbeatTopic.c_str(), "online", true);
             g_lastHeartbeat = currentMillis;
         }
