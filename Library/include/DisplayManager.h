@@ -14,7 +14,10 @@ void displaySetComponent(Component *component);
 void displayShowMessage(const char *msg);
 
 // Display message on specific line (0-indexed), clearing rest of line
+// Overload 1: Display at column 0 (default)
 void displayOverrideLine(uint8_t lineNumber, const char *msg);
+// Overload 2: Display at specific column
+void displayOverrideLine(uint8_t col, uint8_t lineNumber, const char *msg);
 
 // Optional helpers
 void displayClear();

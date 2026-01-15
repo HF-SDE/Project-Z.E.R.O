@@ -12,6 +12,7 @@
 #include <ConfigWriter.h>
 #include <MqttManager.h>
 #include <Led.h>
+#include <Buzzer.h>
 #include <button.h>
 #include <wifi_setup.h>
 #include <DisplayManager.h>
@@ -27,7 +28,6 @@ const String WIFI_PASSWORD = "Nogetjegkanhuske";
 // ---------------------- Component Config ----------------------
 const String components[9] = {
     "LCD",
-    "Overwrite_Button",
     "Blue_Status_LED",
     "Green_Status_LED",
     "Red_Status_LED",
@@ -37,10 +37,13 @@ const String components[9] = {
     "Buzzer"};
 
 std::vector<ConfigComponents::keys> component_config = {
-    {"LCD_Text", 0, "", "text", {"Light Sensor"}},
-    {"LCD_Color", 0, "", "color", {"Light Sensor"}},
-    {"Overwrite_Button", 0, "boolean", {"Button State"}},
-    {"Blue_Status_LED", 0, "rgb_light_state", {"RGB Light State"}},
+    {"LCD_Text", "", "text", {"Display Text"}},
+    {"LCD_Color", "", "color", {"Screen Backlight Color"}},
+    {"Status_LED", 0, "rgb_light_state", {"RGB Light State"}},
+    {"White_LED", 0, "boolean", {"White LED State"}},
+    {"RFID_Reader", "", "text", {"Last Scanned RFID UID"}},
+    {"PmodKYPD_Keypad", "", "text", {"Last Keypad Key"}},
+    {"Buzzer", 0, "boolean", {"Buzzer State"}},
     {"White_LED", 0, "boolean", {"White LED State"}}};
 
 // ---------------------- Pin Map (per schematic) ----------------------
@@ -79,6 +82,9 @@ const char keys[4][4] = {
 // White LED (external, with 220Ω series resistor)
 constexpr uint8_t WHITE_LED_PIN = 3; // LED anode via resistor -> GPIO2
 
+// Buzzer (active buzzer with 220Ω series resistor)
+constexpr uint8_t BUZZER_PIN = 15; // Buzzer GPIO15
+
 // Status indicator (three LEDs with 220Ω resistors)
 // Adjust if needed to match your actual wiring colours.
 constexpr uint8_t STATUS_LED_RED_PIN = 4;
@@ -103,6 +109,24 @@ constexpr int THRESH_OFF = 3300;
 constexpr uint32_t DEBOUNCE_MS = 50;
 
 bool firstWifiStartUp = true;
+
+// ---------------------- Access Control State Machine ----------------------
+enum AccessState
+{
+  WAITING_FOR_RFID,
+  WAITING_FOR_CODE,
+  VALIDATING,
+  GRANTED,
+  DENIED
+};
+
+static AccessState currentAccessState = WAITING_FOR_RFID;
+static AccessState lastDisplayedState = VALIDATING; // Initialize to different state to force first display update
+static String enteredCode = "";
+static String lastDisplayedCode = ""; // Track last displayed code to avoid flickering
+static String correctCode = "1234";   // Default code - can be loaded from config
+static unsigned long stateChangeTime = 0;
+constexpr unsigned long ACCESS_TIMEOUT_MS = 30000; // 30 seconds to enter code
 
 static void initConfig()
 {
@@ -202,6 +226,7 @@ static void initComponentConfig()
   }
 }
 
+// ---------------------- Keypad Setup ----------------------
 static inline void setupKeypadPins()
 {
   // Rows as plain inputs (external 10Ω pull-ups per schematic; input-only pins can't use internal pull-ups)
@@ -233,6 +258,9 @@ void setup()
 
   // LEDs
   Led::begin(WHITE_LED_PIN, "devices/" + String(config.deviceId.c_str()) + "/White_LED");
+
+  // Buzzer
+  Buzzer::begin(BUZZER_PIN, "devices/" + String(config.deviceId.c_str()) + "/Buzzer");
 
   wifiInitStatusLed(STATUS_LED_RED_PIN, STATUS_LED_GREEN_PIN, STATUS_LED_BLUE_PIN);
 
@@ -271,6 +299,15 @@ void setup()
   Environment::print("Pins configured per schematic.");
   displayOverrideLine(0, "System Initialized");
   displayOverrideLine(1, "System Ready");
+
+  // Quick audible chirp to verify buzzer
+  for (int i = 0; i < 2; i++)
+  {
+    Buzzer::beep(100);
+    delay(120);
+  }
+
+  currentAccessState = WAITING_FOR_RFID;
 }
 
 // Keypad scan: returns the key pressed, or 0 if none
@@ -279,26 +316,30 @@ static char scanKeypad()
   // Ensure all columns HIGH before scan
   for (uint8_t i = 0; i < 4; i++)
     digitalWrite(cols[i], HIGH);
-  delayMicroseconds(10);
+  delayMicroseconds(100);
 
   for (uint8_t col = 0; col < 4; col++)
   {
     digitalWrite(cols[col], LOW); // Activate column
-    delayMicroseconds(500);       // Longer settle time for external pull-ups
+    delayMicroseconds(1000);      // Settle time for external pull-ups
 
     for (uint8_t row = 0; row < 4; row++)
     {
       if (digitalRead(rows[row]) == LOW) // Row pulled low?
       {
-        // Multi-sample debounce
+        // Debounce check
         delay(20);
         if (digitalRead(rows[row]) == LOW)
         {
+          char pressedKey = keys[row][col];
+
           // Wait for release
           while (digitalRead(rows[row]) == LOW)
             delay(10);
+
+          delay(20); // Debounce after release
           digitalWrite(cols[col], HIGH);
-          return keys[row][col];
+          return pressedKey;
         }
       }
     }
@@ -311,45 +352,182 @@ void loop()
 {
   static unsigned long lastLedCycle = 0;
   static unsigned long lastKeypadScan = 0;
+  static unsigned long lastWhiteLedToggle = 0;
   unsigned long now = millis();
 
-  // Cycle status LED every 1 second (test)
-  if (now - lastLedCycle >= 1000)
+  // Check for access state timeout
+  if ((currentAccessState == WAITING_FOR_CODE) && (now - stateChangeTime >= ACCESS_TIMEOUT_MS))
   {
-    lastLedCycle = now;
-    static uint8_t ledState = 0;
-    ledState = (ledState + 1) % 3;
-    digitalWrite(WHITE_LED_PIN, ledState == 0 ? HIGH : LOW);
-    digitalWrite(STATUS_LED_RED_PIN, ledState == 0 ? HIGH : LOW);
-    digitalWrite(STATUS_LED_GREEN_PIN, ledState == 1 ? HIGH : LOW);
-    digitalWrite(STATUS_LED_BLUE_PIN, ledState == 2 ? HIGH : LOW);
+    currentAccessState = DENIED;
+    stateChangeTime = now;
   }
 
-  // Scan keypad every 50ms
-  if (now - lastKeypadScan >= 50)
+  // Only update display if state changed or code changed
+  bool stateChanged = (currentAccessState != lastDisplayedState);
+  bool codeChanged = (enteredCode != lastDisplayedCode);
+
+  if (stateChanged || codeChanged)
   {
-    lastKeypadScan = now;
+    lastDisplayedState = currentAccessState;
+    lastDisplayedCode = enteredCode;
+
+    // Handle state-specific display and logic
+    switch (currentAccessState)
+    {
+    case WAITING_FOR_RFID:
+      displayClear();
+      displaySetColor("white");
+      displayOverrideLine(1, "Scan RFID Card");
+      digitalWrite(WHITE_LED_PIN, HIGH); // White LED ON during idle
+      break;
+
+    case WAITING_FOR_CODE:
+    {
+      displayClear();
+      displaySetColor("yellow");
+      displayOverrideLine(0, "Enter Code:");
+      // Show asterisks for security instead of actual digits
+      String maskedCode = "";
+      for (uint8_t i = 0; i < enteredCode.length(); i++)
+        maskedCode += "*";
+      displayOverrideLine(1, maskedCode.c_str());
+      // White LED will blink during code entry (see blink logic below)
+      break;
+    }
+
+    case VALIDATING:
+      displayClear();
+      displaySetColor("blue");
+      displayOverrideLine(0, "Validating...");
+      digitalWrite(WHITE_LED_PIN, LOW); // White LED OFF during validation
+      break;
+
+    case GRANTED:
+    {
+      displayClear();
+      displaySetColor("green");
+      displayOverrideLine(0, "Access Granted!");
+      Buzzer::beep(150);
+      delay(100);
+      Buzzer::beep(150);
+
+      // Blink white LED for 5 seconds
+      unsigned long grantedStartTime = millis();
+      while (millis() - grantedStartTime < 5000)
+      {
+        // Blink LED every 200ms (on for 200ms, off for 200ms)
+        digitalWrite(WHITE_LED_PIN, HIGH);
+        delay(200);
+        digitalWrite(WHITE_LED_PIN, LOW);
+        delay(200);
+      }
+
+      currentAccessState = WAITING_FOR_RFID;
+      enteredCode = "";
+      break;
+    }
+
+    case DENIED:
+    {
+      displayClear();
+      displaySetColor("red");
+      displayOverrideLine(0, "Access Denied");
+      digitalWrite(WHITE_LED_PIN, LOW); // White LED OFF for denied
+      Buzzer::beep(300);
+      delay(2000);
+      currentAccessState = WAITING_FOR_RFID;
+      enteredCode = "";
+      break;
+    }
+    }
+  }
+
+  // Blink white LED while waiting for code entry
+  if (currentAccessState == WAITING_FOR_CODE)
+  {
+    if (now - lastWhiteLedToggle >= 500) // Toggle every 500ms
+    {
+      lastWhiteLedToggle = now;
+      digitalWrite(WHITE_LED_PIN, digitalRead(WHITE_LED_PIN) == HIGH ? LOW : HIGH);
+    }
+  }
+
+  // Scan keypad every 30ms (polling-based for reliability)
+  unsigned long now2 = millis();
+  if (now2 - lastKeypadScan >= 30)
+  {
+    lastKeypadScan = now2;
     char key = scanKeypad();
-    if (key)
+    if (key && currentAccessState == WAITING_FOR_CODE)
     {
       Environment::print("Key pressed: " + String(key));
-      displayOverrideLine(1, ("Key: " + String(key)).c_str());
+
+      // Handle special keys
+      if (key == 'F') // Clear
+      {
+        enteredCode = "";
+      }
+      else if (key == 'D') // Delete/Backspace
+      {
+        if (enteredCode.length() > 0)
+          enteredCode.remove(enteredCode.length() - 1);
+      }
+      else if (key == 'E') // Enter/Accept
+      {
+        if (enteredCode.length() > 0)
+        {
+          currentAccessState = VALIDATING;
+          stateChangeTime = millis();
+          delay(500); // Brief validation delay
+
+          if (enteredCode == correctCode)
+          {
+            currentAccessState = GRANTED;
+          }
+          else
+          {
+            currentAccessState = DENIED;
+          }
+          stateChangeTime = millis();
+        }
+      }
+      else if (key >= '0' && key <= '9') // Numeric input
+      {
+        if (enteredCode.length() < 8) // Max 8 digit code
+        {
+          enteredCode += key;
+        }
+      }
     }
   }
 
   // Check RFID
-  if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
+  if (currentAccessState == WAITING_FOR_RFID)
   {
-    Serial.print("RFID Card UID: ");
-    for (byte i = 0; i < rfid.uid.size; i++)
+    if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
     {
-      if (rfid.uid.uidByte[i] < 0x10)
-        Serial.print("0");
-      Serial.print(rfid.uid.uidByte[i], HEX);
+      String rfidUID = "";
+      Serial.print("RFID Card UID: ");
+      for (byte i = 0; i < rfid.uid.size; i++)
+      {
+        if (rfid.uid.uidByte[i] < 0x10)
+          Serial.print("0");
+        Serial.print(rfid.uid.uidByte[i], HEX);
+        if (rfid.uid.uidByte[i] < 0x10)
+          rfidUID += "0";
+        rfidUID += String(rfid.uid.uidByte[i], HEX);
+      }
+      Serial.println();
+      rfid.PICC_HaltA();
+      rfid.PCD_StopCrypto1();
+
+      // Valid RFID detected, wait for code
+      currentAccessState = WAITING_FOR_CODE;
+      enteredCode = "";
+      stateChangeTime = millis();
+      Buzzer::beep(100);
+      Environment::print("RFID accepted: " + rfidUID);
     }
-    Serial.println();
-    rfid.PICC_HaltA();
-    rfid.PCD_StopCrypto1();
   }
 
   delay(5);
