@@ -18,6 +18,7 @@ void mqttLoop();
 // Optional helpers
 bool mqttIsConnected();
 const char *mqttGetLastMessage();
+String mqttGetLastMessageString();
 
 static String deviceIdHex();
 
@@ -35,5 +36,9 @@ bool retainedMessageExists(const char *topic, uint32_t windowMs = 150);
 void mqttSetComponentValue(const String &componentTopic, const String &status);
 
 void onMqttMessage(const char *topic, const char *payload);
+
+bool doMqttGetLastPayloadInclude(const char *topic, const char *payload, uint32_t windowMs);
+String mqttWaitForMessage(const char *topic, uint32_t windowMs = 1500);
+String mqttGetLastTopic();
 
 #endif

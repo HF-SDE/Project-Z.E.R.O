@@ -18,14 +18,14 @@ namespace Environment
      * @brief Optional compile-time environment selection.
      *
      * If defined, the environment mode is fixed at compile time for zero-cost builds:
-     * - Logging can be compiled out in Production.
+     * - Logging can be compiled out in PRODUCTION.
      * - The active environment can be treated as constant by the compiler.
      *
-     * Valid values: Environment::EnvironmentType::Production, ::Testing, ::Development
+     * Valid values: Environment::EnvironmentMode::PRODUCTION, ::TESTING, ::DEVELOPMENT
      *
      * Example (in build flags or before includes):
      * @code
-     * #define ENVIRONMENT_COMPILETIME_MODE Environment::EnvironmentType::Production
+     * #define ENVIRONMENT_COMPILETIME_MODE Environment::EnvironmentMode::PRODUCTION
      * @endcode
      */
 
@@ -99,7 +99,7 @@ namespace Environment
 
 #if defined(ENVIRONMENT_COMPILETIME_MODE)
     // Convenience constant for compile-time selection.
-    inline constexpr EnvironmentType kCompileTimeMode = ENVIRONMENT_COMPILETIME_MODE;
+    inline constexpr EnvironmentMode kCompileTimeMode = ENVIRONMENT_COMPILETIME_MODE;
 #endif
 
 }

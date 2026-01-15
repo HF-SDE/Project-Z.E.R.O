@@ -121,7 +121,7 @@ static bool computeLedState(int lightValue)
 
 static void initComponentConfig()
 {
-  String basicTopic = "devices/" + config.deviceId + "/";
+  String basicTopic = "clients/" + config.deviceId + "/";
 
   for (const auto &p : component_config)
   {
@@ -175,7 +175,7 @@ void setup()
   pinMode(blueWifiLedPin, OUTPUT);
   pinMode(greenWifiLedPin, OUTPUT);
 
-  Led::begin(LED_PIN, "devices/" + String(config.deviceId.c_str()) + "/White_LED");
+  Led::begin(LED_PIN, "clients/" + String(config.deviceId.c_str()) + "/White_LED");
   LightSensor::begin(LIGHT_SENSOR_PIN);
 
   // For INPUT_PULLUP wiring (button -> GND), press is FALLING.
@@ -211,7 +211,7 @@ void loop()
   unsigned long currentMillis = millis();
   if (currentMillis - lastHeartbeat >= config.heartbeatInterval)
   {
-    String statusTopic = "devices/" + config.deviceId + "/status";
+    String statusTopic = "clients/" + config.deviceId + "/status";
     mqttPublish(statusTopic.c_str(), "online", true);
     lastHeartbeat = currentMillis;
   }
@@ -221,8 +221,8 @@ void loop()
     overwrite = !overwrite;
   }
 
-  const int lightValue = LightSensor::read("devices/" + String(config.deviceId.c_str()) + "/PhotoResistor");
-  Led::set(computeLedState(lightValue), "devices/" + String(config.deviceId.c_str()) + "/White_LED");
+  const int lightValue = LightSensor::read("clients/" + String(config.deviceId.c_str()) + "/PhotoResistor");
+  Led::set(computeLedState(lightValue), "clients/" + String(config.deviceId.c_str()) + "/White_LED");
 
   delay(5);
 }

@@ -128,6 +128,12 @@ static String correctCode = "1234";   // Default code - can be loaded from confi
 static unsigned long stateChangeTime = 0;
 constexpr unsigned long ACCESS_TIMEOUT_MS = 30000; // 30 seconds to enter code
 
+// Zone configuration
+static String assignedZoneUuid = "";     // Default for testing
+static String assignedLocationUuid = ""; // Default for testing
+static String assignedDoorUuid = "";
+static bool zoneConfigured = false;
+
 static void initConfig()
 {
   Environment::print("Initializing Environment...");
@@ -184,7 +190,7 @@ static void initConfig()
 
 static void initComponentConfig()
 {
-  String basicTopic = "devices/" + config.deviceId + "/";
+  String basicTopic = "clients/" + config.deviceId + "/";
 
   for (const auto &p : component_config)
   {
@@ -257,10 +263,10 @@ void setup()
   SPI.begin(SPI_SCK_PIN, SPI_MISO_PIN, SPI_MOSI_PIN);
 
   // LEDs
-  Led::begin(WHITE_LED_PIN, "devices/" + String(config.deviceId.c_str()) + "/White_LED");
+  Led::begin(WHITE_LED_PIN, "clients/" + String(config.deviceId.c_str()) + "/White_LED");
 
   // Buzzer
-  Buzzer::begin(BUZZER_PIN, "devices/" + String(config.deviceId.c_str()) + "/Buzzer");
+  Buzzer::begin(BUZZER_PIN, "clients/" + String(config.deviceId.c_str()) + "/Buzzer");
 
   wifiInitStatusLed(STATUS_LED_RED_PIN, STATUS_LED_GREEN_PIN, STATUS_LED_BLUE_PIN);
 
@@ -279,6 +285,47 @@ void setup()
   if (wifiIsConnected() && mqttIsConnected())
   {
     initComponentConfig();
+
+    // Check if this client is assigned to any zone by searching all zones
+    // We need to check locations/+/zones/+/client_uuids for our UUID
+    Environment::print("Checking for zone assignment...");
+    String myUuid = String(config.deviceId.c_str());
+
+    String zoneWildcardTopic = "locations/+/zones/+/client uuids";
+    bool lastPayload = doMqttGetLastPayloadInclude(zoneWildcardTopic.c_str(), myUuid.c_str(), 2000);
+    if (lastPayload)
+    {
+      Environment::print("Zone assignment found.");
+
+      // Extract location and zone UUIDs from the topic
+      String receivedTopic = mqttGetLastTopic();
+      Environment::print("Received topic: " + receivedTopic);
+
+      // Parse topic format: locations/<location_uuid>/zones/<zone_uuid>/client uuids
+      int firstSlash = receivedTopic.indexOf('/');
+      int secondSlash = receivedTopic.indexOf('/', firstSlash + 1);
+      int thirdSlash = receivedTopic.indexOf('/', secondSlash + 1);
+      int fourthSlash = receivedTopic.indexOf('/', thirdSlash + 1);
+
+      if (firstSlash > 0 && secondSlash > 0 && thirdSlash > 0 && fourthSlash > 0)
+      {
+        assignedLocationUuid = receivedTopic.substring(firstSlash + 1, secondSlash);
+        assignedZoneUuid = receivedTopic.substring(thirdSlash + 1, fourthSlash);
+        Environment::print("Assigned Location UUID: " + assignedLocationUuid);
+        Environment::print("Assigned Zone UUID: " + assignedZoneUuid);
+        zoneConfigured = true;
+      }
+      else
+      {
+        Environment::print("Failed to parse zone topic");
+        zoneConfigured = false;
+      }
+    }
+    else
+    {
+      Environment::print("No zone assignment found.");
+      zoneConfigured = false;
+    }
   }
 
   // RFID control pins
@@ -297,17 +344,24 @@ void setup()
   Environment::print("LCD initialized.");
 
   Environment::print("Pins configured per schematic.");
-  displayOverrideLine(0, "System Initialized");
-  displayOverrideLine(1, "System Ready");
 
-  // Quick audible chirp to verify buzzer
-  for (int i = 0; i < 2; i++)
+  if (!zoneConfigured)
   {
-    Buzzer::beep(100);
-    delay(120);
+    displayClear();
+    displaySetColor("red");
+    displayOverrideLine(0, "Config Needed!");
+    displayOverrideLine(1, "Assign zone on");
+    displayOverrideLine(2, "dashboard");
+    Environment::print("WARNING: No zone assigned! Configure on dashboard.");
+    // Don't allow access until zone is configured
+    currentAccessState = DENIED;
   }
-
-  currentAccessState = WAITING_FOR_RFID;
+  else
+  {
+    displayOverrideLine(0, "System Initialized");
+    displayOverrideLine(1, "System Ready");
+    currentAccessState = WAITING_FOR_RFID;
+  }
 }
 
 // Keypad scan: returns the key pressed, or 0 if none
@@ -366,7 +420,7 @@ void loop()
   bool stateChanged = (currentAccessState != lastDisplayedState);
   bool codeChanged = (enteredCode != lastDisplayedCode);
 
-  if (stateChanged || codeChanged)
+  if ((stateChanged || codeChanged) && zoneConfigured)
   {
     lastDisplayedState = currentAccessState;
     lastDisplayedCode = enteredCode;
@@ -407,9 +461,11 @@ void loop()
       displayClear();
       displaySetColor("green");
       displayOverrideLine(0, "Access Granted!");
-      Buzzer::beep(150);
+
+      // Two beeps
+      Buzzer::beep(200);
       delay(100);
-      Buzzer::beep(150);
+      Buzzer::beep(200);
 
       // Blink white LED for 5 seconds
       unsigned long grantedStartTime = millis();
@@ -422,7 +478,13 @@ void loop()
         delay(200);
       }
 
+      // Reset display to waiting state
+      displayClear();
+      displaySetColor("white");
+      displayOverrideLine(1, "Scan RFID Card");
+      digitalWrite(WHITE_LED_PIN, HIGH);
       currentAccessState = WAITING_FOR_RFID;
+      lastDisplayedState = WAITING_FOR_RFID;
       enteredCode = "";
       break;
     }
@@ -435,7 +497,14 @@ void loop()
       digitalWrite(WHITE_LED_PIN, LOW); // White LED OFF for denied
       Buzzer::beep(300);
       delay(2000);
+
+      // Reset display to waiting state
+      displayClear();
+      displaySetColor("white");
+      displayOverrideLine(1, "Scan RFID Card");
+      digitalWrite(WHITE_LED_PIN, HIGH);
       currentAccessState = WAITING_FOR_RFID;
+      lastDisplayedState = WAITING_FOR_RFID;
       enteredCode = "";
       break;
     }
@@ -502,7 +571,7 @@ void loop()
   }
 
   // Check RFID
-  if (currentAccessState == WAITING_FOR_RFID)
+  if (currentAccessState == WAITING_FOR_RFID && zoneConfigured)
   {
     if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
     {
@@ -521,12 +590,71 @@ void loop()
       rfid.PICC_HaltA();
       rfid.PCD_StopCrypto1();
 
-      // Valid RFID detected, wait for code
-      currentAccessState = WAITING_FOR_CODE;
-      enteredCode = "";
-      stateChangeTime = millis();
+      Environment::print("RFID scanned: " + rfidUID);
       Buzzer::beep(100);
-      Environment::print("RFID accepted: " + rfidUID);
+
+      // Check if chip exists in database
+      String chipConfigTopic = "chips/" + rfidUID + "/config";
+      Environment::print("Checking chip validity: " + chipConfigTopic);
+      String chipConfig = mqttWaitForMessage(chipConfigTopic.c_str(), 2000);
+
+      if (chipConfig == "")
+      {
+        // Chip not found in database
+        displayClear();
+        displaySetColor("red");
+        displayOverrideLine(0, "Invalid Chip!");
+        displayOverrideLine(1, "Not registered");
+        Environment::print("Chip not found: " + rfidUID);
+        Buzzer::beep(300);
+        delay(2000);
+
+        // Reset display to waiting state
+        displayClear();
+        displaySetColor("white");
+        displayOverrideLine(1, "Scan RFID Card");
+        digitalWrite(WHITE_LED_PIN, HIGH);
+        currentAccessState = WAITING_FOR_RFID;
+        lastDisplayedState = WAITING_FOR_RFID;
+      }
+      else
+      {
+        Environment::print("Chip valid, checking access rights...");
+
+        // Check access rights for this chip in the assigned zone
+        String accessTopic = "locations/" + assignedLocationUuid + "/zones/" + assignedZoneUuid + "/access/" + rfidUID;
+        Environment::print("Checking access: " + accessTopic);
+        String accessConfig = mqttWaitForMessage(accessTopic.c_str(), 2000);
+
+        if (accessConfig == "")
+        {
+          // No access rights for this zone
+          displayClear();
+          displaySetColor("red");
+          displayOverrideLine(0, "Access Denied!");
+          displayOverrideLine(1, "No zone access");
+          Environment::print("Chip has no access to this zone: " + rfidUID);
+          Buzzer::beep(300);
+          delay(2000);
+
+          // Reset display to waiting state
+          displayClear();
+          displaySetColor("white");
+          displayOverrideLine(1, "Scan RFID Card");
+          digitalWrite(WHITE_LED_PIN, HIGH);
+          currentAccessState = WAITING_FOR_RFID;
+          lastDisplayedState = WAITING_FOR_RFID;
+        }
+        else
+        {
+          // Valid RFID with access rights, wait for code
+          Environment::print("Access granted for chip, waiting for code");
+          Environment::print("Last topic: " + mqttGetLastTopic());
+          currentAccessState = WAITING_FOR_CODE;
+          enteredCode = "";
+          stateChangeTime = millis();
+        }
+      }
     }
   }
 

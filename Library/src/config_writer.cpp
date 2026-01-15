@@ -41,7 +41,7 @@ static String getChipId()
     config.mqttPort = 1883;
     config.mqttUser = "";
     config.mqttPassword = "";
-    config.mqttTopic = "devices/" + String(getChipId()) + "/#";
+    config.mqttTopic = "clients/" + String(getChipId()) + "/#";
     config.deviceId = getChipId();
     config.heartbeatInterval = 1000 * 60; // 1 minute
 
