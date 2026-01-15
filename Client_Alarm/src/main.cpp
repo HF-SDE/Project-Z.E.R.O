@@ -131,7 +131,6 @@ static void onMqttConfigMessage(const char *topic, const char *payload)
     displayShowMessage("Active. No alarm.");
   }
 }
-
 static void onMqttMessage(const char *topic, const char *payload)
 {
   // Dispatcher: each handler checks if the topic matches
@@ -148,7 +147,6 @@ void setup()
     ; // Wait for Serial to be ready
   }
 
-  // Wire.begin(); - This is called inside displayInit ! DELETE ME IF NEEDED
   displayInit(lcdI2CAddress, lcdColumns, lcdRows);
 
   // Initialize status LED and alarm output managers

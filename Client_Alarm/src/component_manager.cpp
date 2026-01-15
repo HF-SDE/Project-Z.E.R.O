@@ -14,16 +14,12 @@ void componentManagerInit(String deviceId, String baseMqttTopic)
     g_deviceId = deviceId;
     mqttBaseTopic = baseMqttTopic;
     g_componentCount = 0;
-    Serial.println("Component Manager initialized");
 }
 
 void componentRegister(Component *component)
 {
     if (g_componentCount >= MAX_COMPONENTS)
-    {
-        Serial.println("ERROR: Max components reached!");
         return;
-    }
 
     g_components[g_componentCount++] = component;
 }
@@ -43,10 +39,7 @@ void componentUpdateValue(Component *component, const String &newValue)
 void componentPublishAll()
 {
     if (!mqttIsConnected())
-    {
-        Serial.println("MQTT not connected, skipping component publish");
         return;
-    }
 
     char topic[128];
     char payload[512];
@@ -74,9 +67,6 @@ void componentPublishAll()
 
             // Serialize to string
             serializeJson(doc, payload, sizeof(payload));
-
-            Serial.print("Publishing component to topic: ");
-            Serial.println(topic);
 
             // Publish to MQTT
             mqttPublish(topic, payload, true); // retained = true

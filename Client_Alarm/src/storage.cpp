@@ -11,13 +11,10 @@ bool storageInit()
         return true;
 
     if (!LittleFS.begin(true)) // true = format on fail
-    {
-        Serial.println("[Storage] Failed to mount LittleFS");
         return false;
-    }
 
     g_initialized = true;
-    Serial.println("[Storage] LittleFS mounted successfully");
+
     return true;
 }
 
@@ -40,31 +37,20 @@ bool storageSaveConfig(const DeviceConfig &config)
     doc["serialFrequency"] = config.serialFrequency;
     doc["status"] = config.status; // Save the status field
 
-    Serial.print("[Storage] Saving heartbeatInterval: ");
-    Serial.println(config.heartbeatInterval);
-
     File file = LittleFS.open(CONFIG_FILE, "w");
     if (!file)
-    {
-        Serial.println("[Storage] Failed to open config file for writing");
         return false;
-    }
 
     if (serializeJson(doc, file) == 0)
     {
-        Serial.println("[Storage] Failed to write config to file");
         file.close();
         return false;
     }
 
     file.close();
 
-    // Debug: Print what was written to file
-    Serial.println("[Storage] JSON written:");
     serializeJsonPretty(doc, Serial);
-    Serial.println();
 
-    Serial.println("[Storage] Configuration saved successfully");
     return true;
 }
 
@@ -75,27 +61,19 @@ bool storageLoadConfig(DeviceConfig &config)
 
     if (!LittleFS.exists(CONFIG_FILE))
     {
-        Serial.println("[Storage] Config file does not exist");
         return false;
     }
 
     File file = LittleFS.open(CONFIG_FILE, "r");
     if (!file)
-    {
-        Serial.println("[Storage] Failed to open config file for reading");
         return false;
-    }
 
     StaticJsonDocument<512> doc;
     DeserializationError err = deserializeJson(doc, file);
     file.close();
 
     if (err)
-    {
-        Serial.print("[Storage] Failed to parse config file: ");
-        Serial.println(err.c_str());
         return false;
-    }
 
     config.wifiSsid = doc["wifiSsid"] | "";
     config.wifiPassword = doc["wifiPassword"] | "";
@@ -109,19 +87,6 @@ bool storageLoadConfig(DeviceConfig &config)
     config.serialFrequency = doc["serialFrequency"] | 115200;
     config.status = doc["status"] | true; // Load the status field, default to true
 
-    Serial.print("[Storage] Loaded heartbeatInterval from JSON: ");
-    Serial.println(config.heartbeatInterval);
-    Serial.print("[Storage] Raw JSON heartbeatInterval value: ");
-    if (doc.containsKey("heartbeatInterval"))
-    {
-        Serial.println(doc["heartbeatInterval"].as<int>());
-    }
-    else
-    {
-        Serial.println("(key not found, using default)");
-    }
-
-    Serial.println("[Storage] Configuration loaded successfully");
     return true;
 }
 
@@ -139,18 +104,11 @@ bool storageDeleteConfig()
         return false;
 
     if (!LittleFS.exists(CONFIG_FILE))
-    {
-        Serial.println("[Storage] Config file does not exist");
         return true; // Not an error
-    }
 
     if (LittleFS.remove(CONFIG_FILE))
-    {
-        Serial.println("[Storage] Configuration deleted successfully");
         return true;
-    }
 
-    Serial.println("[Storage] Failed to delete configuration");
     return false;
 }
 
@@ -159,14 +117,9 @@ bool storageFormat()
     if (!g_initialized && !storageInit())
         return false;
 
-    Serial.println("[Storage] Formatting filesystem...");
     if (LittleFS.format())
-    {
-        Serial.println("[Storage] Filesystem formatted successfully");
         return true;
-    }
 
-    Serial.println("[Storage] Failed to format filesystem");
     return false;
 }
 

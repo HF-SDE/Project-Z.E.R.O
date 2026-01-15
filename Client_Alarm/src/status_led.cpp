@@ -29,8 +29,10 @@ void statusLedSetComponents(Component *redComponent, Component *greenComponent, 
     g_blueComponent = blueComponent;
 }
 
-void statusLedUpdate(bool wifiConnected, bool mqttConnected, bool firstStartup)
+bool statusLedUpdate(bool wifiConnected, bool mqttConnected, bool firstStartup)
 {
+    if (ledRed == -1 || ledGreen == -1 || ledBlue == -1)
+        return; // Not initialized
     if (firstStartup)
     {
         // Yellow - first startup
