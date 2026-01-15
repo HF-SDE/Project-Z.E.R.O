@@ -11,9 +11,13 @@
 #include <ConfigWriter.h>
 #include <StorageManager.h>
 #include <Environment.h>
+#include <time.h>
 
 // ---------------------- Global Config ----------------------
 DeviceConfig config;
+
+// ---------------------- Opening Hours Configuration ----------------------
+static String openingHours = "08:00-18:00"; // Format: "HH:MM-HH:MM"
 
 //---------------------- Pin config ----------------------
 constexpr uint8_t blueWifiLedPin = 27;
@@ -99,8 +103,55 @@ static void initConfig()
   storagePrintConfig(config);
 }
 
+static bool isWithinOpeningHours()
+{
+  if (openingHours == "")
+  {
+    return true; // No restrictions if not configured
+  }
+
+  // Get current time
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo))
+  {
+    Environment::print("Failed to obtain time");
+    return true; // Allow operation if time unavailable
+  }
+
+  // Parse opening hours "HH:MM-HH:MM"
+  int dashPos = openingHours.indexOf('-');
+  if (dashPos < 0)
+  {
+    return true; // Invalid format, allow operation
+  }
+
+  String startTimeStr = openingHours.substring(0, dashPos);
+  String endTimeStr = openingHours.substring(dashPos + 1);
+
+  int startHour = startTimeStr.substring(0, 2).toInt();
+  int startMin = startTimeStr.substring(3, 5).toInt();
+  int endHour = endTimeStr.substring(0, 2).toInt();
+  int endMin = endTimeStr.substring(3, 5).toInt();
+
+  int currentMinutes = timeinfo.tm_hour * 60 + timeinfo.tm_min;
+  int startMinutes = startHour * 60 + startMin;
+  int endMinutes = endHour * 60 + endMin;
+
+  Environment::print("Current time: " + String(timeinfo.tm_hour) + ":" + String(timeinfo.tm_min));
+  Environment::print("Opening hours: " + openingHours);
+
+  return (currentMinutes >= startMinutes && currentMinutes <= endMinutes);
+}
+
 static bool computeLedState(int lightValue)
 {
+  // Check if within opening hours
+  if (!isWithinOpeningHours())
+  {
+    ledState = false;
+    return false;
+  }
+
   if (overwrite)
   {
     ledState = true;
@@ -198,6 +249,22 @@ void setup()
   if (wifiIsConnected() && mqttIsConnected())
   {
     initComponentConfig();
+
+    // Initialize NTP time
+    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+    Environment::print("Waiting for NTP time sync...");
+    struct tm timeinfo;
+    int retries = 0;
+    while (!getLocalTime(&timeinfo) && retries < 10)
+    {
+      delay(500);
+      Environment::print(".");
+      retries++;
+    }
+    if (getLocalTime(&timeinfo))
+    {
+      Environment::print("Time synchronized: " + String(asctime(&timeinfo)));
+    }
   }
 }
 
