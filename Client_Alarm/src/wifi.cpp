@@ -1,4 +1,4 @@
-#include "../lib/wifi_setup.h"
+#include "../lib/wifi.h"
 
 bool wifiConnect(const char *ssid, const char *password, unsigned long timeoutMs)
 {

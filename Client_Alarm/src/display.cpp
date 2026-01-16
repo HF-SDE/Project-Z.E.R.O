@@ -29,9 +29,10 @@ bool displayInit(uint8_t i2cAddress, uint8_t cols, uint8_t rows, int sdaPin, int
     return true;
 }
 
-void displaySetComponent(Component *component)
+void displaySetComponent(Component *pComponent)
 {
-    g_displayComponent = component;
+    componentRegister(pComponent);
+    g_displayComponent = pComponent;
 }
 
 void displayClear()
@@ -52,9 +53,9 @@ void printPadded(uint8_t col, uint8_t row, const char *s, uint8_t len)
         lcd.print(' ');
 }
 
-void displayShowMessage(const char *msg)
+void displayShowMessage(const char *pMsg)
 {
-    if (!g_ready || msg == nullptr)
+    if (!g_ready || pMsg == nullptr)
         return;
 
     // Clear the entire screen first
@@ -62,7 +63,7 @@ void displayShowMessage(const char *msg)
 
     // Split message across all available rows (up to 4 lines)
     // Automatically shifts to next line when running out of columns
-    const char *currentPos = msg;
+    const char *currentPos = pMsg;
 
     for (uint8_t row = 0; row < g_rows; row++)
     {
@@ -85,15 +86,20 @@ void displayShowMessage(const char *msg)
     // Update component state and publish
     if (g_displayComponent != nullptr)
     {
-        componentUpdateValue(g_displayComponent, String(msg));
+        componentUpdateValue(g_displayComponent, String(pMsg));
     }
 }
 
-void displayOverrideLine(uint8_t lineNumber, const char *msg)
+void displayOverrideLine(uint8_t lineNumber, const char *pMsg)
 {
-    if (!g_ready || msg == nullptr || lineNumber >= g_rows)
+    if (!g_ready || pMsg == nullptr || lineNumber >= g_rows)
         return;
 
     // Display message on specified line and pad the rest
-    printPadded(0, lineNumber, msg, g_cols);
+    printPadded(0, lineNumber, pMsg, g_cols);
+    // Update component state and publish
+    if (g_displayComponent != nullptr)
+    {
+        componentUpdateValue(g_displayComponent, String(pMsg));
+    }
 }

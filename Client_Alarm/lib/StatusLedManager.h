@@ -12,4 +12,7 @@ void statusLedSetComponents(Component *redComponent, Component *greenComponent, 
 // Update LED based on WiFi and MQTT connection status
 bool statusLedUpdate(bool wifiConnected, bool mqttConnected, bool firstStartup = false);
 
+void blinkYellowLed(int times, int delayMs);
+void blinkRedLed(int times, int delayMs);
+void blinkYellowAndRedLed(int times, int delayMs);
 #endif

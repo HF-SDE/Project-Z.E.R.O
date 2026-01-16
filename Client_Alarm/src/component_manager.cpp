@@ -18,7 +18,7 @@ void componentManagerInit(String deviceId, String baseMqttTopic)
 
 void componentRegister(Component *component)
 {
-    if (g_componentCount >= MAX_COMPONENTS)
+    if (component == nullptr || g_componentCount >= MAX_COMPONENTS)
         return;
 
     g_components[g_componentCount++] = component;
@@ -26,13 +26,13 @@ void componentRegister(Component *component)
 
 void componentUpdateValue(Component *component, const String &newValue)
 {
+    if (component == nullptr)
+        return;
+
     if (component->value != newValue)
     {
         component->value = newValue;
         component->stateChanged = true; // Mark component as changed
-
-        // Trigger publish of all component states
-        componentPublishAll();
     }
 }
 

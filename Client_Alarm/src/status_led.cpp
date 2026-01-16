@@ -22,17 +22,74 @@ void statusLedInit(int redPin, int greenPin, int bluePin)
     pinMode(ledBlue, OUTPUT);
 }
 
-void statusLedSetComponents(Component *redComponent, Component *greenComponent, Component *blueComponent)
+void statusLedSetComponents(Component *pRedComponent, Component *pGreenComponent, Component *pBlueComponent)
 {
-    g_redComponent = redComponent;
-    g_greenComponent = greenComponent;
-    g_blueComponent = blueComponent;
+    componentRegister(pRedComponent);
+    componentRegister(pGreenComponent);
+    componentRegister(pBlueComponent);
+    g_redComponent = pRedComponent;
+    g_greenComponent = pGreenComponent;
+    g_blueComponent = pBlueComponent;
+}
+
+void blinkRedLed(int times, int delayMs)
+{
+    if (ledRed == -1)
+        return; // Not initialized
+
+    // Ensure other LEDs are off before blinking
+    digitalWrite(ledBlue, LOW);
+    digitalWrite(ledGreen, LOW);
+
+    for (int i = 0; i < times; i++)
+    {
+        digitalWrite(ledRed, HIGH);
+        delay(delayMs);
+        digitalWrite(ledRed, LOW);
+        delay(delayMs);
+    }
+}
+void blinkYellowLed(int times, int delayMs)
+{
+    if (ledRed == -1 || ledGreen == -1)
+        return; // Not initialized
+
+    // Ensure other LEDs are off before blinking
+    digitalWrite(ledBlue, LOW);
+
+    for (int i = 0; i < times; i++)
+    {
+        digitalWrite(ledRed, HIGH);
+        digitalWrite(ledGreen, HIGH);
+        delay(delayMs);
+        digitalWrite(ledRed, LOW);
+        digitalWrite(ledGreen, LOW);
+        delay(delayMs);
+    }
+}
+void blinkYellowAndRedLed(int times, int delayMs)
+{
+    if (ledRed == -1 || ledGreen == -1)
+        return; // Not initialized
+
+    // Ensure other LEDs are off before blinking
+    digitalWrite(ledBlue, LOW);
+    digitalWrite(ledRed, HIGH);
+    digitalWrite(ledGreen, HIGH);
+
+    for (int i = 0; i < times; i++)
+    {
+        digitalWrite(ledGreen, HIGH);
+        delay(delayMs);
+        digitalWrite(ledGreen, LOW);
+        delay(delayMs);
+    }
 }
 
 bool statusLedUpdate(bool wifiConnected, bool mqttConnected, bool firstStartup)
 {
     if (ledRed == -1 || ledGreen == -1 || ledBlue == -1)
-        return; // Not initialized
+        return false; // Not initialized
     if (firstStartup)
     {
         // Yellow - first startup
@@ -47,7 +104,7 @@ bool statusLedUpdate(bool wifiConnected, bool mqttConnected, bool firstStartup)
             componentUpdateValue(g_greenComponent, "true");
         if (g_blueComponent)
             componentUpdateValue(g_blueComponent, "false");
-        return;
+        return false;
     }
 
     if (wifiConnected && mqttConnected)
@@ -64,7 +121,7 @@ bool statusLedUpdate(bool wifiConnected, bool mqttConnected, bool firstStartup)
             componentUpdateValue(g_greenComponent, "true");
         if (g_blueComponent)
             componentUpdateValue(g_blueComponent, "false");
-        return;
+        return true;
     }
     else if (!mqttConnected)
     {

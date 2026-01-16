@@ -22,10 +22,12 @@ void alarmOutputInit(int alarmLedPin, int buzzerPin)
     digitalWrite(g_buzzerPin, LOW);
 }
 
-void alarmOutputSetComponents(Component *ledComponent, Component *buzzerComponent)
+void alarmOutputSetComponents(Component *pLedComponent, Component *pBuzzerComponent)
 {
-    g_ledComponent = ledComponent;
-    g_buzzerComponent = buzzerComponent;
+    componentRegister(pLedComponent);
+    componentRegister(pBuzzerComponent);
+    g_ledComponent = pLedComponent;
+    g_buzzerComponent = pBuzzerComponent;
 }
 
 void alarmOutputActivate(bool useSound)

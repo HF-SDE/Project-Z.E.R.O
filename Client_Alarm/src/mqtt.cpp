@@ -29,22 +29,24 @@ static void mqttCallback(char *topic, byte *payload, unsigned int length)
     }
 }
 
-// Internal reconnect
+// Internal reconnect (non-blocking)
 static void mqttReconnect()
 {
-    while (!mqtt.connected())
-    {
-        String clientId = "esp32-";
-        clientId += String((uint32_t)ESP.getEfuseMac(), HEX);
+    static unsigned long lastReconnectAttempt = 0;
+    unsigned long now = millis();
 
-        if (mqtt.connect(clientId.c_str()))
-        {
-            mqtt.subscribe(subTopic);
-        }
-        else
-        {
-            delay(1000);
-        }
+    // Throttle reconnection attempts to once per second
+    if (now - lastReconnectAttempt < 1000)
+    {
+        return;
+    }
+    lastReconnectAttempt = now;
+
+    String clientId = String((uint32_t)ESP.getEfuseMac(), HEX);
+
+    if (mqtt.connect(clientId.c_str()))
+    {
+        mqtt.subscribe(subTopic);
     }
 }
 
@@ -53,7 +55,7 @@ void mqttSetMessageHandler(MqttMessageHandler handler)
     userHandler = handler;
 }
 
-void mqttSetHeartbeat(const char *deviceId, unsigned long intervalMs)
+void mqttHeartbeatInit(const char *deviceId, unsigned long intervalMs)
 {
     g_heartbeatTopic = mqttBaseTopic + "/heartbeat";
     g_heartbeatInterval = intervalMs;
