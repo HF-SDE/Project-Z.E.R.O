@@ -34,4 +34,20 @@ namespace Buzzer
      * @param duration Duration of the beep in milliseconds (default: 100ms)
      */
     void beep(uint16_t duration = 100);
+
+    /**
+     * @brief Turn the buzzer on continuously
+     *
+     * Turns the buzzer on and leaves it on until off() is called.
+     *
+     * @param volume Volume level (0-100), default is 20. Higher values = louder.
+     */
+    void on(uint8_t volume = 20);
+
+    /**
+     * @brief Turn the buzzer off
+     *
+     * Turns the buzzer off.
+     */
+    void off();
 }

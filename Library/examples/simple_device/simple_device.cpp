@@ -22,7 +22,7 @@ void onMqttMessage(const char *topic, const char *payload)
     if (strcmp(payload, "TOGGLE") == 0)
     {
         g_ledState = !g_ledState;
-        Led::set(g_ledState, String("devices/") + getChipId() + "/led1");
+        Led::set(g_ledState, String("clients/") + getChipId() + "/led1");
         Environment::print(String("MQTT: toggled LED -> ") + String(g_ledState));
     }
 }
@@ -73,7 +73,7 @@ void setup()
     mqttInit(cfg.mqttHost.c_str(), cfg.mqttPort, cfg.mqttUser.c_str(), cfg.mqttPassword.c_str(), cfg.mqttTopic.c_str());
 
     // Components
-    Led::begin(LED_PIN, String("devices/") + cfg.deviceId + "/led1");
+    Led::begin(LED_PIN, String("clients/") + cfg.deviceId + "/led1");
     LightSensor::begin(LIGHT_PIN);
     Button::begin(BUTTON_PIN, 50, Button::Edge::Falling);
 
@@ -89,7 +89,7 @@ void loop()
     // Read sensor every 5s and publish retained value
     if (millis() - lastLightMs >= 5000)
     {
-        int lux = LightSensor::read(String("devices/") + getChipId() + "/light1");
+        int lux = LightSensor::read(String("clients/") + getChipId() + "/light1");
         Environment::print(String("Light: ") + String(lux));
         lastLightMs = millis();
     }
@@ -98,7 +98,7 @@ void loop()
     if (Button::consumePress())
     {
         g_ledState = !g_ledState;
-        Led::set(g_ledState, String("devices/") + getChipId() + "/led1");
+        Led::set(g_ledState, String("clients/") + getChipId() + "/led1");
         Environment::print(String("Button pressed, LED -> ") + String(g_ledState));
     }
 

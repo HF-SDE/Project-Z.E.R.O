@@ -21,7 +21,7 @@ void test_save_and_load()
     cfg.mqttPort = 1883;
     cfg.mqttUser = "user";
     cfg.mqttPassword = "pass";
-    cfg.mqttTopic = "devices/test/#";
+    cfg.mqttTopic = "clients/test/#";
     cfg.deviceId = "TESTDEVICE";
     cfg.heartbeatInterval = 5000;
 

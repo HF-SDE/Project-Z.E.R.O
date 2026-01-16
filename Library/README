@@ -59,7 +59,7 @@ void setup() {
   mqttInit(cfg.mqttHost.c_str(), cfg.mqttPort, cfg.mqttUser.c_str(), cfg.mqttPassword.c_str(), cfg.mqttTopic.c_str());
 
   // Components
-  Led::begin(2, String("devices/") + cfg.deviceId + "/led1");
+  Led::begin(2, String("clients/") + cfg.deviceId + "/led1");
   LightSensor::begin(34);
   Button::begin(0, 50, Button::Edge::Falling);
 }
@@ -68,10 +68,10 @@ void loop() {
   mqttLoop();
 
   if (Button::consumePress()) {
-    Led::set(true, "devices/<id>/led1");
+    Led::set(true, "clients/<id>/led1");
   }
 
-  LightSensor::read("devices/<id>/light1");
+  LightSensor::read("clients/<id>/light1");
 }
 ```
 
@@ -141,7 +141,7 @@ void loop() {
 
 ## Topics & Conventions 🛰️
 
-- Components publish values to their component topic with a `/value` suffix (e.g. `devices/<deviceId>/led1/value`).
+- Components publish values to their component topic with a `/value` suffix (e.g. `clients/<deviceId>/led1/value`).
 - LED and sensor publishes are retained by default to reflect current state to new subscribers.
 
 ---

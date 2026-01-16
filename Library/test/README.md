@@ -68,7 +68,7 @@ This document explains how to run and extend the unit and integration tests for 
 
 ## Safety notes
 
-- Storage tests may erase configuration files or format LittleFS — **do not run them on production devices**.
+- Storage tests may erase configuration files or format LittleFS — **do not run them on production clients**.
 - Native tests write a `config.json` file into the repository working directory; this will be removed by the test suite but avoid running on important working trees.
 
 ---

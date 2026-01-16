@@ -202,7 +202,7 @@ E 0 F D
 
 The system connects to MQTT for remote monitoring and configuration:
 
-- **Topic Base**: `devices/{deviceId}/`
+- **Topic Base**: `clients/{deviceId}/`
 - **Components**: LCD, Status LEDs, RFID Reader, Keypad, Buzzer, White LED
 - **Supports**: Remote monitoring of access attempts, component status updates
 
